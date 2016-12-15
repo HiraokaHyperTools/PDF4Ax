@@ -1,0 +1,9 @@
+prefix=/usr/i686-w64-mingw32/sys-root/mingw
+exec_prefix=${prefix}
+libdir=${prefix}/lib
+includedir=${prefix}/include
+
+Name: poppler-splash
+Description: Splash backend for Poppler PDF rendering library
+Version: 0.16.7
+Requires: poppler = 0.16.7

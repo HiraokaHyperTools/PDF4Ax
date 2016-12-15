@@ -1,0 +1,13 @@
+prefix=/proj/PDF4Ax/dist
+exec_prefix=${prefix}
+libdir=${exec_prefix}/lib
+includedir=${prefix}/include
+
+Name: cairo
+Description: Multi-platform 2D graphics library
+Version: 1.10.2
+
+Requires.private:   pixman-1 >= 0.18.4   
+Libs: -L${libdir} -lcairo
+Libs.private:      
+Cflags: -I${includedir}/cairo

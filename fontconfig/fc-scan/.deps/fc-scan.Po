@@ -1,0 +1,89 @@
+fc-scan.o: fc-scan.c ../config.h ../fontconfig/fontconfig.h \
+ c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/sys/types.h \
+ c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/_mingw.h \
+ c:\mingw\bin\../lib/gcc/mingw32/4.5.0/include/stddef.h \
+ c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/sys/stat.h \
+ c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/unistd.h \
+ c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/io.h \
+ c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/process.h \
+ c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/stdint.h \
+ c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/getopt.h \
+ c:\mingw\bin\../lib/gcc/mingw32/4.5.0/include/stdarg.h \
+ ../fontconfig/fcfreetype.h \
+ c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/ft2build.h \
+ C:/MinGW/include/freetype2/freetype/config/ftheader.h \
+ C:/MinGW/include/freetype2/freetype/freetype.h \
+ C:/MinGW/include/freetype2/freetype/config/ftconfig.h \
+ C:/MinGW/include/freetype2/freetype/config/ftoption.h \
+ C:/MinGW/include/freetype2/freetype/config/ftstdlib.h \
+ c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/limits.h \
+ c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/string.h \
+ c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/stdio.h \
+ c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/stdlib.h \
+ c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/setjmp.h \
+ C:/MinGW/include/freetype2/freetype/fterrors.h \
+ C:/MinGW/include/freetype2/freetype/ftmoderr.h \
+ C:/MinGW/include/freetype2/freetype/fterrdef.h \
+ C:/MinGW/include/freetype2/freetype/fttypes.h \
+ C:/MinGW/include/freetype2/freetype/ftsystem.h \
+ C:/MinGW/include/freetype2/freetype/ftimage.h
+
+../config.h:
+
+../fontconfig/fontconfig.h:
+
+c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/sys/types.h:
+
+c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/_mingw.h:
+
+c:\mingw\bin\../lib/gcc/mingw32/4.5.0/include/stddef.h:
+
+c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/sys/stat.h:
+
+c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/unistd.h:
+
+c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/io.h:
+
+c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/process.h:
+
+c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/stdint.h:
+
+c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/getopt.h:
+
+c:\mingw\bin\../lib/gcc/mingw32/4.5.0/include/stdarg.h:
+
+../fontconfig/fcfreetype.h:
+
+c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/ft2build.h:
+
+C:/MinGW/include/freetype2/freetype/config/ftheader.h:
+
+C:/MinGW/include/freetype2/freetype/freetype.h:
+
+C:/MinGW/include/freetype2/freetype/config/ftconfig.h:
+
+C:/MinGW/include/freetype2/freetype/config/ftoption.h:
+
+C:/MinGW/include/freetype2/freetype/config/ftstdlib.h:
+
+c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/limits.h:
+
+c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/string.h:
+
+c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/stdio.h:
+
+c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/stdlib.h:
+
+c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/setjmp.h:
+
+C:/MinGW/include/freetype2/freetype/fterrors.h:
+
+C:/MinGW/include/freetype2/freetype/ftmoderr.h:
+
+C:/MinGW/include/freetype2/freetype/fterrdef.h:
+
+C:/MinGW/include/freetype2/freetype/fttypes.h:
+
+C:/MinGW/include/freetype2/freetype/ftsystem.h:
+
+C:/MinGW/include/freetype2/freetype/ftimage.h:

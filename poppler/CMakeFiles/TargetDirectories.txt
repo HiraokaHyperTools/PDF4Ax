@@ -1,0 +1,13 @@
+C:/Proj/PDF4Ax/poppler/CMakeFiles/ALL_BUILD.dir
+C:/Proj/PDF4Ax/poppler/CMakeFiles/ZERO_CHECK.dir
+C:/Proj/PDF4Ax/poppler/test/CMakeFiles/pdf-fullrewrite.dir
+C:/Proj/PDF4Ax/poppler/utils/CMakeFiles/pdffonts.dir
+C:/Proj/PDF4Ax/poppler/utils/CMakeFiles/pdfimages.dir
+C:/Proj/PDF4Ax/poppler/utils/CMakeFiles/pdfinfo.dir
+C:/Proj/PDF4Ax/poppler/utils/CMakeFiles/pdfseparate.dir
+C:/Proj/PDF4Ax/poppler/utils/CMakeFiles/pdftohtml.dir
+C:/Proj/PDF4Ax/poppler/utils/CMakeFiles/pdftoppm.dir
+C:/Proj/PDF4Ax/poppler/utils/CMakeFiles/pdftops.dir
+C:/Proj/PDF4Ax/poppler/utils/CMakeFiles/pdftotext.dir
+C:/Proj/PDF4Ax/poppler/utils/CMakeFiles/pdfunite.dir
+C:/Proj/PDF4Ax/poppler/CMakeFiles/poppler.dir

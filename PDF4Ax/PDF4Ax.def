@@ -1,0 +1,9 @@
+﻿; PDF4Ax.def : モジュール パラメータを宣言します。
+
+LIBRARY      "PDF4Ax.OCX"
+
+EXPORTS
+	DllCanUnloadNow     PRIVATE
+	DllGetClassObject   PRIVATE
+	DllRegisterServer   PRIVATE
+	DllUnregisterServer PRIVATE

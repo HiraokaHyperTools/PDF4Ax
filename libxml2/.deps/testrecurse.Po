@@ -1,0 +1,260 @@
+testrecurse.o: testrecurse.c libxml.h config.h \
+ include/libxml/xmlversion.h include/libxml/xmlexports.h \
+ c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/ansidecl.h \
+ c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/stdio.h \
+ c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/_mingw.h \
+ c:\mingw\bin\../lib/gcc/mingw32/4.5.0/include/stddef.h \
+ c:\mingw\bin\../lib/gcc/mingw32/4.5.0/include/stdarg.h \
+ c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/sys/types.h \
+ c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/string.h \
+ c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/sys/stat.h \
+ c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/fcntl.h \
+ c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/io.h \
+ include/libxml/parser.h include/libxml/tree.h include/libxml/xmlstring.h \
+ include/libxml/xmlregexp.h include/libxml/dict.h include/libxml/hash.h \
+ include/libxml/valid.h include/libxml/xmlerror.h include/libxml/list.h \
+ include/libxml/xmlautomata.h include/libxml/entities.h \
+ include/libxml/encoding.h \
+ c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/iconv.h \
+ c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/errno.h \
+ c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/wchar.h \
+ c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/wctype.h \
+ c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/stdint.h \
+ include/libxml/xmlIO.h include/libxml/globals.h include/libxml/SAX.h \
+ c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/stdlib.h \
+ include/libxml/xlink.h include/libxml/SAX2.h include/libxml/xmlmemory.h \
+ include/libxml/threads.h include/libxml/uri.h include/libxml/xmlreader.h \
+ include/libxml/relaxng.h include/libxml/xmlschemas.h \
+ c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/windows.h \
+ c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/windef.h \
+ c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/winnt.h \
+ c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/winerror.h \
+ c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/basetsd.h \
+ c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/pshpack4.h \
+ c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/poppack.h \
+ c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/wincon.h \
+ c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/winbase.h \
+ c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/wingdi.h \
+ c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/winuser.h \
+ c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/winnls.h \
+ c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/winver.h \
+ c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/winnetwk.h \
+ c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/winreg.h \
+ c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/winsvc.h \
+ c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/cderr.h \
+ c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/dde.h \
+ c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/ddeml.h \
+ c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/dlgs.h \
+ c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/imm.h \
+ c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/lzexpand.h \
+ c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/mmsystem.h \
+ c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/nb30.h \
+ c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/rpc.h \
+ c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/rpcdce.h \
+ c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/basetyps.h \
+ c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/rpcdcep.h \
+ c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/rpcnsi.h \
+ c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/rpcnterr.h \
+ c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/shellapi.h \
+ c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/pshpack2.h \
+ c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/winperf.h \
+ c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/commdlg.h \
+ c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/winspool.h \
+ c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/winsock2.h \
+ c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/ole2.h \
+ c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/objbase.h \
+ c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/rpcndr.h \
+ c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/rpcnsip.h \
+ c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/objfwd.h \
+ c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/wtypes.h \
+ c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/unknwn.h \
+ c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/objidl.h \
+ c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/cguid.h \
+ c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/olectlid.h \
+ c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/oleauto.h \
+ c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/oaidl.h \
+ c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/oleidl.h
+
+libxml.h:
+
+config.h:
+
+include/libxml/xmlversion.h:
+
+include/libxml/xmlexports.h:
+
+c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/ansidecl.h:
+
+c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/stdio.h:
+
+c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/_mingw.h:
+
+c:\mingw\bin\../lib/gcc/mingw32/4.5.0/include/stddef.h:
+
+c:\mingw\bin\../lib/gcc/mingw32/4.5.0/include/stdarg.h:
+
+c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/sys/types.h:
+
+c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/string.h:
+
+c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/sys/stat.h:
+
+c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/fcntl.h:
+
+c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/io.h:
+
+include/libxml/parser.h:
+
+include/libxml/tree.h:
+
+include/libxml/xmlstring.h:
+
+include/libxml/xmlregexp.h:
+
+include/libxml/dict.h:
+
+include/libxml/hash.h:
+
+include/libxml/valid.h:
+
+include/libxml/xmlerror.h:
+
+include/libxml/list.h:
+
+include/libxml/xmlautomata.h:
+
+include/libxml/entities.h:
+
+include/libxml/encoding.h:
+
+c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/iconv.h:
+
+c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/errno.h:
+
+c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/wchar.h:
+
+c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/wctype.h:
+
+c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/stdint.h:
+
+include/libxml/xmlIO.h:
+
+include/libxml/globals.h:
+
+include/libxml/SAX.h:
+
+c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/stdlib.h:
+
+include/libxml/xlink.h:
+
+include/libxml/SAX2.h:
+
+include/libxml/xmlmemory.h:
+
+include/libxml/threads.h:
+
+include/libxml/uri.h:
+
+include/libxml/xmlreader.h:
+
+include/libxml/relaxng.h:
+
+include/libxml/xmlschemas.h:
+
+c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/windows.h:
+
+c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/windef.h:
+
+c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/winnt.h:
+
+c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/winerror.h:
+
+c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/basetsd.h:
+
+c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/pshpack4.h:
+
+c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/poppack.h:
+
+c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/wincon.h:
+
+c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/winbase.h:
+
+c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/wingdi.h:
+
+c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/winuser.h:
+
+c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/winnls.h:
+
+c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/winver.h:
+
+c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/winnetwk.h:
+
+c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/winreg.h:
+
+c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/winsvc.h:
+
+c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/cderr.h:
+
+c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/dde.h:
+
+c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/ddeml.h:
+
+c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/dlgs.h:
+
+c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/imm.h:
+
+c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/lzexpand.h:
+
+c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/mmsystem.h:
+
+c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/nb30.h:
+
+c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/rpc.h:
+
+c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/rpcdce.h:
+
+c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/basetyps.h:
+
+c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/rpcdcep.h:
+
+c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/rpcnsi.h:
+
+c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/rpcnterr.h:
+
+c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/shellapi.h:
+
+c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/pshpack2.h:
+
+c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/winperf.h:
+
+c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/commdlg.h:
+
+c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/winspool.h:
+
+c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/winsock2.h:
+
+c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/ole2.h:
+
+c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/objbase.h:
+
+c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/rpcndr.h:
+
+c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/rpcnsip.h:
+
+c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/objfwd.h:
+
+c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/wtypes.h:
+
+c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/unknwn.h:
+
+c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/objidl.h:
+
+c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/cguid.h:
+
+c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/olectlid.h:
+
+c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/oleauto.h:
+
+c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/oaidl.h:
+
+c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/oleidl.h:

@@ -1,0 +1,297 @@
+fcxml.lo: fcxml.c fcint.h ../config.h \
+ c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/stdlib.h \
+ c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/_mingw.h \
+ c:\mingw\bin\../lib/gcc/mingw32/4.5.0/include/stddef.h \
+ c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/stdio.h \
+ c:\mingw\bin\../lib/gcc/mingw32/4.5.0/include/stdarg.h \
+ c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/sys/types.h \
+ c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/inttypes.h \
+ c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/stdint.h \
+ c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/string.h \
+ c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/ctype.h \
+ c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/errno.h \
+ c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/unistd.h \
+ c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/io.h \
+ c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/process.h \
+ c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/getopt.h \
+ c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/sys/stat.h \
+ c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/time.h \
+ ../fontconfig/fontconfig.h ../fontconfig/fcprivate.h fcdeprecate.h \
+ c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/fcntl.h \
+ c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/dirent.h \
+ c:/Proj/PDF4Ax/Release/include/libxml2/libxml/parser.h \
+ c:/Proj/PDF4Ax/Release/include/libxml2/libxml/xmlversion.h \
+ c:/Proj/PDF4Ax/Release/include/libxml2/libxml/xmlexports.h \
+ c:/Proj/PDF4Ax/Release/include/libxml2/libxml/tree.h \
+ c:/Proj/PDF4Ax/Release/include/libxml2/libxml/xmlstring.h \
+ c:/Proj/PDF4Ax/Release/include/libxml2/libxml/xmlregexp.h \
+ c:/Proj/PDF4Ax/Release/include/libxml2/libxml/dict.h \
+ c:/Proj/PDF4Ax/Release/include/libxml2/libxml/hash.h \
+ c:/Proj/PDF4Ax/Release/include/libxml2/libxml/valid.h \
+ c:/Proj/PDF4Ax/Release/include/libxml2/libxml/xmlerror.h \
+ c:/Proj/PDF4Ax/Release/include/libxml2/libxml/list.h \
+ c:/Proj/PDF4Ax/Release/include/libxml2/libxml/xmlautomata.h \
+ c:/Proj/PDF4Ax/Release/include/libxml2/libxml/entities.h \
+ c:/Proj/PDF4Ax/Release/include/libxml2/libxml/encoding.h \
+ c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/iconv.h \
+ c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/wchar.h \
+ c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/wctype.h \
+ c:/Proj/PDF4Ax/Release/include/libxml2/libxml/xmlIO.h \
+ c:/Proj/PDF4Ax/Release/include/libxml2/libxml/globals.h \
+ c:/Proj/PDF4Ax/Release/include/libxml2/libxml/SAX.h \
+ c:/Proj/PDF4Ax/Release/include/libxml2/libxml/xlink.h \
+ c:/Proj/PDF4Ax/Release/include/libxml2/libxml/SAX2.h \
+ c:/Proj/PDF4Ax/Release/include/libxml2/libxml/xmlmemory.h \
+ c:/Proj/PDF4Ax/Release/include/libxml2/libxml/threads.h \
+ c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/windows.h \
+ c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/windef.h \
+ c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/winnt.h \
+ c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/winerror.h \
+ c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/basetsd.h \
+ c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/pshpack4.h \
+ c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/poppack.h \
+ c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/wincon.h \
+ c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/winbase.h \
+ c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/wingdi.h \
+ c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/winuser.h \
+ c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/winnls.h \
+ c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/winver.h \
+ c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/winnetwk.h \
+ c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/winreg.h \
+ c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/winsvc.h \
+ c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/cderr.h \
+ c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/dde.h \
+ c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/ddeml.h \
+ c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/dlgs.h \
+ c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/imm.h \
+ c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/lzexpand.h \
+ c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/mmsystem.h \
+ c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/nb30.h \
+ c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/rpc.h \
+ c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/rpcdce.h \
+ c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/basetyps.h \
+ c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/rpcdcep.h \
+ c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/rpcnsi.h \
+ c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/rpcnterr.h \
+ c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/shellapi.h \
+ c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/pshpack2.h \
+ c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/winperf.h \
+ c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/commdlg.h \
+ c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/winspool.h \
+ c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/winsock2.h \
+ c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/ole2.h \
+ c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/objbase.h \
+ c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/rpcndr.h \
+ c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/rpcnsip.h \
+ c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/objfwd.h \
+ c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/wtypes.h \
+ c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/unknwn.h \
+ c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/objidl.h \
+ c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/cguid.h \
+ c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/olectlid.h \
+ c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/oleauto.h \
+ c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/oaidl.h \
+ c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/oleidl.h \
+ c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/mbstring.h \
+ c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/locale.h \
+ fcaliastail.h
+
+fcint.h:
+
+../config.h:
+
+c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/stdlib.h:
+
+c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/_mingw.h:
+
+c:\mingw\bin\../lib/gcc/mingw32/4.5.0/include/stddef.h:
+
+c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/stdio.h:
+
+c:\mingw\bin\../lib/gcc/mingw32/4.5.0/include/stdarg.h:
+
+c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/sys/types.h:
+
+c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/inttypes.h:
+
+c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/stdint.h:
+
+c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/string.h:
+
+c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/ctype.h:
+
+c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/errno.h:
+
+c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/unistd.h:
+
+c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/io.h:
+
+c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/process.h:
+
+c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/getopt.h:
+
+c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/sys/stat.h:
+
+c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/time.h:
+
+../fontconfig/fontconfig.h:
+
+../fontconfig/fcprivate.h:
+
+fcdeprecate.h:
+
+c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/fcntl.h:
+
+c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/dirent.h:
+
+c:/Proj/PDF4Ax/Release/include/libxml2/libxml/parser.h:
+
+c:/Proj/PDF4Ax/Release/include/libxml2/libxml/xmlversion.h:
+
+c:/Proj/PDF4Ax/Release/include/libxml2/libxml/xmlexports.h:
+
+c:/Proj/PDF4Ax/Release/include/libxml2/libxml/tree.h:
+
+c:/Proj/PDF4Ax/Release/include/libxml2/libxml/xmlstring.h:
+
+c:/Proj/PDF4Ax/Release/include/libxml2/libxml/xmlregexp.h:
+
+c:/Proj/PDF4Ax/Release/include/libxml2/libxml/dict.h:
+
+c:/Proj/PDF4Ax/Release/include/libxml2/libxml/hash.h:
+
+c:/Proj/PDF4Ax/Release/include/libxml2/libxml/valid.h:
+
+c:/Proj/PDF4Ax/Release/include/libxml2/libxml/xmlerror.h:
+
+c:/Proj/PDF4Ax/Release/include/libxml2/libxml/list.h:
+
+c:/Proj/PDF4Ax/Release/include/libxml2/libxml/xmlautomata.h:
+
+c:/Proj/PDF4Ax/Release/include/libxml2/libxml/entities.h:
+
+c:/Proj/PDF4Ax/Release/include/libxml2/libxml/encoding.h:
+
+c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/iconv.h:
+
+c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/wchar.h:
+
+c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/wctype.h:
+
+c:/Proj/PDF4Ax/Release/include/libxml2/libxml/xmlIO.h:
+
+c:/Proj/PDF4Ax/Release/include/libxml2/libxml/globals.h:
+
+c:/Proj/PDF4Ax/Release/include/libxml2/libxml/SAX.h:
+
+c:/Proj/PDF4Ax/Release/include/libxml2/libxml/xlink.h:
+
+c:/Proj/PDF4Ax/Release/include/libxml2/libxml/SAX2.h:
+
+c:/Proj/PDF4Ax/Release/include/libxml2/libxml/xmlmemory.h:
+
+c:/Proj/PDF4Ax/Release/include/libxml2/libxml/threads.h:
+
+c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/windows.h:
+
+c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/windef.h:
+
+c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/winnt.h:
+
+c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/winerror.h:
+
+c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/basetsd.h:
+
+c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/pshpack4.h:
+
+c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/poppack.h:
+
+c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/wincon.h:
+
+c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/winbase.h:
+
+c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/wingdi.h:
+
+c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/winuser.h:
+
+c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/winnls.h:
+
+c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/winver.h:
+
+c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/winnetwk.h:
+
+c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/winreg.h:
+
+c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/winsvc.h:
+
+c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/cderr.h:
+
+c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/dde.h:
+
+c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/ddeml.h:
+
+c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/dlgs.h:
+
+c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/imm.h:
+
+c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/lzexpand.h:
+
+c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/mmsystem.h:
+
+c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/nb30.h:
+
+c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/rpc.h:
+
+c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/rpcdce.h:
+
+c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/basetyps.h:
+
+c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/rpcdcep.h:
+
+c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/rpcnsi.h:
+
+c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/rpcnterr.h:
+
+c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/shellapi.h:
+
+c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/pshpack2.h:
+
+c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/winperf.h:
+
+c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/commdlg.h:
+
+c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/winspool.h:
+
+c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/winsock2.h:
+
+c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/ole2.h:
+
+c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/objbase.h:
+
+c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/rpcndr.h:
+
+c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/rpcnsip.h:
+
+c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/objfwd.h:
+
+c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/wtypes.h:
+
+c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/unknwn.h:
+
+c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/objidl.h:
+
+c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/cguid.h:
+
+c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/olectlid.h:
+
+c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/oleauto.h:
+
+c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/oaidl.h:
+
+c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/oleidl.h:
+
+c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/mbstring.h:
+
+c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/locale.h:
+
+fcaliastail.h:

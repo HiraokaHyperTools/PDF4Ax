@@ -1,0 +1,11 @@
+prefix=/c/Proj/PDF4Ax/Release
+exec_prefix=${prefix}
+libdir=${exec_prefix}/lib
+includedir=${prefix}/include
+
+Name: Fontconfig
+Description: Font configuration and customization library
+Version: 2.8.0
+Libs: -L${libdir} -lfontconfig
+Libs.private: -L/c/Proj/PDF4Ax/Release/lib -lxml2    -L/mingw/lib -lfreetype -lz -liconv
+Cflags: -I${includedir}

@@ -1,0 +1,109 @@
+schematron.lo: schematron.c libxml.h config.h include/libxml/xmlversion.h \
+ include/libxml/xmlexports.h \
+ c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/ansidecl.h \
+ c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/stdio.h \
+ c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/_mingw.h \
+ c:\mingw\bin\../lib/gcc/mingw32/4.5.0/include/stddef.h \
+ c:\mingw\bin\../lib/gcc/mingw32/4.5.0/include/stdarg.h \
+ c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/sys/types.h \
+ c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/string.h \
+ include/libxml/parser.h include/libxml/tree.h include/libxml/xmlstring.h \
+ include/libxml/xmlregexp.h include/libxml/dict.h include/libxml/hash.h \
+ include/libxml/valid.h include/libxml/xmlerror.h include/libxml/list.h \
+ include/libxml/xmlautomata.h include/libxml/entities.h \
+ include/libxml/encoding.h \
+ c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/iconv.h \
+ c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/errno.h \
+ c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/wchar.h \
+ c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/wctype.h \
+ c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/stdint.h \
+ include/libxml/xmlIO.h include/libxml/globals.h include/libxml/SAX.h \
+ c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/stdlib.h \
+ include/libxml/xlink.h include/libxml/SAX2.h include/libxml/xmlmemory.h \
+ include/libxml/threads.h include/libxml/uri.h include/libxml/xpath.h \
+ include/libxml/xpathInternals.h include/libxml/pattern.h \
+ include/libxml/schematron.h elfgcchack.h
+
+libxml.h:
+
+config.h:
+
+include/libxml/xmlversion.h:
+
+include/libxml/xmlexports.h:
+
+c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/ansidecl.h:
+
+c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/stdio.h:
+
+c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/_mingw.h:
+
+c:\mingw\bin\../lib/gcc/mingw32/4.5.0/include/stddef.h:
+
+c:\mingw\bin\../lib/gcc/mingw32/4.5.0/include/stdarg.h:
+
+c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/sys/types.h:
+
+c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/string.h:
+
+include/libxml/parser.h:
+
+include/libxml/tree.h:
+
+include/libxml/xmlstring.h:
+
+include/libxml/xmlregexp.h:
+
+include/libxml/dict.h:
+
+include/libxml/hash.h:
+
+include/libxml/valid.h:
+
+include/libxml/xmlerror.h:
+
+include/libxml/list.h:
+
+include/libxml/xmlautomata.h:
+
+include/libxml/entities.h:
+
+include/libxml/encoding.h:
+
+c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/iconv.h:
+
+c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/errno.h:
+
+c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/wchar.h:
+
+c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/wctype.h:
+
+c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/stdint.h:
+
+include/libxml/xmlIO.h:
+
+include/libxml/globals.h:
+
+include/libxml/SAX.h:
+
+c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/stdlib.h:
+
+include/libxml/xlink.h:
+
+include/libxml/SAX2.h:
+
+include/libxml/xmlmemory.h:
+
+include/libxml/threads.h:
+
+include/libxml/uri.h:
+
+include/libxml/xpath.h:
+
+include/libxml/xpathInternals.h:
+
+include/libxml/pattern.h:
+
+include/libxml/schematron.h:
+
+elfgcchack.h:

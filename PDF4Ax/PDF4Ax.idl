@@ -1,0 +1,54 @@
+﻿// PDF4Ax.idl : ActiveX コントロール プロジェクトのタイプ ライブラリ ソースです。
+
+// このファイルは、PDF4Ax.ocx のリソース
+// になるタイプ ライブラリ (PDF4Ax.tlb) を作成するために MIDL コンパイラ ツール
+// によって処理されます。
+
+#include <olectl.h>
+#include <idispids.h>
+
+[ uuid(D3444B56-F4FE-4BC4-9035-71842CF3E869), version(1.0),
+  helpfile("PDF4Ax.hlp"),
+  helpstring("PDF4Ax ActiveX Control module"),
+  control ]
+library PDF4AxLib
+{
+	importlib(STDOLE_TLB);
+
+	//  CPDF4AxCtrl のプライマリ ディスパッチ インターフェイスです。
+
+	[ uuid(3FF92EA8-9206-48D0-90F2-00F8A9A98E16),
+	  helpstring("PDF4Ax Control Dispatch interface")]
+	dispinterface _DPDF4Ax
+	{
+		properties:
+			[id(1001)] BSTR src;
+			[id(1002)] BSTR iv;
+	methods:
+
+			[id(DISPID_ABOUTBOX)] void AboutBox();
+	};
+
+	//  CPDF4AxCtrl のイベント ディスパッチ インターフェイスです。
+
+	[ uuid(7D43C1E0-B4DF-4E6F-9E34-4DDBF5258906),
+	  helpstring("PDF4Ax Control Event interface") ]
+	dispinterface _DPDF4AxEvents
+	{
+		properties:
+			//  イベント インターフェイスにプロパティがありません。
+
+		methods:
+	};
+
+	//  CPDF4AxCtrl のクラス情報です。
+
+	[ uuid(FE687896-F410-4D10-8740-D584DA23C74D),
+	  helpstring("PDF4Ax Control"), control ]
+	coclass PDF4Ax
+	{
+		[default] dispinterface _DPDF4Ax;
+		[default, source] dispinterface _DPDF4AxEvents;
+	};
+
+};

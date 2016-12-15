@@ -1,0 +1,41 @@
+xmlunicode.lo: xmlunicode.c libxml.h config.h include/libxml/xmlversion.h \
+ include/libxml/xmlexports.h \
+ c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/ansidecl.h \
+ c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/stdio.h \
+ c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/_mingw.h \
+ c:\mingw\bin\../lib/gcc/mingw32/4.5.0/include/stddef.h \
+ c:\mingw\bin\../lib/gcc/mingw32/4.5.0/include/stdarg.h \
+ c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/sys/types.h \
+ c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/string.h \
+ include/libxml/xmlunicode.h include/libxml/chvalid.h \
+ include/libxml/xmlstring.h elfgcchack.h
+
+libxml.h:
+
+config.h:
+
+include/libxml/xmlversion.h:
+
+include/libxml/xmlexports.h:
+
+c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/ansidecl.h:
+
+c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/stdio.h:
+
+c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/_mingw.h:
+
+c:\mingw\bin\../lib/gcc/mingw32/4.5.0/include/stddef.h:
+
+c:\mingw\bin\../lib/gcc/mingw32/4.5.0/include/stdarg.h:
+
+c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/sys/types.h:
+
+c:\mingw\bin\../lib/gcc/mingw32/4.5.0/../../../../include/string.h:
+
+include/libxml/xmlunicode.h:
+
+include/libxml/chvalid.h:
+
+include/libxml/xmlstring.h:
+
+elfgcchack.h:
