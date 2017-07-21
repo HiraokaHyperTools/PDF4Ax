@@ -131,3 +131,15 @@ int CFrmApp::ExitInstance() {
 
 	return CWinApp::ExitInstance();
 }
+
+int _tmain() {
+	if (!AfxWinInit(GetModuleHandle(NULL), 0, GetCommandLine(), SW_SHOW)) {
+		return 1;
+	}
+	if (AfxGetApp()->InitApplication()) {
+		AfxGetApp()->InitInstance();
+		AfxGetApp()->Run();
+	}
+	AfxWinTerm();
+	return 0;
+}

@@ -36,7 +36,7 @@ CAxFrame::CAxFrame()
 
 CAxFrame::~CAxFrame()
 {
-
+	AfxPostQuitMessage(0);
 }
 
 int CAxFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
@@ -71,7 +71,8 @@ int CAxFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 
 //	m_wndToolBar.SetBarStyle(m_wndToolBar.GetBarStyle() | CBRS_TOOLTIPS | CBRS_FLYBY);
 
-	m_wndView.LoadPDF(_T("C:\\Proj\\TestConvPdfs2\\JP.pdf"));
+	//m_wndView.LoadPDF(_T("C:\\Proj\\TestConvPdfs2\\JP.pdf"));
+	m_wndView.LoadPDF(_T("C:\\A\\A.pdf"));
 	//m_wndView.LoadPDF(_T("E:\\DL\\saitama.pdf"));
 	//m_wndView.LoadPDF(_T("E:\\DL\\map_tokyo.pdf"));
 	//m_wndView.LoadPDF(_T("H:\\DL\\OpenGL\\GDC2003_OGL_ARBFragmentProgram.pdf"));

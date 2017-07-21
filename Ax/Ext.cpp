@@ -8,7 +8,9 @@ namespace Ext {
 			globalParams = new GlobalParams(customPopplerDataDir);
 	}
 	void DestroyGlobalParams() {
-		if (globalParams != NULL)
+		if (globalParams != NULL) {
 			delete globalParams;
+			globalParams = NULL;
+		}
 	}
 }
