@@ -879,7 +879,7 @@ Splash::Splash(SplashBitmap *bitmapA, GBool vectorAntialiasA,
     aaBuf = NULL;
   }
   clearModRegion();
-  debugMode = gFalse;
+  debugMode = gTrue;
 }
 
 Splash::Splash(SplashBitmap *bitmapA, GBool vectorAntialiasA,
@@ -2371,6 +2371,10 @@ SplashError Splash::drawImage(SplashImageSource src, void *srcData,
                                    : (lly > lry) ? lly : lry
 		     : (ury > lly) ? (ury > lry) ? ury : lry
                                    : (lly > lry) ? lly : lry;
+  if (debugMode) {
+    printf("drawImage: %5d %5d %5d %5d \n",
+	   xMin, yMin, xMax, yMax);
+  }
   clipRes = state->clip->testRect(xMin, yMin, xMax, yMax);
   opClipRes = clipRes;
   if (clipRes == splashClipAllOutside) {
@@ -3074,6 +3078,7 @@ SplashError Splash::drawImage(SplashImageSource src, void *srcData,
   gfree(colorBuf);
   gfree(alphaBuf);
 
+  bitmap->writePNMFile("C:\\A\\A.pnm");
   return splashOk;
 }
 
