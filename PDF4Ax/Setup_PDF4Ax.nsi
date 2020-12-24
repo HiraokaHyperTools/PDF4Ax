@@ -7,6 +7,8 @@
 
 ;--------------------------------
 
+Unicode true
+
 !define APP "PDF4Ax"
 
 !system 'DefineAsmVer.exe "..\Release\${APP}.ocx" "!define VER ""[SVER]"" " > Tmpver.nsh'
@@ -35,6 +37,7 @@
 
 !include "LogicLib.nsh"
 !include "FileFunc.nsh"
+!include "x64.nsh"
 
 ; The name of the installer
 Name "${TTL} ${VER}"
@@ -49,6 +52,8 @@ InstallDir "$PROGRAMFILES\${APP}"
 RequestExecutionLevel admin
 
 SetOverwrite ifdiff
+
+XPStyle on
 
 ;--------------------------------
 
@@ -102,6 +107,8 @@ Section "ñ{ëÃ ì±ì¸" ;No components page, name is not important
   File "..\Release\PDF4Ax.ocx"
 
   RegDLL "$INSTDIR\PDF4Ax.ocx"
+  
+  File "..\GPL\pdftocairo.exe"
 
   SetOutPath "$INSTDIR\share\poppler"
   File /r /x ".svn" "..\poppler-data\*.*"
@@ -126,6 +133,19 @@ Section "ActiveX ä÷òAïtÇØ ê›íË (${EXTN})"
 
   WriteRegStr HKCR "CLSID\${CLSID}\EnableFullPage\${EXT2}" "" ""
 !endif
+
+  ${If} 32 < 8086
+    WriteRegStr   HKLM "SOFTWARE\Microsoft\Internet Explorer\Low Rights\ElevationPolicy\${CLSID}" "AppName" "pdftocairo.exe"
+    WriteRegStr   HKLM "SOFTWARE\Microsoft\Internet Explorer\Low Rights\ElevationPolicy\${CLSID}" "AppPath" "$INSTDIR"
+    WriteRegDWord HKLM "SOFTWARE\Microsoft\Internet Explorer\Low Rights\ElevationPolicy\${CLSID}" "Policy" 1
+  ${EndIf}
+  ${If} ${RunningX64}
+    SetRegView 64
+    WriteRegStr   HKLM "SOFTWARE\Microsoft\Internet Explorer\Low Rights\ElevationPolicy\${CLSID}" "AppName" "pdftocairo.exe"
+    WriteRegStr   HKLM "SOFTWARE\Microsoft\Internet Explorer\Low Rights\ElevationPolicy\${CLSID}" "AppPath" "$INSTDIR"
+    WriteRegDWord HKLM "SOFTWARE\Microsoft\Internet Explorer\Low Rights\ElevationPolicy\${CLSID}" "Policy" 1
+    SetRegView lastused
+  ${EndIf}
 SectionEnd
 
 ;--------------------------------
