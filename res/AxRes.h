@@ -18,6 +18,7 @@
 #define IDB_PAGE_DISP                   310
 #define IDB_MASK10                      311
 #define IDB_MASKS50                     312
+#define IDB_PRT                         313
 #define IDC_MAG                         40001
 #define IDC_MOVE                        40002
 #define IDC_P6                          40003
@@ -40,7 +41,7 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        312
+#define _APS_NEXT_RESOURCE_VALUE        314
 #define _APS_NEXT_COMMAND_VALUE         41017
 #define _APS_NEXT_CONTROL_VALUE         1001
 #define _APS_NEXT_SYMED_VALUE           101

@@ -429,6 +429,15 @@ void CAxVw::OnPaint()
 		if (fHatch) FillHatch(dc, m_rcAbout);
 		dc.ExcludeClipRect(m_rcAbout);
 	}
+	if (dc.RectVisible(m_rcPrt)) {
+		CDC dcMem;
+		dcMem.CreateCompatibleDC(&dc);
+		CBitmap* pOrg = dcMem.SelectObject(&m_bmPrt);
+		dc.BitBlt(m_rcPrt.left, m_rcPrt.top, m_rcPrt.Width(), m_rcPrt.Height(), &dcMem, 0, 0, SRCCOPY);
+		dcMem.SelectObject(pOrg);
+		if (fHatch) FillHatch(dc, m_rcPrt);
+		dc.ExcludeClipRect(m_rcPrt);
+	}
 	if (dc.RectVisible(m_rcMMSel)) {
 		CDC dcMem;
 		dcMem.CreateCompatibleDC(&dc);
@@ -634,6 +643,7 @@ int CAxVw::OnCreate(LPCREATESTRUCT lpCreateStruct)
 		|| !m_bmZoomVal.LoadBitmap(IDB_ZOOMVAL)
 		|| !m_bmPageDisp.LoadBitmap(IDB_PAGE_DISP)
 		|| !m_bmMask10.LoadBitmap(IDB_MASK10)
+		|| !m_bmPrt.LoadBitmap(IDB_PRT)
 		)
 		return -1;
 
@@ -775,6 +785,11 @@ void CAxVw::LayoutClient() {
 		m_rcNext.right = curx = (curx += cxBMNext);
 		m_rcNext.top = rc.bottom - cyBar;
 
+		m_rcPrt.left = curx;
+		m_rcPrt.bottom = rc.bottom;
+		m_rcPrt.right = (curx += 24);
+		m_rcPrt.top = rc.bottom - cyBar;
+
 		m_rcAbout.left = curx;
 		m_rcAbout.bottom = rc.bottom;
 		m_rcAbout.right = (curx += 24);
@@ -790,6 +805,7 @@ void CAxVw::LayoutClient() {
 		m_rcPrev.OffsetRect(cex, 0);
 		m_rcDisp.OffsetRect(cex, 0);
 		m_rcNext.OffsetRect(cex, 0);
+		m_rcPrt.OffsetRect(cex, 0);
 		m_rcAbout.OffsetRect(cex, 0);
 
 		m_rcCmdBar.OffsetRect(cex, 0);
@@ -955,6 +971,63 @@ void CAxVw::OnLButtonDown(UINT nFlags, CPoint point) {
 			CWnd *p = GetOwner();
 			if (p)
 				p->OnCmdMsg(ID_APP_ABOUT, 0, NULL, NULL);
+		}
+		else if (m_rcPrt.PtInRect(point)) {
+			CSingleLock lck(&s_lockpdf);
+			TCHAR tcTmpfp[MAX_PATH] = { 0 };
+			if (TUt::GetTempPathName(tcTmpfp)) {
+				GooString temp(static_cast<LPCSTR>(CT2A(tcTmpfp)));
+				if (0 == m_pdfdoc->saveWithoutChangesAs(&temp)) {
+					CString arg = _T(" -printdlg ");
+					arg += _T("\"");
+					arg += tcTmpfp;
+					arg += _T("\"");
+					PROCESS_INFORMATION pi = { 0 };
+					STARTUPINFO si = {
+						sizeof(STARTUPINFO),
+					};
+					CString pdftocairo;
+					{
+						TCHAR tcMe[MAX_PATH] = { 0 };
+						GetModuleFileName(AfxGetInstanceHandle(), tcMe, MAX_PATH);
+						PathRemoveFileSpec(tcMe);
+						TCHAR tcDir[MAX_PATH] = { 0 };
+						PathCombine(tcDir, tcMe, _T("pdftocairo.exe"));
+						pdftocairo = tcDir;
+					}
+					CreateProcess(
+						pdftocairo,
+						const_cast<LPWSTR>(static_cast<LPCWSTR>(arg)),
+						NULL,
+						NULL,
+						true,
+						CREATE_NO_WINDOW,
+						NULL,
+						NULL,
+						&si,
+						&pi
+					);
+
+					class CTmpDeleter : public CWinThread {
+					public:
+						CString fileToDelete;
+						PROCESS_INFORMATION pi;
+
+						virtual BOOL InitInstance() {
+							WaitForSingleObject(pi.hProcess, INFINITE);
+							CloseHandle(pi.hProcess);
+							CloseHandle(pi.hThread);
+							DeleteFile(fileToDelete);
+							return false;
+						}
+					};
+
+					CTmpDeleter* thread = new CTmpDeleter();
+					thread->fileToDelete = tcTmpfp;
+					thread->pi = pi;
+					thread->CreateThread();
+				}
+			}
 		}
 		else if (m_rcMMSel.PtInRect(point)) {
 			CMenu aSel;

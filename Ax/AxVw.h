@@ -109,8 +109,8 @@ protected:
 	CBitmap m_bmMask10;
 	CWinThread *m_threadRenderer;
 
-	CBitmap m_bmPrev, m_bmNext, m_bmAbout, m_bmMag, m_bmMagBtn, m_bmMove, m_bmMoveBtn, m_bmZoomVal, m_bmPageDisp;
-	CRect m_rcPaint, m_rcPrev, m_rcNext, m_rcDisp, m_rcAbout, m_rcFitWH, m_rcFitW;
+	CBitmap m_bmPrev, m_bmNext, m_bmAbout, m_bmMag, m_bmMagBtn, m_bmMove, m_bmMoveBtn, m_bmZoomVal, m_bmPageDisp, m_bmPrt;
+	CRect m_rcPaint, m_rcPrev, m_rcNext, m_rcDisp, m_rcAbout, m_rcFitWH, m_rcFitW, m_rcPrt;
 	CRect m_rcMMSel, m_rcZoomVal, m_rcCmdBar;
 	bool m_toolZoom;
 	CPoint m_ptBegin, m_ptScrollFrm;

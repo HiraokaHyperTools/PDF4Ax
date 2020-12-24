@@ -52,7 +52,7 @@
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <Midl>
-      <AdditionalIncludeDirectories>C:\Proj\PDF4Ax\poppler;C:\Proj\PDF4Ax\poppler\fofi;C:\Proj\PDF4Ax\poppler\goo;C:\Proj\PDF4Ax\poppler\poppler;C:\Proj\PDF4Ax\freetype\include;C:\Proj\PDF4Ax\freetype\include\freetype;C:\Proj\PDF4Ax\zlib;C:\Proj\PDF4Ax\jpeg;C:\Proj\PDF4Ax\libpng;C:\Proj\PDF4Ax\lcms\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>H:\Proj\PDF4Ax\poppler;H:\Proj\PDF4Ax\poppler\fofi;H:\Proj\PDF4Ax\poppler\goo;H:\Proj\PDF4Ax\poppler\poppler;H:\Proj\PDF4Ax\freetype\include;H:\Proj\PDF4Ax\freetype\include\freetype;H:\Proj\PDF4Ax\zlib;H:\Proj\PDF4Ax\jpeg;H:\Proj\PDF4Ax\libpng;H:\Proj\PDF4Ax\lcms\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <MkTypLibCompatible>false</MkTypLibCompatible>
       <TargetEnvironment>Win32</TargetEnvironment>
       <GenerateStublessProxies>true</GenerateStublessProxies>
@@ -67,7 +67,7 @@
       <AdditionalOptions> /Zm1000 %(AdditionalOptions)</AdditionalOptions>
       <Optimization>Disabled</Optimization>
       <InlineFunctionExpansion>Default</InlineFunctionExpansion>
-      <AdditionalIncludeDirectories>C:\Proj\PDF4Ax\poppler;C:\Proj\PDF4Ax\poppler\fofi;C:\Proj\PDF4Ax\poppler\goo;C:\Proj\PDF4Ax\poppler\poppler;C:\Proj\PDF4Ax\freetype\include;C:\Proj\PDF4Ax\freetype\include\freetype;C:\Proj\PDF4Ax\zlib;C:\Proj\PDF4Ax\jpeg;C:\Proj\PDF4Ax\libpng;C:\Proj\PDF4Ax\lcms\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>H:\Proj\PDF4Ax\poppler;H:\Proj\PDF4Ax\poppler\fofi;H:\Proj\PDF4Ax\poppler\goo;H:\Proj\PDF4Ax\poppler\poppler;H:\Proj\PDF4Ax\freetype\include;H:\Proj\PDF4Ax\freetype\include\freetype;H:\Proj\PDF4Ax\zlib;H:\Proj\PDF4Ax\jpeg;H:\Proj\PDF4Ax\libpng;H:\Proj\PDF4Ax\lcms\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_WINDOWS;_DEBUG;HAVE_CONFIG_H=1;_CRT_SECURE_NO_WARNINGS;CMAKE_INTDIR="Debug";%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ExceptionHandling>Sync</ExceptionHandling>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
@@ -75,22 +75,22 @@
       <RuntimeTypeInfo>true</RuntimeTypeInfo>
       <AssemblerListingLocation>Debug</AssemblerListingLocation>
       <ObjectFileName>$(IntDir)</ObjectFileName>
-      <ProgramDataBaseFileName>C:\Proj\PDF4Ax\poppler\Debug/poppler.pdb</ProgramDataBaseFileName>
+      <ProgramDataBaseFileName>H:\Proj\PDF4Ax\poppler\Debug/poppler.pdb</ProgramDataBaseFileName>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <CompileAs>CompileAsCpp</CompileAs>
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>WIN32;_WINDOWS;_DEBUG;HAVE_CONFIG_H=1;_CRT_SECURE_NO_WARNINGS;CMAKE_INTDIR="Debug";%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>C:\Proj\PDF4Ax\poppler;C:\Proj\PDF4Ax\poppler\fofi;C:\Proj\PDF4Ax\poppler\goo;C:\Proj\PDF4Ax\poppler\poppler;C:\Proj\PDF4Ax\freetype\include;C:\Proj\PDF4Ax\freetype\include\freetype;C:\Proj\PDF4Ax\zlib;C:\Proj\PDF4Ax\jpeg;C:\Proj\PDF4Ax\libpng;C:\Proj\PDF4Ax\lcms\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>H:\Proj\PDF4Ax\poppler;H:\Proj\PDF4Ax\poppler\fofi;H:\Proj\PDF4Ax\poppler\goo;H:\Proj\PDF4Ax\poppler\poppler;H:\Proj\PDF4Ax\freetype\include;H:\Proj\PDF4Ax\freetype\include\freetype;H:\Proj\PDF4Ax\zlib;H:\Proj\PDF4Ax\jpeg;H:\Proj\PDF4Ax\libpng;H:\Proj\PDF4Ax\lcms\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Lib>
-      <OutputFile>C:\Proj\PDF4Ax\poppler\Debug\poppler.lib</OutputFile>
+      <OutputFile>H:\Proj\PDF4Ax\poppler\Debug\poppler.lib</OutputFile>
     </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <Midl>
-      <AdditionalIncludeDirectories>C:\Proj\PDF4Ax\poppler;C:\Proj\PDF4Ax\poppler\fofi;C:\Proj\PDF4Ax\poppler\goo;C:\Proj\PDF4Ax\poppler\poppler;C:\Proj\PDF4Ax\freetype\include;C:\Proj\PDF4Ax\freetype\include\freetype;C:\Proj\PDF4Ax\zlib;C:\Proj\PDF4Ax\jpeg;C:\Proj\PDF4Ax\libpng;C:\Proj\PDF4Ax\lcms\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>H:\Proj\PDF4Ax\poppler;H:\Proj\PDF4Ax\poppler\fofi;H:\Proj\PDF4Ax\poppler\goo;H:\Proj\PDF4Ax\poppler\poppler;H:\Proj\PDF4Ax\freetype\include;H:\Proj\PDF4Ax\freetype\include\freetype;H:\Proj\PDF4Ax\zlib;H:\Proj\PDF4Ax\jpeg;H:\Proj\PDF4Ax\libpng;H:\Proj\PDF4Ax\lcms\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <MkTypLibCompatible>false</MkTypLibCompatible>
       <TargetEnvironment>Win32</TargetEnvironment>
       <GenerateStublessProxies>true</GenerateStublessProxies>
@@ -105,126 +105,126 @@
       <AdditionalOptions> /Zm1000 %(AdditionalOptions)</AdditionalOptions>
       <Optimization>MaxSpeed</Optimization>
       <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
-      <AdditionalIncludeDirectories>C:\Proj\PDF4Ax\poppler;C:\Proj\PDF4Ax\poppler\fofi;C:\Proj\PDF4Ax\poppler\goo;C:\Proj\PDF4Ax\poppler\poppler;C:\Proj\PDF4Ax\freetype\include;C:\Proj\PDF4Ax\freetype\include\freetype;C:\Proj\PDF4Ax\zlib;C:\Proj\PDF4Ax\jpeg;C:\Proj\PDF4Ax\libpng;C:\Proj\PDF4Ax\lcms\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>H:\Proj\PDF4Ax\poppler;H:\Proj\PDF4Ax\poppler\fofi;H:\Proj\PDF4Ax\poppler\goo;H:\Proj\PDF4Ax\poppler\poppler;H:\Proj\PDF4Ax\freetype\include;H:\Proj\PDF4Ax\freetype\include\freetype;H:\Proj\PDF4Ax\zlib;H:\Proj\PDF4Ax\jpeg;H:\Proj\PDF4Ax\libpng;H:\Proj\PDF4Ax\lcms\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_WINDOWS;NDEBUG;QT_NO_DEBUG;HAVE_CONFIG_H=1;_CRT_SECURE_NO_WARNINGS;CMAKE_INTDIR="Release";%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ExceptionHandling>Sync</ExceptionHandling>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <RuntimeTypeInfo>true</RuntimeTypeInfo>
       <AssemblerListingLocation>Release</AssemblerListingLocation>
       <ObjectFileName>$(IntDir)</ObjectFileName>
-      <ProgramDataBaseFileName>C:\Proj\PDF4Ax\poppler\Release/poppler.pdb</ProgramDataBaseFileName>
+      <ProgramDataBaseFileName>H:\Proj\PDF4Ax\poppler\Release/poppler.pdb</ProgramDataBaseFileName>
       <WarningLevel>Level3</WarningLevel>
       <CompileAs>CompileAsCpp</CompileAs>
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>WIN32;_WINDOWS;NDEBUG;QT_NO_DEBUG;HAVE_CONFIG_H=1;_CRT_SECURE_NO_WARNINGS;CMAKE_INTDIR="Release";%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>C:\Proj\PDF4Ax\poppler;C:\Proj\PDF4Ax\poppler\fofi;C:\Proj\PDF4Ax\poppler\goo;C:\Proj\PDF4Ax\poppler\poppler;C:\Proj\PDF4Ax\freetype\include;C:\Proj\PDF4Ax\freetype\include\freetype;C:\Proj\PDF4Ax\zlib;C:\Proj\PDF4Ax\jpeg;C:\Proj\PDF4Ax\libpng;C:\Proj\PDF4Ax\lcms\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>H:\Proj\PDF4Ax\poppler;H:\Proj\PDF4Ax\poppler\fofi;H:\Proj\PDF4Ax\poppler\goo;H:\Proj\PDF4Ax\poppler\poppler;H:\Proj\PDF4Ax\freetype\include;H:\Proj\PDF4Ax\freetype\include\freetype;H:\Proj\PDF4Ax\zlib;H:\Proj\PDF4Ax\jpeg;H:\Proj\PDF4Ax\libpng;H:\Proj\PDF4Ax\lcms\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Lib>
-      <OutputFile>C:\Proj\PDF4Ax\poppler\Release\poppler.lib</OutputFile>
+      <OutputFile>H:\Proj\PDF4Ax\poppler\Release\poppler.lib</OutputFile>
     </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="C:\Proj\PDF4Ax\poppler\fofi\FoFiBase.cc" />
-    <ClCompile Include="C:\Proj\PDF4Ax\poppler\fofi\FoFiEncodings.cc" />
-    <ClCompile Include="C:\Proj\PDF4Ax\poppler\fofi\FoFiTrueType.cc" />
-    <ClCompile Include="C:\Proj\PDF4Ax\poppler\fofi\FoFiType1.cc" />
-    <ClCompile Include="C:\Proj\PDF4Ax\poppler\fofi\FoFiType1C.cc" />
-    <ClCompile Include="C:\Proj\PDF4Ax\poppler\goo\FixedPoint.cc" />
-    <ClCompile Include="C:\Proj\PDF4Ax\poppler\goo\gfile.cc" />
-    <ClCompile Include="C:\Proj\PDF4Ax\poppler\goo\gmem.cc" />
-    <ClCompile Include="C:\Proj\PDF4Ax\poppler\goo\gmempp.cc" />
-    <ClCompile Include="C:\Proj\PDF4Ax\poppler\goo\GooHash.cc" />
-    <ClCompile Include="C:\Proj\PDF4Ax\poppler\goo\GooList.cc" />
-    <ClCompile Include="C:\Proj\PDF4Ax\poppler\goo\GooString.cc" />
-    <ClCompile Include="C:\Proj\PDF4Ax\poppler\goo\GooTimer.cc" />
-    <ClCompile Include="C:\Proj\PDF4Ax\poppler\goo\gstrtod.cc" />
-    <ClCompile Include="C:\Proj\PDF4Ax\poppler\goo\ImgWriter.cc" />
-    <ClCompile Include="C:\Proj\PDF4Ax\poppler\goo\JpegWriter.cc" />
-    <ClCompile Include="C:\Proj\PDF4Ax\poppler\goo\PNGWriter.cc" />
-    <ClCompile Include="C:\Proj\PDF4Ax\poppler\goo\TiffWriter.cc" />
-    <ClCompile Include="C:\Proj\PDF4Ax\poppler\poppler\Annot.cc" />
-    <ClCompile Include="C:\Proj\PDF4Ax\poppler\poppler\Array.cc" />
-    <ClCompile Include="C:\Proj\PDF4Ax\poppler\poppler\BuiltinFont.cc" />
-    <ClCompile Include="C:\Proj\PDF4Ax\poppler\poppler\BuiltinFontTables.cc" />
-    <ClCompile Include="C:\Proj\PDF4Ax\poppler\poppler\CachedFile.cc" />
-    <ClCompile Include="C:\Proj\PDF4Ax\poppler\poppler\Catalog.cc" />
-    <ClCompile Include="C:\Proj\PDF4Ax\poppler\poppler\CharCodeToUnicode.cc" />
-    <ClCompile Include="C:\Proj\PDF4Ax\poppler\poppler\CMap.cc" />
-    <ClCompile Include="C:\Proj\PDF4Ax\poppler\poppler\DateInfo.cc" />
-    <ClCompile Include="C:\Proj\PDF4Ax\poppler\poppler\DCTStream.cc" />
-    <ClCompile Include="C:\Proj\PDF4Ax\poppler\poppler\Decrypt.cc" />
-    <ClCompile Include="C:\Proj\PDF4Ax\poppler\poppler\Dict.cc" />
-    <ClCompile Include="C:\Proj\PDF4Ax\poppler\poppler\Error.cc" />
-    <ClCompile Include="C:\Proj\PDF4Ax\poppler\poppler\FileSpec.cc" />
-    <ClCompile Include="C:\Proj\PDF4Ax\poppler\poppler\FlateStream.cc" />
-    <ClCompile Include="C:\Proj\PDF4Ax\poppler\poppler\FontEncodingTables.cc" />
-    <ClCompile Include="C:\Proj\PDF4Ax\poppler\poppler\FontInfo.cc" />
-    <ClCompile Include="C:\Proj\PDF4Ax\poppler\poppler\Form.cc" />
-    <ClCompile Include="C:\Proj\PDF4Ax\poppler\poppler\Function.cc" />
-    <ClCompile Include="C:\Proj\PDF4Ax\poppler\poppler\Gfx.cc" />
-    <ClCompile Include="C:\Proj\PDF4Ax\poppler\poppler\GfxFont.cc" />
-    <ClCompile Include="C:\Proj\PDF4Ax\poppler\poppler\GfxState.cc" />
-    <ClCompile Include="C:\Proj\PDF4Ax\poppler\poppler\GlobalParams.cc" />
-    <ClCompile Include="C:\Proj\PDF4Ax\poppler\poppler\Hints.cc" />
-    <ClCompile Include="C:\Proj\PDF4Ax\poppler\poppler\JArithmeticDecoder.cc" />
-    <ClCompile Include="C:\Proj\PDF4Ax\poppler\poppler\JBIG2Stream.cc" />
-    <ClCompile Include="C:\Proj\PDF4Ax\poppler\poppler\JPXStream.cc" />
-    <ClCompile Include="C:\Proj\PDF4Ax\poppler\poppler\Lexer.cc" />
-    <ClCompile Include="C:\Proj\PDF4Ax\poppler\poppler\Linearization.cc" />
-    <ClCompile Include="C:\Proj\PDF4Ax\poppler\poppler\Link.cc" />
-    <ClCompile Include="C:\Proj\PDF4Ax\poppler\poppler\LocalPDFDocBuilder.cc" />
-    <ClCompile Include="C:\Proj\PDF4Ax\poppler\poppler\Movie.cc" />
-    <ClCompile Include="C:\Proj\PDF4Ax\poppler\poppler\NameToCharCode.cc" />
-    <ClCompile Include="C:\Proj\PDF4Ax\poppler\poppler\Object.cc" />
-    <ClCompile Include="C:\Proj\PDF4Ax\poppler\poppler\OptionalContent.cc" />
-    <ClCompile Include="C:\Proj\PDF4Ax\poppler\poppler\Outline.cc" />
-    <ClCompile Include="C:\Proj\PDF4Ax\poppler\poppler\OutputDev.cc" />
-    <ClCompile Include="C:\Proj\PDF4Ax\poppler\poppler\Page.cc" />
-    <ClCompile Include="C:\Proj\PDF4Ax\poppler\poppler\PageLabelInfo.cc" />
-    <ClCompile Include="C:\Proj\PDF4Ax\poppler\poppler\PageTransition.cc" />
-    <ClCompile Include="C:\Proj\PDF4Ax\poppler\poppler\Parser.cc" />
-    <ClCompile Include="C:\Proj\PDF4Ax\poppler\poppler\PDFDoc.cc" />
-    <ClCompile Include="C:\Proj\PDF4Ax\poppler\poppler\PDFDocEncoding.cc" />
-    <ClCompile Include="C:\Proj\PDF4Ax\poppler\poppler\PDFDocFactory.cc" />
-    <ClCompile Include="C:\Proj\PDF4Ax\poppler\poppler\PopplerCache.cc" />
-    <ClCompile Include="C:\Proj\PDF4Ax\poppler\poppler\PreScanOutputDev.cc" />
-    <ClCompile Include="C:\Proj\PDF4Ax\poppler\poppler\ProfileData.cc" />
-    <ClCompile Include="C:\Proj\PDF4Ax\poppler\poppler\PSOutputDev.cc" />
-    <ClCompile Include="C:\Proj\PDF4Ax\poppler\poppler\PSTokenizer.cc" />
-    <ClCompile Include="C:\Proj\PDF4Ax\poppler\poppler\Rendition.cc" />
-    <ClCompile Include="C:\Proj\PDF4Ax\poppler\poppler\SecurityHandler.cc" />
-    <ClCompile Include="C:\Proj\PDF4Ax\poppler\poppler\Sound.cc" />
-    <ClCompile Include="C:\Proj\PDF4Ax\poppler\poppler\SplashOutputDev.cc" />
-    <ClCompile Include="C:\Proj\PDF4Ax\poppler\poppler\StdinCachedFile.cc" />
-    <ClCompile Include="C:\Proj\PDF4Ax\poppler\poppler\StdinPDFDocBuilder.cc" />
-    <ClCompile Include="C:\Proj\PDF4Ax\poppler\poppler\Stream.cc" />
-    <ClCompile Include="C:\Proj\PDF4Ax\poppler\poppler\strtok_r.cpp" />
-    <ClCompile Include="C:\Proj\PDF4Ax\poppler\poppler\TextOutputDev.cc" />
-    <ClCompile Include="C:\Proj\PDF4Ax\poppler\poppler\UnicodeMap.cc" />
-    <ClCompile Include="C:\Proj\PDF4Ax\poppler\poppler\UnicodeTypeTable.cc" />
-    <ClCompile Include="C:\Proj\PDF4Ax\poppler\poppler\ViewerPreferences.cc" />
-    <ClCompile Include="C:\Proj\PDF4Ax\poppler\poppler\XpdfPluginAPI.cc" />
-    <ClCompile Include="C:\Proj\PDF4Ax\poppler\poppler\XRef.cc" />
-    <ClCompile Include="C:\Proj\PDF4Ax\poppler\splash\Splash.cc" />
-    <ClCompile Include="C:\Proj\PDF4Ax\poppler\splash\SplashBitmap.cc" />
-    <ClCompile Include="C:\Proj\PDF4Ax\poppler\splash\SplashClip.cc" />
-    <ClCompile Include="C:\Proj\PDF4Ax\poppler\splash\SplashFont.cc" />
-    <ClCompile Include="C:\Proj\PDF4Ax\poppler\splash\SplashFontEngine.cc" />
-    <ClCompile Include="C:\Proj\PDF4Ax\poppler\splash\SplashFontFile.cc" />
-    <ClCompile Include="C:\Proj\PDF4Ax\poppler\splash\SplashFontFileID.cc" />
-    <ClCompile Include="C:\Proj\PDF4Ax\poppler\splash\SplashFTFont.cc" />
-    <ClCompile Include="C:\Proj\PDF4Ax\poppler\splash\SplashFTFontEngine.cc" />
-    <ClCompile Include="C:\Proj\PDF4Ax\poppler\splash\SplashFTFontFile.cc" />
-    <ClCompile Include="C:\Proj\PDF4Ax\poppler\splash\SplashPath.cc" />
-    <ClCompile Include="C:\Proj\PDF4Ax\poppler\splash\SplashPattern.cc" />
-    <ClCompile Include="C:\Proj\PDF4Ax\poppler\splash\SplashScreen.cc" />
-    <ClCompile Include="C:\Proj\PDF4Ax\poppler\splash\SplashState.cc" />
-    <ClCompile Include="C:\Proj\PDF4Ax\poppler\splash\SplashT1Font.cc" />
-    <ClCompile Include="C:\Proj\PDF4Ax\poppler\splash\SplashT1FontEngine.cc" />
-    <ClCompile Include="C:\Proj\PDF4Ax\poppler\splash\SplashT1FontFile.cc" />
-    <ClCompile Include="C:\Proj\PDF4Ax\poppler\splash\SplashXPath.cc" />
-    <ClCompile Include="C:\Proj\PDF4Ax\poppler\splash\SplashXPathScanner.cc" />
+    <ClCompile Include="H:\Proj\PDF4Ax\poppler\fofi\FoFiBase.cc" />
+    <ClCompile Include="H:\Proj\PDF4Ax\poppler\fofi\FoFiEncodings.cc" />
+    <ClCompile Include="H:\Proj\PDF4Ax\poppler\fofi\FoFiTrueType.cc" />
+    <ClCompile Include="H:\Proj\PDF4Ax\poppler\fofi\FoFiType1.cc" />
+    <ClCompile Include="H:\Proj\PDF4Ax\poppler\fofi\FoFiType1C.cc" />
+    <ClCompile Include="H:\Proj\PDF4Ax\poppler\goo\FixedPoint.cc" />
+    <ClCompile Include="H:\Proj\PDF4Ax\poppler\goo\gfile.cc" />
+    <ClCompile Include="H:\Proj\PDF4Ax\poppler\goo\gmem.cc" />
+    <ClCompile Include="H:\Proj\PDF4Ax\poppler\goo\gmempp.cc" />
+    <ClCompile Include="H:\Proj\PDF4Ax\poppler\goo\GooHash.cc" />
+    <ClCompile Include="H:\Proj\PDF4Ax\poppler\goo\GooList.cc" />
+    <ClCompile Include="H:\Proj\PDF4Ax\poppler\goo\GooString.cc" />
+    <ClCompile Include="H:\Proj\PDF4Ax\poppler\goo\GooTimer.cc" />
+    <ClCompile Include="H:\Proj\PDF4Ax\poppler\goo\gstrtod.cc" />
+    <ClCompile Include="H:\Proj\PDF4Ax\poppler\goo\ImgWriter.cc" />
+    <ClCompile Include="H:\Proj\PDF4Ax\poppler\goo\JpegWriter.cc" />
+    <ClCompile Include="H:\Proj\PDF4Ax\poppler\goo\PNGWriter.cc" />
+    <ClCompile Include="H:\Proj\PDF4Ax\poppler\goo\TiffWriter.cc" />
+    <ClCompile Include="H:\Proj\PDF4Ax\poppler\poppler\Annot.cc" />
+    <ClCompile Include="H:\Proj\PDF4Ax\poppler\poppler\Array.cc" />
+    <ClCompile Include="H:\Proj\PDF4Ax\poppler\poppler\BuiltinFont.cc" />
+    <ClCompile Include="H:\Proj\PDF4Ax\poppler\poppler\BuiltinFontTables.cc" />
+    <ClCompile Include="H:\Proj\PDF4Ax\poppler\poppler\CachedFile.cc" />
+    <ClCompile Include="H:\Proj\PDF4Ax\poppler\poppler\Catalog.cc" />
+    <ClCompile Include="H:\Proj\PDF4Ax\poppler\poppler\CharCodeToUnicode.cc" />
+    <ClCompile Include="H:\Proj\PDF4Ax\poppler\poppler\CMap.cc" />
+    <ClCompile Include="H:\Proj\PDF4Ax\poppler\poppler\DateInfo.cc" />
+    <ClCompile Include="H:\Proj\PDF4Ax\poppler\poppler\DCTStream.cc" />
+    <ClCompile Include="H:\Proj\PDF4Ax\poppler\poppler\Decrypt.cc" />
+    <ClCompile Include="H:\Proj\PDF4Ax\poppler\poppler\Dict.cc" />
+    <ClCompile Include="H:\Proj\PDF4Ax\poppler\poppler\Error.cc" />
+    <ClCompile Include="H:\Proj\PDF4Ax\poppler\poppler\FileSpec.cc" />
+    <ClCompile Include="H:\Proj\PDF4Ax\poppler\poppler\FlateStream.cc" />
+    <ClCompile Include="H:\Proj\PDF4Ax\poppler\poppler\FontEncodingTables.cc" />
+    <ClCompile Include="H:\Proj\PDF4Ax\poppler\poppler\FontInfo.cc" />
+    <ClCompile Include="H:\Proj\PDF4Ax\poppler\poppler\Form.cc" />
+    <ClCompile Include="H:\Proj\PDF4Ax\poppler\poppler\Function.cc" />
+    <ClCompile Include="H:\Proj\PDF4Ax\poppler\poppler\Gfx.cc" />
+    <ClCompile Include="H:\Proj\PDF4Ax\poppler\poppler\GfxFont.cc" />
+    <ClCompile Include="H:\Proj\PDF4Ax\poppler\poppler\GfxState.cc" />
+    <ClCompile Include="H:\Proj\PDF4Ax\poppler\poppler\GlobalParams.cc" />
+    <ClCompile Include="H:\Proj\PDF4Ax\poppler\poppler\Hints.cc" />
+    <ClCompile Include="H:\Proj\PDF4Ax\poppler\poppler\JArithmeticDecoder.cc" />
+    <ClCompile Include="H:\Proj\PDF4Ax\poppler\poppler\JBIG2Stream.cc" />
+    <ClCompile Include="H:\Proj\PDF4Ax\poppler\poppler\JPXStream.cc" />
+    <ClCompile Include="H:\Proj\PDF4Ax\poppler\poppler\Lexer.cc" />
+    <ClCompile Include="H:\Proj\PDF4Ax\poppler\poppler\Linearization.cc" />
+    <ClCompile Include="H:\Proj\PDF4Ax\poppler\poppler\Link.cc" />
+    <ClCompile Include="H:\Proj\PDF4Ax\poppler\poppler\LocalPDFDocBuilder.cc" />
+    <ClCompile Include="H:\Proj\PDF4Ax\poppler\poppler\Movie.cc" />
+    <ClCompile Include="H:\Proj\PDF4Ax\poppler\poppler\NameToCharCode.cc" />
+    <ClCompile Include="H:\Proj\PDF4Ax\poppler\poppler\Object.cc" />
+    <ClCompile Include="H:\Proj\PDF4Ax\poppler\poppler\OptionalContent.cc" />
+    <ClCompile Include="H:\Proj\PDF4Ax\poppler\poppler\Outline.cc" />
+    <ClCompile Include="H:\Proj\PDF4Ax\poppler\poppler\OutputDev.cc" />
+    <ClCompile Include="H:\Proj\PDF4Ax\poppler\poppler\Page.cc" />
+    <ClCompile Include="H:\Proj\PDF4Ax\poppler\poppler\PageLabelInfo.cc" />
+    <ClCompile Include="H:\Proj\PDF4Ax\poppler\poppler\PageTransition.cc" />
+    <ClCompile Include="H:\Proj\PDF4Ax\poppler\poppler\Parser.cc" />
+    <ClCompile Include="H:\Proj\PDF4Ax\poppler\poppler\PDFDoc.cc" />
+    <ClCompile Include="H:\Proj\PDF4Ax\poppler\poppler\PDFDocEncoding.cc" />
+    <ClCompile Include="H:\Proj\PDF4Ax\poppler\poppler\PDFDocFactory.cc" />
+    <ClCompile Include="H:\Proj\PDF4Ax\poppler\poppler\PopplerCache.cc" />
+    <ClCompile Include="H:\Proj\PDF4Ax\poppler\poppler\PreScanOutputDev.cc" />
+    <ClCompile Include="H:\Proj\PDF4Ax\poppler\poppler\ProfileData.cc" />
+    <ClCompile Include="H:\Proj\PDF4Ax\poppler\poppler\PSOutputDev.cc" />
+    <ClCompile Include="H:\Proj\PDF4Ax\poppler\poppler\PSTokenizer.cc" />
+    <ClCompile Include="H:\Proj\PDF4Ax\poppler\poppler\Rendition.cc" />
+    <ClCompile Include="H:\Proj\PDF4Ax\poppler\poppler\SecurityHandler.cc" />
+    <ClCompile Include="H:\Proj\PDF4Ax\poppler\poppler\Sound.cc" />
+    <ClCompile Include="H:\Proj\PDF4Ax\poppler\poppler\SplashOutputDev.cc" />
+    <ClCompile Include="H:\Proj\PDF4Ax\poppler\poppler\StdinCachedFile.cc" />
+    <ClCompile Include="H:\Proj\PDF4Ax\poppler\poppler\StdinPDFDocBuilder.cc" />
+    <ClCompile Include="H:\Proj\PDF4Ax\poppler\poppler\Stream.cc" />
+    <ClCompile Include="H:\Proj\PDF4Ax\poppler\poppler\strtok_r.cpp" />
+    <ClCompile Include="H:\Proj\PDF4Ax\poppler\poppler\TextOutputDev.cc" />
+    <ClCompile Include="H:\Proj\PDF4Ax\poppler\poppler\UnicodeMap.cc" />
+    <ClCompile Include="H:\Proj\PDF4Ax\poppler\poppler\UnicodeTypeTable.cc" />
+    <ClCompile Include="H:\Proj\PDF4Ax\poppler\poppler\ViewerPreferences.cc" />
+    <ClCompile Include="H:\Proj\PDF4Ax\poppler\poppler\XpdfPluginAPI.cc" />
+    <ClCompile Include="H:\Proj\PDF4Ax\poppler\poppler\XRef.cc" />
+    <ClCompile Include="H:\Proj\PDF4Ax\poppler\splash\Splash.cc" />
+    <ClCompile Include="H:\Proj\PDF4Ax\poppler\splash\SplashBitmap.cc" />
+    <ClCompile Include="H:\Proj\PDF4Ax\poppler\splash\SplashClip.cc" />
+    <ClCompile Include="H:\Proj\PDF4Ax\poppler\splash\SplashFont.cc" />
+    <ClCompile Include="H:\Proj\PDF4Ax\poppler\splash\SplashFontEngine.cc" />
+    <ClCompile Include="H:\Proj\PDF4Ax\poppler\splash\SplashFontFile.cc" />
+    <ClCompile Include="H:\Proj\PDF4Ax\poppler\splash\SplashFontFileID.cc" />
+    <ClCompile Include="H:\Proj\PDF4Ax\poppler\splash\SplashFTFont.cc" />
+    <ClCompile Include="H:\Proj\PDF4Ax\poppler\splash\SplashFTFontEngine.cc" />
+    <ClCompile Include="H:\Proj\PDF4Ax\poppler\splash\SplashFTFontFile.cc" />
+    <ClCompile Include="H:\Proj\PDF4Ax\poppler\splash\SplashPath.cc" />
+    <ClCompile Include="H:\Proj\PDF4Ax\poppler\splash\SplashPattern.cc" />
+    <ClCompile Include="H:\Proj\PDF4Ax\poppler\splash\SplashScreen.cc" />
+    <ClCompile Include="H:\Proj\PDF4Ax\poppler\splash\SplashState.cc" />
+    <ClCompile Include="H:\Proj\PDF4Ax\poppler\splash\SplashT1Font.cc" />
+    <ClCompile Include="H:\Proj\PDF4Ax\poppler\splash\SplashT1FontEngine.cc" />
+    <ClCompile Include="H:\Proj\PDF4Ax\poppler\splash\SplashT1FontFile.cc" />
+    <ClCompile Include="H:\Proj\PDF4Ax\poppler\splash\SplashXPath.cc" />
+    <ClCompile Include="H:\Proj\PDF4Ax\poppler\splash\SplashXPathScanner.cc" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\freetype\builds\win32\vc2005\freetype.vcxproj">
