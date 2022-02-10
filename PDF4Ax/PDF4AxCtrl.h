@@ -42,6 +42,7 @@ protected:
 	CComPtr<IStream> m_pStAsync;
 	DWORD m_tickLastInv;
 	CComPtr<IBinding> m_binding;
+	CString m_errorMessage;
 
 	DECLARE_OLECREATE_EX(CPDF4AxCtrl)    // クラス ファクトリ と guid
 	DECLARE_OLETYPELIB(CPDF4AxCtrl)      // GetTypeInfo

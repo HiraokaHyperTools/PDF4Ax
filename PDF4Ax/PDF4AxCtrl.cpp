@@ -189,7 +189,14 @@ void CPDF4AxCtrl::OnDraw(CDC* pDC, const CRect& rcBounds, const CRect& rcInvalid
 		dc.SelectStockObject(DEFAULT_GUI_FONT);
 		dc.Rectangle(rcBounds);
 		dc.SetTextColor(RGB(0,0,0));
-		dc.DrawText(_T("(PDF4Ax Control)"), CRect(rcBounds), DT_SINGLELINE|DT_VCENTER|DT_CENTER);
+		if (m_errorMessage.IsEmpty()) {
+			dc.DrawText(_T("(PDF4Ax Control)"), CRect(rcBounds), DT_SINGLELINE | DT_VCENTER | DT_CENTER);
+		}
+		else {
+			CRect rcText(rcBounds);
+			rcText.DeflateRect(3, 3);
+			dc.DrawText(m_errorMessage, rcText, DT_LEFT | DT_TOP);
+		}
 		return;
 	}
 
@@ -256,8 +263,15 @@ void CPDF4AxCtrl::LoadFromMoniker(LPBC pibc, LPMONIKER pimkDL) {
 				DWORD cchfp = 256;
 				if (!ok && UrlIsFileUrl(lpcw)) {
 					if (SUCCEEDED(hr = PathCreateFromUrl(lpcw, wcfp, &cchfp, NULL))) {
-						Setsrc(CW2T(wcfp));
-						ok = true;
+						TRY {
+							Setsrc(CW2T(wcfp));
+							ok = true;
+						}
+						CATCH_ALL(e) {
+							// PDF が破損しているなど、環境固有の問題
+							return;
+						}
+						END_CATCH_ALL;
 					}
 				}
 				if (!ok && PathIsURL(lpcw)) {
@@ -355,12 +369,18 @@ void CPDF4AxCtrl::Setsrc(LPCTSTR newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
-	HRESULT hr;
-	if (FAILED(hr = m_frm.m_wndView.LoadPDF(newVal)))
-		AfxThrowOleException(hr);
+	m_errorMessage.Empty();
 
-	if (!m_frm.IsWindowVisible())
+	HRESULT hr;
+	if (FAILED(hr = m_frm.m_wndView.LoadPDF(newVal))) {
+		m_frm.ShowWindow(SW_HIDE);
+		m_errorMessage.FormatMessage(IDS_ERROR_PDF_LOADER, static_cast<LPCTSTR>(m_frm.m_wndView.m_errorMessage));
+		AfxThrowOleDispatchException(HRESULT_CODE(hr), m_frm.m_wndView.m_errorMessage);
+	}
+
+	if (!m_frm.IsWindowVisible()) {
 		m_frm.ShowWindow(SW_SHOW);
+	}
 }
 
 int CPDF4AxCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct) {

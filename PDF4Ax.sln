@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.28307.421
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.32126.317
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Frm", "Frm\Frm.vcxproj", "{41DF052A-822A-494F-BADD-6E5AC010F0ED}"
 EndProject
@@ -28,7 +28,6 @@ Global
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{41DF052A-822A-494F-BADD-6E5AC010F0ED}.Debug|Win32.ActiveCfg = Debug|Win32
-		{41DF052A-822A-494F-BADD-6E5AC010F0ED}.Debug|Win32.Build.0 = Debug|Win32
 		{41DF052A-822A-494F-BADD-6E5AC010F0ED}.Debug|x64.ActiveCfg = Debug|Win32
 		{41DF052A-822A-494F-BADD-6E5AC010F0ED}.Release|Win32.ActiveCfg = Release|Win32
 		{41DF052A-822A-494F-BADD-6E5AC010F0ED}.Release|x64.ActiveCfg = Release|Win32

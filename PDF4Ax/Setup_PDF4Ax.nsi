@@ -11,8 +11,8 @@ Unicode true
 
 !define APP "PDF4Ax"
 
-!system 'DefineAsmVer.exe "..\Release\${APP}.ocx" "!define VER ""[SVER]"" " > Tmpver.nsh'
-!include "Tmpver.nsh"
+!system 'DefineAsmVer.exe "..\Release\${APP}.ocx" "!define VER ""[SVER]"" " > Appver.tmp'
+!include "Appver.tmp"
 !searchreplace APV ${VER} "." "_"
 
 !system 'MySign "..\Release\${APP}.ocx"'
@@ -109,6 +109,9 @@ Section "–{‘Ì “±“ü" ;No components page, name is not important
   RegDLL "$INSTDIR\PDF4Ax.ocx"
   
   File "..\GPL\pdftocairo.exe"
+  
+  ExecWait 'icacls pdftocairo.exe /setintegritylevel low' $0
+  DetailPrint "Œ‹‰Ê: $0"
 
   SetOutPath "$INSTDIR\share\poppler"
   File /r /x ".svn" "..\poppler-data\*.*"

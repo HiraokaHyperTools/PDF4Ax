@@ -6,6 +6,17 @@
 //#include "UseG.h"
 #include "memory"
 
+#define E_errOpenFile MAKE_HRESULT(SEVERITY_ERROR,FACILITY_ITF,2001)
+#define E_errBadCatalog MAKE_HRESULT(SEVERITY_ERROR,FACILITY_ITF,2002)
+#define E_errDamaged MAKE_HRESULT(SEVERITY_ERROR,FACILITY_ITF,2003)
+#define E_errEncrypted MAKE_HRESULT(SEVERITY_ERROR,FACILITY_ITF,2004)
+#define E_errHighlightFile MAKE_HRESULT(SEVERITY_ERROR,FACILITY_ITF,2005)
+#define E_errBadPrinter MAKE_HRESULT(SEVERITY_ERROR,FACILITY_ITF,2006)
+#define E_errPrinting MAKE_HRESULT(SEVERITY_ERROR,FACILITY_ITF,2007)
+#define E_errPermission MAKE_HRESULT(SEVERITY_ERROR,FACILITY_ITF,2008)
+#define E_errBadPageNum MAKE_HRESULT(SEVERITY_ERROR,FACILITY_ITF,2009)
+#define E_errFileIO MAKE_HRESULT(SEVERITY_ERROR,FACILITY_ITF,2010)
+
 class CPvRender {
 public:
 	virtual CBitmap *GetThumb(int iPage, int cx) = NULL;
@@ -91,6 +102,7 @@ public:
 // 属性
 public:
 	CString m_strUrl;
+	CString m_errorMessage;
 
 protected:
 	CComPtr<CPDFRef> m_prefpdf;
@@ -120,6 +132,7 @@ protected:
 	CAutoPtrArray<CBitmap> m_pThumbs;
 	HCURSOR m_hcZoomIn, m_hcZoomOut;
 	CArray<CPPSummary> m_pps;
+	bool m_canPrintThisPDF;
 
 // 操作
 public:
@@ -206,6 +219,10 @@ public:
 	CBitmap *GetThumb(int iPage, int cx);
 
 	void FillHatch(CDC &dc, CRect rc);
+
+	bool IsPDFReady() const {
+		return m_pdfdoc != NULL;
+	}
 
 // オーバーライド
 protected:

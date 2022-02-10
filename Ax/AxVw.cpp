@@ -5,6 +5,7 @@
 #include "resource.h"
 #include "AxRes.h"
 #include "AxVw.h"
+#include "ErrorCodes.h"
 
 #undef max
 #undef min
@@ -488,6 +489,8 @@ void CAxVw::UnloadPDF() {
 	m_prefpdf.Release();
 
 	m_strUrl.Empty();
+
+	m_canPrintThisPDF = false;
 }
 
 HRESULT CAxVw::LoadPDF(LPCTSTR newVal) {
@@ -495,23 +498,32 @@ HRESULT CAxVw::LoadPDF(LPCTSTR newVal) {
 	bool maybeItsPDF = false;
 
 	CFile fUnk;
-	if (!fUnk.Open(newVal, CFile::modeRead|CFile::shareDenyWrite))
-		return E_FAIL;
+	if (!fUnk.Open(newVal, CFile::modeRead | CFile::shareDenyWrite)) {
+		m_errorMessage.Format(IDS_STRING2001);
+		return E_errOpenFile;
+	}
 
 	BYTE buff[4];
-	if (fUnk.Read(buff, 4) != 4)
-		return E_FAIL;
+	if (fUnk.Read(buff, 4) != 4) {
+		m_errorMessage.Format(IDS_STRING2003);
+		return E_errDamaged;
+	}
 
-	if (memcmp(buff, "%PDF", 4) == 0)
+	if (memcmp(buff, "%PDF", 4) == 0) {
 		return LoadTruePDF(newVal);
+	}
 
 	TCHAR tcTmpfp[MAX_PATH] = {0};
-	if (!TUt::GetTempPathName(tcTmpfp))
-		return E_FAIL;
+	if (!TUt::GetTempPathName(tcTmpfp)) {
+		m_errorMessage.Format(IDS_STRING2010);
+		return E_errFileIO;
+	}
 
 	CFile fTmp;
-	if (!fTmp.Open(tcTmpfp, CFile::modeCreate|CFile::modeReadWrite|CFile::shareDenyWrite))
-		return E_FAIL;
+	if (!fTmp.Open(tcTmpfp, CFile::modeCreate | CFile::modeReadWrite | CFile::shareDenyWrite)) {
+		m_errorMessage.Format(IDS_STRING2010);
+		return E_errFileIO;
+	}
 
 	fUnk.SeekToBegin();
 	int t = 0;
@@ -523,7 +535,8 @@ HRESULT CAxVw::LoadPDF(LPCTSTR newVal) {
 			break;
 		rijndaelDecrypt(rk, nr, buffIn, buffOut);
 		if (t == 0 && memcmp(buffOut, "%PDF", 4) != 0) {
-			return E_FAIL;
+			m_errorMessage.Format(IDS_STRING2003);
+			return E_errDamaged;
 		}
 		maybeItsPDF = true;
 		fTmp.Write(buffOut, 16);
@@ -534,19 +547,55 @@ HRESULT CAxVw::LoadPDF(LPCTSTR newVal) {
 	return LoadTruePDF(tcTmpfp);
 }
 
+class ErrorCatcher {
+public:
+	static CStringA text;
+
+	static void Empty(int, char*, va_list)
+	{
+
+	}
+
+	static void Capture(int pos, char* msg, va_list args)
+	{
+		if (pos >= 0) {
+			text.AppendFormat("Error (%d): ", pos);
+		}
+		else {
+			text.AppendFormat("Error: ");
+		}
+		text.AppendFormatV(msg, args);
+		text.Append("\n");
+	}
+};
+
+CStringA ErrorCatcher::text;
+
 HRESULT CAxVw::LoadTruePDF(LPCTSTR newVal) {
 	UnloadPDF();
 
+	m_errorMessage.Empty();
+
 	DWORD atts = GetFileAttributes(newVal);
-	if (atts == 0xFFFFFFFFU || (atts & FILE_ATTRIBUTE_DIRECTORY) != 0)
-		return E_FAIL;
+	if (atts == 0xFFFFFFFFU || (atts & FILE_ATTRIBUTE_DIRECTORY) != 0) {
+		m_errorMessage.Format(IDS_STRING2010);
+		return E_errFileIO;
+	}
 
 	CStringW str = newVal;
 
-	m_pdfdoc = new PDFDoc(const_cast<wchar_t *>(static_cast<LPCWSTR>(str)), str.GetLength());
+	ErrorCatcher::text.Empty();
+	setErrorFunction(ErrorCatcher::Capture);
+
+	m_pdfdoc = new PDFDoc(const_cast<wchar_t *>(static_cast<LPCWSTR>(str)), str.GetLength(), 0, 0);
+
+	setErrorFunction(ErrorCatcher::Empty);
+
+	int errorCode = m_pdfdoc->getErrorCode();
 	if (!m_pdfdoc->isOk()) {
 		UnloadPDF();
-		return E_FAIL;
+		m_errorMessage = ErrorCatcher::text;
+		return MAKE_HRESULT(SEVERITY_ERROR, FACILITY_ITF, 2000 + errorCode);
 	}
 
 	m_prefpdf.Release();
@@ -569,6 +618,10 @@ HRESULT CAxVw::LoadTruePDF(LPCTSTR newVal) {
 		}
 		m_pps.Add(pps);
 	}
+
+	m_canPrintThisPDF = m_pdfdoc->okToPrint() ? true : false;
+
+	LayoutClient();
 
 	SetPage(0, true);
 
@@ -785,10 +838,15 @@ void CAxVw::LayoutClient() {
 		m_rcNext.right = curx = (curx += cxBMNext);
 		m_rcNext.top = rc.bottom - cyBar;
 
-		m_rcPrt.left = curx;
-		m_rcPrt.bottom = rc.bottom;
-		m_rcPrt.right = (curx += 24);
-		m_rcPrt.top = rc.bottom - cyBar;
+		if (m_canPrintThisPDF) {
+			m_rcPrt.left = curx;
+			m_rcPrt.bottom = rc.bottom;
+			m_rcPrt.right = (curx += 24);
+			m_rcPrt.top = rc.bottom - cyBar;
+		}
+		else {
+			m_rcPrt.SetRectEmpty();
+		}
 
 		m_rcAbout.left = curx;
 		m_rcAbout.bottom = rc.bottom;
@@ -975,6 +1033,13 @@ void CAxVw::OnLButtonDown(UINT nFlags, CPoint point) {
 		else if (m_rcPrt.PtInRect(point)) {
 			CSingleLock lck(&s_lockpdf);
 			TCHAR tcTmpfp[MAX_PATH] = { 0 };
+			if (!IsPDFReady()) {
+				return;
+			}
+			if (!m_canPrintThisPDF) {
+				AfxMessageBox(IDS_PRINTING_IS_NOT_ALLOWED);
+				return;
+			}
 			if (TUt::GetTempPathName(tcTmpfp)) {
 				GooString temp(static_cast<LPCSTR>(CT2A(tcTmpfp)));
 				if (0 == m_pdfdoc->saveWithoutChangesAs(&temp)) {
