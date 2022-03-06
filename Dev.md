@@ -56,9 +56,11 @@ cmake -D CMAKE_INSTALL_PREFIX:PATH=H:\Proj\PDF4Ax\root32 -G "Visual Studio 17 20
 
 - [end to end build for win32](https://www.cairographics.org/end_to_end_build_for_win32/)
 
+no pkgconfig
+
 ```bat
 pip3 install meson
-meson build --backend vs2022 --prefix H:\Proj\PDF4Ax\root32 --buildtype debugoptimized
+meson build --backend vs2022 --prefix H:\Proj\PDF4Ax\root32 --buildtype debugoptimized --default-library static
 msbuild pixman.sln /p:Configuration=debugoptimized /p:Platform=Win32
 msbuild RUN_INSTALL.vcxproj /p:Configuration=debugoptimized /p:Platform=Win32
 ```
@@ -69,6 +71,8 @@ msbuild RUN_INSTALL.vcxproj /p:Configuration=debugoptimized /p:Platform=Win32
 
 ```bat
 path %path%;C:\msys32\mingw32\bin
+set PKG_CONFIG_PATH=H:\Proj\PDF4Ax\root32\lib\pkgconfig
+set PKG_CONFIG_LIBDIR=H:\Proj\PDF4Ax\root32\lib
 
 cmake -D CMAKE_INSTALL_PREFIX:PATH=H:\Proj\PDF4Ax\root32 -D CMAKE_DEBUG_POSTFIX=d -G "Visual Studio 17 2022" -A Win32 ..
 ```
@@ -80,7 +84,7 @@ cmake -D CMAKE_INSTALL_PREFIX:PATH=H:\Proj\PDF4Ax\root32 -D CMAKE_DEBUG_POSTFIX=
 ```bat
 path %path%;C:\msys32\mingw32\bin
 
-meson build --backend vs2022 --prefix H:\Proj\PDF4Ax\root32 --buildtype debugoptimized -Dglib=disabled -Dspectre=disabled -Dfontconfig=disabled -Dfreetype=disabled -Dpng=disabled
+meson build --backend vs2022 --prefix H:\Proj\PDF4Ax\root32 --buildtype debugoptimized -Dglib=disabled -Dspectre=disabled -Dfontconfig=disabled -Dfreetype=disabled -Dpng=disabled --default-library static
 
 msbuild cairo.sln /p:Configuration=debugoptimized /p:Platform=Win32
 msbuild RUN_INSTALL.vcxproj /p:Configuration=debugoptimized /p:Platform=Win32
@@ -88,6 +92,8 @@ msbuild RUN_INSTALL.vcxproj /p:Configuration=debugoptimized /p:Platform=Win32
 
 ## poppler
 
+no pkg-config
+
 ```bat
-H:\Proj\PDF4Ax\poppler\build>cmake -DCMAKE_INSTALL_PREFIX:PATH=H:\Proj\PDF4Ax\root32 -DCMAKE_BUILD_TYPE=DEBUG -DENABLE_BOOST=OFF -DENABLE_LIBOPENJPEG=none -DENABLE_UTILS:BOOL=OFF -DENABLE_ZLIB_UNCOMPRESS:BOOL=ON -G "Visual Studio 17 2022" -A Win32 ..
+cmake -DCMAKE_INSTALL_PREFIX:PATH=H:\Proj\PDF4Ax\root32 -DCMAKE_BUILD_TYPE=DEBUG -DENABLE_BOOST=OFF -DENABLE_LIBOPENJPEG=none -DENABLE_UTILS:BOOL=OFF -DENABLE_ZLIB_UNCOMPRESS:BOOL=ON -DWITH_GLIB:BOOL=OFF -DCMAKE_DEBUG_POSTFIX:STRING=d -G "Visual Studio 17 2022" -A Win32 ..
 ```
