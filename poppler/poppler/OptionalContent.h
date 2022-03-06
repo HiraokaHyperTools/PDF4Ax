@@ -4,6 +4,9 @@
 //
 // Copyright 2007 Brad Hards <bradh@kde.org>
 // Copyright 2008 Carlos Garcia Campos <carlosgc@gnome.org>
+// Copyright 2013, 2018, 2019, 2021 Albert Astals Cid <aacid@kde.org>
+// Copyright 2018 Adam Reichold <adam.reichold@t-online.de>
+// Copyright 2019 Oliver Sander <oliver.sander@tu-dresden.de>
 //
 // Released under the GPL (version 2, or later, at your option)
 //
@@ -12,82 +15,103 @@
 #ifndef OPTIONALCONTENT_H
 #define OPTIONALCONTENT_H
 
-#ifdef USE_GCC_PRAGMAS
-#pragma interface
-#endif
-
 #include "Object.h"
 #include "CharTypes.h"
+#include "poppler_private_export.h"
+#include <unordered_map>
+#include <memory>
 
 class GooString;
-class GooList;
 class XRef;
 
-class OptionalContentGroup; 
+class OptionalContentGroup;
 
 //------------------------------------------------------------------------
 
-class OCGs {
+class POPPLER_PRIVATE_EXPORT OCGs
+{
 public:
+    OCGs(Object *ocgObject, XRef *xref);
 
-  OCGs(Object *ocgObject, XRef *xref);
-  ~OCGs();
+    OCGs(const OCGs &) = delete;
+    OCGs &operator=(const OCGs &) = delete;
 
-  // Is OCGS valid?
-  GBool isOk() { return ok; }
-  
-  bool hasOCGs();
-  GooList *getOCGs() const { return optionalContentGroups; }
+    // Is OCGS valid?
+    bool isOk() const { return ok; }
 
-  OptionalContentGroup* findOcgByRef( const Ref &ref);
+    bool hasOCGs() const;
+    const std::unordered_map<Ref, std::unique_ptr<OptionalContentGroup>> &getOCGs() const { return optionalContentGroups; }
 
-  Array* getOrderArray() 
-    { return (order.isArray() && order.arrayGetLength() > 0) ? order.getArray() : NULL; }
-  Array* getRBGroupsArray() 
-    { return (rbgroups.isArray() && rbgroups.arrayGetLength()) ? rbgroups.getArray() : NULL; }
+    OptionalContentGroup *findOcgByRef(const Ref ref);
 
-  bool optContentIsVisible( Object *dictRef );
+    Array *getOrderArray() { return (order.isArray() && order.arrayGetLength() > 0) ? order.getArray() : nullptr; }
+    Array *getRBGroupsArray() { return (rbgroups.isArray() && rbgroups.arrayGetLength()) ? rbgroups.getArray() : nullptr; }
+
+    bool optContentIsVisible(const Object *dictRef);
 
 private:
-  GBool ok;
-  
-  bool allOn( Array *ocgArray );
-  bool allOff( Array *ocgArray );
-  bool anyOn( Array *ocgArray );
-  bool anyOff( Array *ocgArray );
+    bool ok;
 
-  GooList *optionalContentGroups;
+    bool evalOCVisibilityExpr(const Object *expr, int recursion);
+    bool allOn(Array *ocgArray);
+    bool allOff(Array *ocgArray);
+    bool anyOn(Array *ocgArray);
+    bool anyOff(Array *ocgArray);
 
-  Object order;
-  Object rbgroups;
-  XRef *m_xref;
+    std::unordered_map<Ref, std::unique_ptr<OptionalContentGroup>> optionalContentGroups;
+
+    Object order;
+    Object rbgroups;
+    XRef *m_xref;
 };
 
 //------------------------------------------------------------------------
 
-class OptionalContentGroup {
+class POPPLER_PRIVATE_EXPORT OptionalContentGroup
+{
 public:
-  enum State { On, Off };
+    enum State
+    {
+        On,
+        Off
+    };
 
-  OptionalContentGroup(Dict *dict);
+    // Values from the optional content usage dictionary.
+    enum UsageState
+    {
+        ocUsageOn,
+        ocUsageOff,
+        ocUsageUnset
+    };
 
-  OptionalContentGroup(GooString *label);
+    explicit OptionalContentGroup(Dict *dict);
 
-  ~OptionalContentGroup();
+    explicit OptionalContentGroup(GooString *label);
 
-  GooString* getName() const;
+    ~OptionalContentGroup();
 
-  Ref getRef() const;
-  void setRef(const Ref ref);
+    OptionalContentGroup(const OptionalContentGroup &) = delete;
+    OptionalContentGroup &operator=(const OptionalContentGroup &) = delete;
 
-  State getState() { return m_state; };
-  void setState(State state) { m_state = state; };
+    const GooString *getName() const;
+
+    Ref getRef() const;
+    void setRef(const Ref ref);
+
+    State getState() const { return m_state; };
+    void setState(State state) { m_state = state; };
+
+    UsageState getViewState() const { return viewState; }
+    UsageState getPrintState() const { return printState; }
 
 private:
-  XRef *xref;
-  GooString *m_name;
-  Ref m_ref;
-  State m_state;  
+    GooString *m_name;
+    Ref m_ref;
+    State m_state;
+    UsageState viewState; // suggested state when viewing
+    UsageState printState; // suggested state when printing
 };
+
+//------------------------------------------------------------------------
 
 #endif

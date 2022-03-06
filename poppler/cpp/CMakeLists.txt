@@ -1,6 +1,7 @@
 include_directories(
   ${CMAKE_CURRENT_SOURCE_DIR}
   ${CMAKE_CURRENT_BINARY_DIR}
+  ${ICONV_INCLUDE_DIR}
 )
 
 configure_file(poppler-version.h.in ${CMAKE_CURRENT_BINARY_DIR}/poppler-version.h @ONLY)
@@ -8,7 +9,7 @@ configure_file(poppler-version.h.in ${CMAKE_CURRENT_BINARY_DIR}/poppler-version.
 add_subdirectory(tests)
 
 set(poppler_cpp_SRCS
-  PNMWriter.cc
+  poppler-destination.cpp
   poppler-document.cpp
   poppler-embedded-file.cpp
   poppler-font.cpp
@@ -23,19 +24,22 @@ set(poppler_cpp_SRCS
   poppler-version.cpp
 )
 
-add_library(poppler-cpp SHARED ${poppler_cpp_SRCS})
-set_target_properties(poppler-cpp PROPERTIES VERSION 0.2.0 SOVERSION 0)
+add_library(poppler-cpp ${poppler_cpp_SRCS})
+generate_export_header(poppler-cpp BASE_NAME poppler-cpp EXPORT_FILE_NAME "${CMAKE_CURRENT_BINARY_DIR}/poppler_cpp_export.h")
+set_target_properties(poppler-cpp PROPERTIES VERSION 0.9.0 SOVERSION 0)
+if(MINGW AND BUILD_SHARED_LIBS)
+    get_target_property(POPPLER_CPP_SOVERSION poppler-cpp SOVERSION)
+    set_target_properties(poppler-cpp PROPERTIES SUFFIX "-${POPPLER_CPP_SOVERSION}${CMAKE_SHARED_LIBRARY_SUFFIX}")
+endif()
 target_link_libraries(poppler-cpp poppler ${ICONV_LIBRARIES})
-if(MSVC)
-target_link_libraries(poppler-cpp ${poppler_LIBS})
-endif(MSVC)
-target_link_libraries(poppler-cpp LINK_INTERFACE_LIBRARIES "")
-install(TARGETS poppler-cpp RUNTIME DESTINATION bin LIBRARY DESTINATION lib${LIB_SUFFIX} ARCHIVE DESTINATION lib${LIB_SUFFIX})
+install(TARGETS poppler-cpp RUNTIME DESTINATION bin LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR} ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
 
 install(FILES
+  poppler-destination.h
   poppler-document.h
   poppler-embedded-file.h
   poppler-font.h
+  poppler-font-private.h
   poppler-global.h
   poppler-image.h
   poppler-page.h
@@ -43,6 +47,7 @@ install(FILES
   poppler-page-transition.h
   poppler-rectangle.h
   poppler-toc.h
+  ${CMAKE_CURRENT_BINARY_DIR}/poppler_cpp_export.h
   ${CMAKE_CURRENT_BINARY_DIR}/poppler-version.h
   DESTINATION include/poppler/cpp)
 

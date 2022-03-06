@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2010, Pino Toscano <pino@kde.org>
+ * Copyright (C) 2017, 2019, Albert Astals Cid <aacid@kde.org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -32,19 +33,12 @@ bool show_formats = false;
 char out_filename[4096];
 int doc_page = 0;
 
-static const ArgDesc the_args[] = {
-    { "-f",                    argFlag,  &show_formats,        0,
-      "show supported output image formats" },
-    { "--page",                argInt,   &doc_page,            0,
-      "select page to render" },
-    { "-o",                    argString, &out_filename,       sizeof(out_filename),
-      "output filename for the resulting PNG image" },
-    { "-h",                    argFlag,  &show_help,           0,
-      "print usage information" },
-    { "--help",                argFlag,  &show_help,           0,
-      "print usage information" },
-    { NULL, argFlag, 0, 0, NULL }
-};
+static const ArgDesc the_args[] = { { "-f", argFlag, &show_formats, 0, "show supported output image formats" },
+                                    { "--page", argInt, &doc_page, 0, "select page to render" },
+                                    { "-o", argString, &out_filename, sizeof(out_filename), "output filename for the resulting PNG image" },
+                                    { "-h", argFlag, &show_help, 0, "print usage information" },
+                                    { "--help", argFlag, &show_help, 0, "print usage information" },
+                                    { nullptr, argFlag, nullptr, 0, nullptr } };
 
 static void error(const std::string &msg)
 {
@@ -55,8 +49,7 @@ static void error(const std::string &msg)
 
 int main(int argc, char *argv[])
 {
-    if (!parseArgs(the_args, &argc, argv)
-        || (argc < 2 && !show_formats) || show_help) {
+    if (!parseArgs(the_args, &argc, argv) || (argc < 2 && !show_formats) || show_help) {
         printUsage(argv[0], "DOCUMENT", the_args);
         exit(1);
     }
@@ -64,8 +57,8 @@ int main(int argc, char *argv[])
     if (show_formats) {
         const std::vector<std::string> formats = poppler::image::supported_image_formats();
         std::cout << "Supported image formats:" << std::endl;
-        for (size_t i = 0; i < formats.size(); ++i) {
-            std::cout << "  " << formats[i] << std::endl;
+        for (const std::string &format : formats) {
+            std::cout << "  " << format << std::endl;
         }
         exit(0);
     }
@@ -80,7 +73,7 @@ int main(int argc, char *argv[])
 
     const std::string file_name(argv[1]);
 
-    std::auto_ptr<poppler::document> doc(poppler::document::load_from_file(file_name));
+    std::unique_ptr<poppler::document> doc(poppler::document::load_from_file(file_name));
     if (!doc.get()) {
         error("loading error");
     }
@@ -91,7 +84,7 @@ int main(int argc, char *argv[])
     if (doc_page < 0 || doc_page >= doc->pages()) {
         error("specified page number out of page count");
     }
-    std::auto_ptr<poppler::page> p(doc->create_page(doc_page));
+    std::unique_ptr<poppler::page> p(doc->create_page(doc_page));
     if (!p.get()) {
         error("NULL page");
     }

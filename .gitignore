@@ -382,3 +382,13 @@ LibRelease
 Win32_LIB_Debug
 Win32_LIB_Release
 CMakeCache.txt
+/~poppler
+/freetype/build
+/iconv-wrap/build
+/jpeg/build
+/libpng/build
+/lzo2/build
+/pixman/build
+/poppler/build
+/root32
+/zlib/build

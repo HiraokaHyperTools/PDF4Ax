@@ -1,8 +1,8 @@
-.\" Copyright 1999-2004 Glyph & Cog, LLC
-.TH pdfinfo 1 "22 January 2004"
+.\" Copyright 1999-2011 Glyph & Cog, LLC
+.TH pdfinfo 1 "15 August 2011"
 .SH NAME
 pdfinfo \- Portable Document Format (PDF) document information
-extractor (version 3.00)
+extractor (version 3.03)
 .SH SYNOPSIS
 .B pdfinfo
 [options]
@@ -11,6 +11,10 @@ extractor (version 3.00)
 .B Pdfinfo
 prints the contents of the \'Info' dictionary (plus some other useful
 information) from a Portable Document Format (PDF) file.
+.PP
+If
+.I PDF-file
+is \'-', it reads the PDF file from stdin.
 .PP
 The \'Info' dictionary contains the following values:
 .PP
@@ -42,7 +46,25 @@ modification date
 In addition, the following information is printed:
 .PP
 .RS
+custom metadata (yes/no)
+.RE
+.RS
+metadata stream (yes/no)
+.RE
+.RS
 tagged (yes/no)
+.RE
+.RS
+userproperties (yes/no)
+.RE
+.RS
+suspects (yes/no)
+.RE
+.RS
+form (AcroForm / XFA / none)
+.RE
+.RS
+javascript (yes/no)
 .RE
 .RS
 page count
@@ -68,6 +90,8 @@ PDF version
 .RS
 metadata (only if requested)
 .RE
+.PP
+The options \-listenc, \-meta, \-js, \-struct, and \-struct-text only print the requested information. The 'Info' dictionary and related data listed above is not printed. At most one of these five options may be used.
 .SH OPTIONS
 .TP
 .BI \-f " number"
@@ -86,6 +110,37 @@ TrimBox, and ArtBox.
 .B \-meta
 Prints document-level metadata.  (This is the "Metadata" stream from
 the PDF file's Catalog object.)
+.TP
+.B \-custom
+Prints custom and standard metadata.
+.TP
+.B \-js
+Prints all JavaScript in the PDF.
+.TP
+.B \-struct
+Prints the logical document structure of a Tagged-PDF file.
+.TP
+.B \-struct-text
+Print the textual content along with the document structure of a Tagged-PDF
+file.  Note that extracting text this way might be slow for big PDF files.
+(Implies
+.BR \-struct .)
+.TP
+.B \-url
+Print all URLs in the PDF. Only the URL types supported by Poppler are listed.
+Currently, this is limited to Annotations. Note: only URLs referenced by the PDF objects
+such as Link Annotations are listed. pdfinfo does not attempt to extract strings
+matching http://... from the text content.
+.TP
+.B \-isodates
+Prints dates in ISO-8601 format (including the time zone).
+.TP
+.B \-rawdates
+Prints the raw (undecoded) date strings, directly from the PDF file.
+.TP
+.B \-dests
+Print a list of all named destinations. If a page range is specified using "\-f" and "\-l", only
+destinations in the page range are listed.
 .TP
 .BI \-enc " encoding-name"
 Sets the encoding to use for text output. This defaults to "UTF-8".
@@ -127,9 +182,10 @@ Error related to PDF permissions.
 99
 Other error.
 .SH AUTHOR
-The pdfinfo software and documentation are copyright 1996-2004 Glyph &
+The pdfinfo software and documentation are copyright 1996-2011 Glyph &
 Cog, LLC.
 .SH "SEE ALSO"
+.BR pdfdetach (1),
 .BR pdffonts (1),
 .BR pdfimages (1),
 .BR pdftocairo (1),
@@ -137,3 +193,6 @@ Cog, LLC.
 .BR pdftoppm (1),
 .BR pdftops (1),
 .BR pdftotext (1)
+.BR pdfseparate (1),
+.BR pdfsig (1),
+.BR pdfunite (1)

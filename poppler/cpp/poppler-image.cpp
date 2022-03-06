@@ -1,5 +1,10 @@
 /*
  * Copyright (C) 2010-2011, Pino Toscano <pino@kde.org>
+ * Copyright (C) 2013 Adrian Johnson <ajohnson@redneon.com>
+ * Copyright (C) 2017-2019, 2021, Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2017, Jeroen Ooms <jeroenooms@gmail.com>
+ * Copyright (C) 2018, Zsombor Hollay-Horvath <hollay.horvath@gmail.com>
+ * Copyright (C) 2018, Adam Reichold <adam.reichold@t-online.de>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,6 +21,9 @@
  * Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
+/**
+ \file poppler-image.h
+ */
 #include "poppler-image.h"
 
 #include "poppler-image-private.h"
@@ -23,15 +31,15 @@
 #include <config.h>
 #include "ImgWriter.h"
 #if defined(ENABLE_LIBPNG)
-#include "PNGWriter.h"
+#    include "PNGWriter.h"
 #endif
 #if defined(ENABLE_LIBJPEG)
-#include "JpegWriter.h"
+#    include "JpegWriter.h"
 #endif
 #if defined(ENABLE_LIBTIFF)
-#include "TiffWriter.h"
+#    include "TiffWriter.h"
 #endif
-#include "PNMWriter.h"
+#include "NetPBMWriter.h"
 
 #include <cstdlib>
 #include <cstring>
@@ -39,17 +47,23 @@
 #include <memory>
 #include <vector>
 
-using poppler::PNMWriter;
-
 namespace {
 
-struct FileCloser {
-    inline FileCloser(FILE *ff)
-        : f(ff) {}
-    inline ~FileCloser()
-    { (void)close(); }
+struct FileCloser
+{
+    inline explicit FileCloser(FILE *ff) : f(ff) { }
+    inline ~FileCloser() { (void)close(); }
+    FileCloser(const FileCloser &) = delete;
+    FileCloser &operator=(const FileCloser &) = delete;
     inline bool close()
-    { if (f) { const int c = fclose(f); f = 0; return c == 0; } return true; }
+    {
+        if (f) {
+            const int c = fclose(f);
+            f = nullptr;
+            return c == 0;
+        }
+        return true;
+    }
 
     FILE *f;
 };
@@ -61,42 +75,37 @@ int calc_bytes_per_row(int width, poppler::image::format_enum format)
         return 0;
     case poppler::image::format_mono:
         return (width + 7) >> 3;
+    case poppler::image::format_gray8:
+        return (width + 3) >> 2 << 2;
     case poppler::image::format_rgb24:
-        return width * 3;
+    case poppler::image::format_bgr24:
+        return (width * 3 + 3) >> 2 << 2;
     case poppler::image::format_argb32:
         return width * 4;
     }
     return 0;
 }
 
-PNMWriter::OutFormat pnm_format(poppler::image::format_enum format)
+NetPBMWriter::Format pnm_format(poppler::image::format_enum format)
 {
     switch (format) {
     case poppler::image::format_invalid: // unused, anyway
     case poppler::image::format_mono:
-        return PNMWriter::PBM;
+        return NetPBMWriter::MONOCHROME;
+    case poppler::image::format_gray8:
     case poppler::image::format_rgb24:
+    case poppler::image::format_bgr24:
     case poppler::image::format_argb32:
-        return PNMWriter::PPM;
+        return NetPBMWriter::RGB;
     }
-    return PNMWriter::PPM;
+    return NetPBMWriter::RGB;
 }
 
 }
 
 using namespace poppler;
 
-image_private::image_private(int iwidth, int iheight, image::format_enum iformat)
-    : ref(1)
-    , data(0)
-    , width(iwidth)
-    , height(iheight)
-    , bytes_per_row(0)
-    , bytes_num(0)
-    , format(iformat)
-    , own_data(true)
-{
-}
+image_private::image_private(int iwidth, int iheight, image::format_enum iformat) : ref(1), data(nullptr), width(iwidth), height(iheight), bytes_per_row(0), bytes_num(0), format(iformat), own_data(true) { }
 
 image_private::~image_private()
 {
@@ -108,19 +117,19 @@ image_private::~image_private()
 image_private *image_private::create_data(int width, int height, image::format_enum format)
 {
     if (width <= 0 || height <= 0) {
-        return 0;
+        return nullptr;
     }
 
     int bpr = calc_bytes_per_row(width, format);
     if (bpr <= 0) {
-        return 0;
+        return nullptr;
     }
 
-    std::auto_ptr<image_private> d(new image_private(width, height, format));
+    auto d = std::make_unique<image_private>(width, height, format);
     d->bytes_num = bpr * height;
     d->data = reinterpret_cast<char *>(std::malloc(d->bytes_num));
     if (!d->data) {
-        return 0;
+        return nullptr;
     }
     d->own_data = true;
     d->bytes_per_row = bpr;
@@ -131,21 +140,21 @@ image_private *image_private::create_data(int width, int height, image::format_e
 image_private *image_private::create_data(char *data, int width, int height, image::format_enum format)
 {
     if (width <= 0 || height <= 0 || !data) {
-        return 0;
+        return nullptr;
     }
 
     int bpr = calc_bytes_per_row(width, format);
     if (bpr <= 0) {
-        return 0;
+        return nullptr;
     }
 
-    std::auto_ptr<image_private> d(new image_private(width, height, format));
+    image_private *d = new image_private(width, height, format);
     d->bytes_num = bpr * height;
     d->data = data;
     d->own_data = false;
     d->bytes_per_row = bpr;
 
-    return d.release();
+    return d;
 }
 
 /**
@@ -165,16 +174,14 @@ image_private *image_private::create_data(char *data, int width, int height, ima
  \enum poppler::image::format_enum
 
  The possible formats for an image.
-*/
 
+ format_gray8 and format_bgr24 were introduced in poppler 0.65.
+*/
 
 /**
  Construct an invalid image.
  */
-image::image()
-    : d(0)
-{
-}
+image::image() : d(nullptr) { }
 
 /**
  Construct a new image.
@@ -186,10 +193,7 @@ image::image()
  \param iheight the height for the image
  \param iformat the format for the bits of the image
  */
-image::image(int iwidth, int iheight, image::format_enum iformat)
-    : d(image_private::create_data(iwidth, iheight, iformat))
-{
-}
+image::image(int iwidth, int iheight, image::format_enum iformat) : d(image_private::create_data(iwidth, iheight, iformat)) { }
 
 /**
  Construct a new image.
@@ -202,16 +206,12 @@ image::image(int iwidth, int iheight, image::format_enum iformat)
  \param iheight the height for the image
  \param iformat the format for the bits of the image
  */
-image::image(char *idata, int iwidth, int iheight, image::format_enum iformat)
-    : d(image_private::create_data(idata, iwidth, iheight, iformat))
-{
-}
+image::image(char *idata, int iwidth, int iheight, image::format_enum iformat) : d(image_private::create_data(idata, iwidth, iheight, iformat)) { }
 
 /**
  Copy constructor.
  */
-image::image(const image &pt)
-    : d(pt.d)
+image::image(const image &img) : d(img.d)
 {
     if (d) {
         ++d->ref;
@@ -280,7 +280,7 @@ int image::bytes_per_row() const
 char *image::data()
 {
     if (!d) {
-        return 0;
+        return nullptr;
     }
 
     detach();
@@ -296,7 +296,7 @@ char *image::data()
  */
 const char *image::const_data() const
 {
-    return d ? d->data : 0;
+    return d ? d->data : nullptr;
 }
 
 /**
@@ -346,32 +346,32 @@ bool image::save(const std::string &file_name, const std::string &out_format, in
     std::string fmt = out_format;
     std::transform(fmt.begin(), fmt.end(), fmt.begin(), tolower);
 
-    std::auto_ptr<ImgWriter> w;
+    std::unique_ptr<ImgWriter> w;
     const int actual_dpi = dpi == -1 ? 75 : dpi;
     if (false) {
     }
 #if defined(ENABLE_LIBPNG)
     else if (fmt == "png") {
-        w.reset(new PNGWriter());
+        w = std::make_unique<PNGWriter>();
     }
 #endif
 #if defined(ENABLE_LIBJPEG)
     else if (fmt == "jpeg" || fmt == "jpg") {
-        w.reset(new JpegWriter());
+        w = std::make_unique<JpegWriter>();
     }
 #endif
 #if defined(ENABLE_LIBTIFF)
     else if (fmt == "tiff") {
-        w.reset(new TiffWriter());
+        w = std::make_unique<TiffWriter>();
     }
 #endif
     else if (fmt == "pnm") {
-        w.reset(new PNMWriter(pnm_format(d->format)));
+        w = std::make_unique<NetPBMWriter>(pnm_format(d->format));
     }
     if (!w.get()) {
         return false;
     }
-    FILE *f = fopen(file_name.c_str(), "w");
+    FILE *f = fopen(file_name.c_str(), "wb");
     if (!f) {
         return false;
     }
@@ -384,6 +384,42 @@ bool image::save(const std::string &file_name, const std::string &out_format, in
         return false;
     case format_mono:
         return false;
+    case format_gray8: {
+        std::vector<unsigned char> row(3 * d->width);
+        char *hptr = d->data;
+        for (int y = 0; y < d->height; ++y) {
+            unsigned char *rowptr = &row[0];
+            for (int x = 0; x < d->width; ++x, rowptr += 3) {
+                rowptr[0] = *reinterpret_cast<unsigned char *>(hptr + x);
+                rowptr[1] = *reinterpret_cast<unsigned char *>(hptr + x);
+                rowptr[2] = *reinterpret_cast<unsigned char *>(hptr + x);
+            }
+            rowptr = &row[0];
+            if (!w->writeRow(&rowptr)) {
+                return false;
+            }
+            hptr += d->bytes_per_row;
+        }
+        break;
+    }
+    case format_bgr24: {
+        std::vector<unsigned char> row(3 * d->width);
+        char *hptr = d->data;
+        for (int y = 0; y < d->height; ++y) {
+            unsigned char *rowptr = &row[0];
+            for (int x = 0; x < d->width; ++x, rowptr += 3) {
+                rowptr[0] = *reinterpret_cast<unsigned char *>(hptr + x * 3 + 2);
+                rowptr[1] = *reinterpret_cast<unsigned char *>(hptr + x * 3 + 1);
+                rowptr[2] = *reinterpret_cast<unsigned char *>(hptr + x * 3);
+            }
+            rowptr = &row[0];
+            if (!w->writeRow(&rowptr)) {
+                return false;
+            }
+            hptr += d->bytes_per_row;
+        }
+        break;
+    }
     case format_rgb24: {
         char *hptr = d->data;
         for (int y = 0; y < d->height; ++y) {
@@ -429,29 +465,32 @@ std::vector<std::string> image::supported_image_formats()
 {
     std::vector<std::string> formats;
 #if defined(ENABLE_LIBPNG)
-    formats.push_back("png");
+    formats.emplace_back("png");
 #endif
 #if defined(ENABLE_LIBJPEG)
-    formats.push_back("jpeg");
-    formats.push_back("jpg");
+    formats.emplace_back("jpeg");
+    formats.emplace_back("jpg");
 #endif
 #if defined(ENABLE_LIBTIFF)
-    formats.push_back("tiff");
+    formats.emplace_back("tiff");
 #endif
-    formats.push_back("pnm");
+    formats.emplace_back("pnm");
     return formats;
 }
 
 /**
  Assignment operator.
  */
-image& image::operator=(const image &pt)
+image &image::operator=(const image &img)
 {
-    if (pt.d) {
-        ++pt.d->ref;
+    if (this == &img)
+        return *this;
+
+    if (img.d) {
+        ++img.d->ref;
     }
     image_private *old_d = d;
-    d = pt.d;
+    d = img.d;
     if (old_d && !--old_d->ref) {
         delete old_d;
     }

@@ -14,11 +14,19 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2005 Brad Hards <bradh@frogmouth.net>
-// Copyright (C) 2006, 2008, 2010, 2011 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2006, 2008, 2010-2013, 2017-2021 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2007-2008 Julien Rebetez <julienr@svn.gnome.org>
 // Copyright (C) 2007 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright (C) 2010 Ilya Gorenbein <igorenbein@finjan.com>
-// Copyright 2010 Hib Eris <hib@hiberis.nl>
+// Copyright (C) 2010 Hib Eris <hib@hiberis.nl>
+// Copyright (C) 2012, 2013, 2016 Thomas Freitag <Thomas.Freitag@kabelmail.de>
+// Copyright (C) 2012, 2013 Fabio D'Urso <fabiodurso@hotmail.it>
+// Copyright (C) 2013, 2017, 2019 Adrian Johnson <ajohnson@redneon.com>
+// Copyright (C) 2016 Jakub Alba <jakubalba@gmail.com>
+// Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
+// Copyright (C) 2018 Marek Kasik <mkasik@redhat.com>
+// Copyright (C) 2021 Mahmoud Khalil <mahmoudkhalil11@gmail.com>
+// Copyright (C) 2021 Georgiy Sgibnev <georgiy@sgibnev.com>. Work sponsored by lab50.net.
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -28,149 +36,290 @@
 #ifndef XREF_H
 #define XREF_H
 
-#ifdef USE_GCC_PRAGMAS
-#pragma interface
-#endif
+#include <functional>
 
-#include "goo/gtypes.h"
+#include "poppler-config.h"
+#include "poppler_private_export.h"
 #include "Object.h"
-
-#include <vector>
+#include "Stream.h"
+#include "PopplerCache.h"
 
 class Dict;
 class Stream;
 class Parser;
-class PopplerCache;
+class ObjectStream;
 
 //------------------------------------------------------------------------
 // XRef
 //------------------------------------------------------------------------
 
-enum XRefEntryType {
-  xrefEntryFree,
-  xrefEntryUncompressed,
-  xrefEntryCompressed,
-  xrefEntryNone
+enum XRefEntryType
+{
+    xrefEntryFree,
+    xrefEntryUncompressed,
+    xrefEntryCompressed,
+    xrefEntryNone
 };
 
-struct XRefEntry {
-  Guint offset;
-  int gen;
-  XRefEntryType type;
-  bool updated;
-  Object obj; //if this entry was updated, obj will contains the updated object
+struct XRefEntry
+{
+    Goffset offset;
+    int gen;
+    XRefEntryType type;
+    int flags;
+    Object obj; // if this entry was updated, obj will contains the updated object
+
+    enum Flag
+    {
+        // Regular flags
+        Updated, // Entry was modified
+        Parsing, // Entry is currently being parsed
+
+        // Special flags -- available only after xref->scanSpecialFlags() is run
+        Unencrypted, // Entry is stored in unencrypted form (meaningless in unencrypted documents)
+        DontRewrite // Entry must not be written back in case of full rewrite
+    };
+
+    inline bool getFlag(Flag flag) const
+    {
+        const int mask = (1 << (int)flag);
+        return (flags & mask) != 0;
+    }
+
+    inline void setFlag(Flag flag, bool value)
+    {
+        const int mask = (1 << (int)flag);
+        if (value) {
+            flags |= mask;
+        } else {
+            flags &= ~mask;
+        }
+    }
 };
 
-class XRef {
+class POPPLER_PRIVATE_EXPORT XRef
+{
 public:
+    // Constructor, create an empty XRef, used for PDF writing
+    XRef();
+    // Constructor, create an empty XRef but with info dict, used for PDF writing
+    explicit XRef(const Object *trailerDictA);
+    // Constructor.  Read xref table from stream.
+    XRef(BaseStream *strA, Goffset pos, Goffset mainXRefEntriesOffsetA = 0, bool *wasReconstructed = nullptr, bool reconstruct = false, const std::function<void()> &xrefReconstructedCallback = {});
 
-  // Constructor, create an empty XRef, used for PDF writing
-  XRef();
-  // Constructor.  Read xref table from stream.
-  XRef(BaseStream *strA, Guint pos, Guint mainXRefEntriesOffsetA = 0, GBool *wasReconstructed = NULL, GBool reconstruct = false);
+    // Destructor.
+    ~XRef();
 
-  // Destructor.
-  ~XRef();
+    XRef(const XRef &) = delete;
+    XRef &operator=(const XRef &) = delete;
 
-  // Is xref table valid?
-  GBool isOk() { return ok; }
+    // Copy xref but with new base stream!
+    XRef *copy() const;
 
-  // Get the error code (if isOk() returns false).
-  int getErrorCode() { return errCode; }
+    // Is xref table valid?
+    bool isOk() const { return ok; }
 
-  // Set the encryption parameters.
-  void setEncryption(int permFlagsA, GBool ownerPasswordOkA,
-		     Guchar *fileKeyA, int keyLengthA,
-		     int encVersionA, int encRevisionA,
-		     CryptAlgorithm encAlgorithmA);
+    // Is the last XRef section a stream or a table?
+    bool isXRefStream() const { return xRefStream; }
 
-  // Is the file encrypted?
-  GBool isEncrypted() { return encrypted; }
+    // Get the error code (if isOk() returns false).
+    int getErrorCode() const { return errCode; }
 
-  // Check various permissions.
-  GBool okToPrint(GBool ignoreOwnerPW = gFalse);
-  GBool okToPrintHighRes(GBool ignoreOwnerPW = gFalse);
-  GBool okToChange(GBool ignoreOwnerPW = gFalse);
-  GBool okToCopy(GBool ignoreOwnerPW = gFalse);
-  GBool okToAddNotes(GBool ignoreOwnerPW = gFalse);
-  GBool okToFillForm(GBool ignoreOwnerPW = gFalse);
-  GBool okToAccessibility(GBool ignoreOwnerPW = gFalse);
-  GBool okToAssemble(GBool ignoreOwnerPW = gFalse);
+    // Set the encryption parameters.
+    void setEncryption(int permFlagsA, bool ownerPasswordOkA, const unsigned char *fileKeyA, int keyLengthA, int encVersionA, int encRevisionA, CryptAlgorithm encAlgorithmA);
+    // Mark Encrypt entry as Unencrypted
+    void markUnencrypted();
 
-  // Get catalog object.
-  Object *getCatalog(Object *obj) { return fetch(rootNum, rootGen, obj); }
+    void getEncryptionParameters(unsigned char **fileKeyA, CryptAlgorithm *encAlgorithmA, int *keyLengthA);
 
-  // Fetch an indirect reference.
-  Object *fetch(int num, int gen, Object *obj, std::set<int> *fetchOriginatorNums = NULL);
+    // Is the file encrypted?
+    bool isEncrypted() const { return encrypted; }
 
-  // Return the document's Info dictionary (if any).
-  Object *getDocInfo(Object *obj);
-  Object *getDocInfoNF(Object *obj);
+    // Is the given Ref encrypted?
+    bool isRefEncrypted(Ref r);
 
-  // Return the number of objects in the xref table.
-  int getNumObjects() { return size; }
+    // Check various permissions.
+    bool okToPrint(bool ignoreOwnerPW = false) const;
+    bool okToPrintHighRes(bool ignoreOwnerPW = false) const;
+    bool okToChange(bool ignoreOwnerPW = false) const;
+    bool okToCopy(bool ignoreOwnerPW = false) const;
+    bool okToAddNotes(bool ignoreOwnerPW = false) const;
+    bool okToFillForm(bool ignoreOwnerPW = false) const;
+    bool okToAccessibility(bool ignoreOwnerPW = false) const;
+    bool okToAssemble(bool ignoreOwnerPW = false) const;
+    int getPermFlags() const { return permFlags; }
 
-  // Return the catalog object reference.
-  int getRootNum() { return rootNum; }
-  int getRootGen() { return rootGen; }
+    // Get catalog object.
+    Object getCatalog();
 
-  // Get end position for a stream in a damaged file.
-  // Returns false if unknown or file is not damaged.
-  GBool getStreamEnd(Guint streamStart, Guint *streamEnd);
+    // Fetch an indirect reference.
+    Object fetch(const Ref ref, int recursion = 0);
+    // If endPos is not null, returns file position after parsing the object. This will
+    // be a few bytes after the end of the object due to the parser reading ahead.
+    // Returns -1 if object is in compressed stream.
+    Object fetch(int num, int gen, int recursion = 0, Goffset *endPos = nullptr);
 
-  // Retuns the entry that belongs to the offset
-  int getNumEntry(Guint offset);
+    // Return the document's Info dictionary (if any).
+    Object getDocInfo();
+    Object getDocInfoNF();
 
-  // Direct access.
-  int getSize() { return size; }
-  XRefEntry *getEntry(int i);
-  Object *getTrailerDict() { return &trailerDict; }
+    // Create and return the document's Info dictionary if needed.
+    // Otherwise return the existing one.
+    // Returns in the given parameter the Ref the Info is in
+    Object createDocInfoIfNeeded(Ref *ref);
 
-  // Write access
-  void setModifiedObject(Object* o, Ref r);
-  Ref addIndirectObject (Object* o);
-  void add(int num, int gen,  Guint offs, GBool used);
-  void writeToFile(OutStream* outStr, GBool writeAllEntries);
+    // Remove the document's Info dictionary and update the trailer dictionary.
+    void removeDocInfo();
+
+    // Return the number of objects in the xref table.
+    int getNumObjects() const { return size; }
+
+    // Return the catalog object reference.
+    int getRootNum() const { return rootNum; }
+    int getRootGen() const { return rootGen; }
+    Ref getRoot() const { return { rootNum, rootGen }; }
+
+    // Get end position for a stream in a damaged file.
+    // Returns false if unknown or file is not damaged.
+    bool getStreamEnd(Goffset streamStart, Goffset *streamEnd);
+
+    // Retuns the entry that belongs to the offset
+    int getNumEntry(Goffset offset);
+
+    // Scans the document and sets special flags in all xref entries. One of those
+    // flags is Unencrypted, which affects how the object is fetched. Therefore,
+    // this function must be called before fetching unencrypted objects (e.g.
+    // Encrypt dictionary, XRef streams). Note that the code that initializes
+    // decryption doesn't need to call this function, because it runs before
+    // decryption is enabled, and therefore the Unencrypted flag is ignored.
+    void scanSpecialFlags();
+
+    // Direct access.
+    XRefEntry *getEntry(int i, bool complainIfMissing = true);
+    Object *getTrailerDict() { return &trailerDict; }
+
+    // Was the XRef modified?
+    bool isModified() const { return modified; }
+    // Set the modification flag for XRef to true.
+    void setModified() { modified = true; }
+
+    // Write access
+    void setModifiedObject(const Object *o, Ref r);
+    Ref addIndirectObject(const Object &o);
+    void removeIndirectObject(Ref r);
+    void add(int num, int gen, Goffset offs, bool used);
+    void add(Ref ref, Goffset offs, bool used);
+    // Adds a stream object using AutoFreeMemStream.
+    // The function takes ownership over dict and buffer.
+    // The buffer should be created using gmalloc().
+    // Returns ref to a new object.
+    Ref addStreamObject(Dict *dict, char *buffer, const Goffset bufferSize);
+    Ref addStreamObject(Dict *dict, uint8_t *buffer, const Goffset bufferSize);
+
+    // Output XRef table to stream
+    void writeTableToFile(OutStream *outStr, bool writeAllEntries);
+    // Output XRef stream contents to GooString and fill trailerDict fields accordingly
+    void writeStreamToBuffer(GooString *stmBuf, Dict *xrefDict, XRef *xref);
+
+    // to be thread safe during write where changes are not allowed
+    void lock();
+    void unlock();
 
 private:
+    BaseStream *str; // input stream
+    Goffset start; // offset in file (to allow for garbage
+                   //   at beginning of file)
+    XRefEntry *entries; // xref entries
+    int capacity; // size of <entries> array
+    int size; // number of entries
+    int rootNum, rootGen; // catalog dict
+    bool ok; // true if xref table is valid
+    int errCode; // error code (if <ok> is false)
+    bool xrefReconstructed; // marker, true if xref was already reconstructed
+    Object trailerDict; // trailer dictionary
+    bool modified;
+    Goffset *streamEnds; // 'endstream' positions - only used in
+                         //   damaged files
+    int streamEndsLen; // number of valid entries in streamEnds
+    PopplerCache<Goffset, ObjectStream> objStrs; // cached object streams
+    bool encrypted; // true if file is encrypted
+    int encRevision;
+    int encVersion; // encryption algorithm
+    CryptAlgorithm encAlgorithm; // encryption algorithm
+    int keyLength; // length of key, in bytes
+    int permFlags; // permission bits
+    unsigned char fileKey[32]; // file decryption key
+    bool ownerPasswordOk; // true if owner password is correct
+    Goffset prevXRefOffset; // position of prev XRef section (= next to read)
+    Goffset mainXRefEntriesOffset; // offset of entries in main XRef table
+    bool xRefStream; // true if last XRef section is a stream
+    Goffset mainXRefOffset; // position of the main XRef table/stream
+    bool scannedSpecialFlags; // true if scanSpecialFlags has been called
+    bool strOwner; // true if str is owned by the instance
+    mutable std::recursive_mutex mutex;
+    std::function<void()> xrefReconstructedCb;
 
-  BaseStream *str;		// input stream
-  Guint start;			// offset in file (to allow for garbage
-				//   at beginning of file)
-  XRefEntry *entries;		// xref entries
-  int capacity;			// size of <entries> array
-  int size;			// number of entries
-  int rootNum, rootGen;		// catalog dict
-  GBool ok;			// true if xref table is valid
-  int errCode;			// error code (if <ok> is false)
-  Object trailerDict;		// trailer dictionary
-  Guint *streamEnds;		// 'endstream' positions - only used in
-				//   damaged files
-  int streamEndsLen;		// number of valid entries in streamEnds
-  PopplerCache *objStrs;	// cached object streams
-  GBool encrypted;		// true if file is encrypted
-  int encRevision;		
-  int encVersion;		// encryption algorithm
-  CryptAlgorithm encAlgorithm;	// encryption algorithm
-  int keyLength;		// length of key, in bytes
-  int permFlags;		// permission bits
-  Guchar fileKey[16];		// file decryption key
-  GBool ownerPasswordOk;	// true if owner password is correct
-  Guint prevXRefOffset;		// position of prev XRef section (= next to read)
-  Guint mainXRefEntriesOffset;	// offset of entries in main XRef table
-  GBool xRefStream;		// true if last XRef section is a stream
+    int reserve(int newSize);
+    int resize(int newSize);
+    bool readXRef(Goffset *pos, std::vector<Goffset> *followedXRefStm, std::vector<int> *xrefStreamObjsNum);
+    bool readXRefTable(Parser *parser, Goffset *pos, std::vector<Goffset> *followedXRefStm, std::vector<int> *xrefStreamObjsNum);
+    bool readXRefStreamSection(Stream *xrefStr, const int *w, int first, int n);
+    bool readXRefStream(Stream *xrefStr, Goffset *pos);
+    bool constructXRef(bool *wasReconstructed, bool needCatalogDict = false);
+    bool parseEntry(Goffset offset, XRefEntry *entry);
+    void readXRefUntil(int untilEntryNum, std::vector<int> *xrefStreamObjsNum = nullptr);
+    void markUnencrypted(Object *obj);
 
-  void init();
-  int reserve(int newSize);
-  int resize(int newSize);
-  Guint getStartXref();
-  GBool readXRef(Guint *pos, std::vector<Guint> *followedXRefStm);
-  GBool readXRefTable(Parser *parser, Guint *pos, std::vector<Guint> *followedXRefStm);
-  GBool readXRefStreamSection(Stream *xrefStr, int *w, int first, int n);
-  GBool readXRefStream(Stream *xrefStr, Guint *pos);
-  GBool constructXRef(GBool *wasReconstructed);
-  GBool parseEntry(Guint offset, XRefEntry *entry);
+    class XRefWriter
+    {
+    public:
+        XRefWriter() = default;
+        virtual void startSection(int first, int count) = 0;
+        virtual void writeEntry(Goffset offset, int gen, XRefEntryType type) = 0;
+        virtual ~XRefWriter();
 
+        XRefWriter(const XRefWriter &) = delete;
+        XRefWriter &operator=(const XRefWriter &other) = delete;
+    };
+
+    // XRefWriter subclass that writes a XRef table
+    class XRefTableWriter : public XRefWriter
+    {
+    public:
+        explicit XRefTableWriter(OutStream *outStrA);
+        void startSection(int first, int count) override;
+        void writeEntry(Goffset offset, int gen, XRefEntryType type) override;
+
+    private:
+        OutStream *outStr;
+    };
+
+    // XRefWriter subclass that writes a XRef stream
+    class XRefStreamWriter : public XRefWriter
+    {
+    public:
+        XRefStreamWriter(Array *index, GooString *stmBuf, int offsetSize);
+        void startSection(int first, int count) override;
+        void writeEntry(Goffset offset, int gen, XRefEntryType type) override;
+
+    private:
+        Array *index;
+        GooString *stmBuf;
+        int offsetSize;
+    };
+
+    // Dummy XRefWriter subclass that only checks if all offsets fit in 4 bytes
+    class XRefPreScanWriter : public XRefWriter
+    {
+    public:
+        XRefPreScanWriter();
+        void startSection(int first, int count) override;
+        void writeEntry(Goffset offset, int gen, XRefEntryType type) override;
+
+        bool hasOffsetsBeyond4GB;
+    };
+
+    void writeXRef(XRefWriter *writer, bool writeAllEntries);
 };
 
 #endif

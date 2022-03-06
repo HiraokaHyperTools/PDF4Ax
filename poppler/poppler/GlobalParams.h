@@ -13,16 +13,21 @@
 // All changes made under the Poppler project to this file are licensed
 // under GPL version 2 or later
 //
-// Copyright (C) 2005, 2007-2010 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2005, 2007-2010, 2012, 2015, 2017-2021 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2005 Jonathan Blandford <jrb@redhat.com>
 // Copyright (C) 2006 Takashi Iwai <tiwai@suse.de>
 // Copyright (C) 2006 Kristian Høgsberg <krh@redhat.com>
 // Copyright (C) 2007 Krzysztof Kowalczyk <kkowalczyk@gmail.com>
 // Copyright (C) 2009 Jonathan Kew <jonathan_kew@sil.org>
 // Copyright (C) 2009 Petr Gajdos <pgajdos@novell.com>
-// Copyright (C) 2009, 2011 William Bader <williambader@hotmail.com>
+// Copyright (C) 2009, 2011, 2012, 2014, 2015 William Bader <williambader@hotmail.com>
 // Copyright (C) 2010 Hib Eris <hib@hiberis.nl>
 // Copyright (C) 2011 Pino Toscano <pino@kde.org>
+// Copyright (C) 2012, 2017 Adrian Johnson <ajohnson@redneon.com>
+// Copyright (C) 2012 Thomas Freitag <Thomas.Freitag@alfa.de>
+// Copyright (C) 2013 Jason Crain <jason@aquaticape.us>
+// Copyright (C) 2018, 2020 Adam Reichold <adam.reichold@t-online.de>
+// Copyright (C) 2019 Oliver Sander <oliver.sander@tu-dresden.de>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -32,345 +37,178 @@
 #ifndef GLOBALPARAMS_H
 #define GLOBALPARAMS_H
 
-#ifdef USE_GCC_PRAGMAS
-#pragma interface
-#endif
-
-#include <assert.h>
+#include <cassert>
 #include "poppler-config.h"
-#include <stdio.h>
-#include "goo/gtypes.h"
+#include "poppler_private_export.h"
+#include <cstdio>
 #include "CharTypes.h"
-
-#if MULTITHREADED
-#include "goo/GooMutex.h"
-#endif
+#include "UnicodeMap.h"
+#include "Error.h"
+#include <unordered_map>
+#include <string>
+#include <memory>
+#include <mutex>
+#include <vector>
 
 class GooString;
-class GooList;
-class GooHash;
 class NameToCharCode;
 class CharCodeToUnicode;
 class CharCodeToUnicodeCache;
-class UnicodeMap;
 class UnicodeMapCache;
 class CMap;
 class CMapCache;
-struct XpdfSecurityHandler;
 class GlobalParams;
 class GfxFont;
 class Stream;
-#ifdef _WIN32
-class WinFontList;
-#endif
+class SysFontList;
 
 //------------------------------------------------------------------------
 
 // The global parameters object.
-extern GlobalParams *globalParams;
+extern std::unique_ptr<GlobalParams> POPPLER_PRIVATE_EXPORT globalParams;
 
 //------------------------------------------------------------------------
 
-enum DisplayFontParamKind {
-  displayFontT1,
-  displayFontTT
+enum SysFontType
+{
+    sysFontPFA,
+    sysFontPFB,
+    sysFontTTF,
+    sysFontTTC
 };
 
-struct DisplayFontParamT1 {
-  GooString *fileName;
-};
+//------------------------------------------------------------------------
 
-struct DisplayFontParamTT {
-  GooString *fileName;
-  int faceIndex;
-};
-
-class DisplayFontParam {
+class POPPLER_PRIVATE_EXPORT GlobalParams
+{
 public:
+    // Initialize the global parameters
+    explicit GlobalParams(const char *customPopplerDataDir = nullptr);
 
-  GooString *name;		// font name for 8-bit fonts and named
-				//   CID fonts; collection name for
-				//   generic CID fonts
-  DisplayFontParamKind kind;
-  union {
-    DisplayFontParamT1 t1;
-    DisplayFontParamTT tt;
-  };
+    ~GlobalParams();
 
-  DisplayFontParam(GooString *nameA, DisplayFontParamKind kindA);
-  void setFileName(GooString *fileNameA) {
-    if (displayFontT1 == kind)
-        t1.fileName = fileNameA;
-    else {
-        assert(displayFontTT == kind);
-        tt.fileName = fileNameA;
-		tt.faceIndex = 0;
-    }
-  }  
-  virtual ~DisplayFontParam();
-};
+    GlobalParams(const GlobalParams &) = delete;
+    GlobalParams &operator=(const GlobalParams &) = delete;
 
-//------------------------------------------------------------------------
+    void setupBaseFonts(const char *dir);
 
-class PSFontParam {
-public:
+    //----- accessors
 
-  GooString *pdfFontName;		// PDF font name for 8-bit fonts and
-				//   named 16-bit fonts; char collection
-				//   name for generic 16-bit fonts
-  int wMode;			// writing mode (0=horiz, 1=vert) for
-				//   16-bit fonts
-  GooString *psFontName;		// PostScript font name
-  GooString *encoding;		// encoding, for 16-bit fonts only
+    CharCode getMacRomanCharCode(const char *charName);
 
-  PSFontParam(GooString *pdfFontNameA, int wModeA,
-	      GooString *psFontNameA, GooString *encodingA);
-  ~PSFontParam();
-};
+    // Return Unicode values for character names.  Used for general text
+    // extraction.
+    Unicode mapNameToUnicodeText(const char *charName);
 
-//------------------------------------------------------------------------
+    // Return Unicode values for character names.  Used for glyph
+    // lookups or text extraction with ZapfDingbats fonts.
+    Unicode mapNameToUnicodeAll(const char *charName);
 
-enum PSLevel {
-  psLevel1,
-  psLevel1Sep,
-  psLevel2,
-  psLevel2Sep,
-  psLevel3,
-  psLevel3Sep
-};
+    UnicodeMap *getResidentUnicodeMap(const std::string &encodingName);
+    FILE *getUnicodeMapFile(const std::string &encodingName);
+    FILE *findCMapFile(const GooString *collection, const GooString *cMapName);
+    FILE *findToUnicodeFile(const GooString *name);
+    GooString *findFontFile(const GooString *fontName);
+    GooString *findBase14FontFile(const GooString *base14Name, const GfxFont *font);
+    GooString *findSystemFontFile(const GfxFont *font, SysFontType *type, int *fontNum, GooString *substituteFontName = nullptr, const GooString *base14Name = nullptr);
+    std::string getTextEncodingName() const;
+    bool getPrintCommands();
+    bool getProfileCommands();
+    bool getErrQuiet();
 
-//------------------------------------------------------------------------
+    CharCodeToUnicode *getCIDToUnicode(const GooString *collection);
+    const UnicodeMap *getUnicodeMap(const std::string &encodingName);
+    CMap *getCMap(const GooString *collection, const GooString *cMapName);
+    const UnicodeMap *getTextEncoding();
 
-enum EndOfLineKind {
-  eolUnix,			// LF
-  eolDOS,			// CR+LF
-  eolMac			// CR
-};
+    const UnicodeMap *getUtf8Map();
 
-//------------------------------------------------------------------------
+    std::vector<std::string> getEncodingNames();
 
-enum ScreenType {
-  screenUnset,
-  screenDispersed,
-  screenClustered,
-  screenStochasticClustered
-};
+    //----- functions to set parameters
+    void addFontFile(const GooString *fontName, const GooString *path);
+    void setTextEncoding(const char *encodingName);
+    void setPrintCommands(bool printCommandsA);
+    void setProfileCommands(bool profileCommandsA);
+    void setErrQuiet(bool errQuietA);
 
-//------------------------------------------------------------------------
-
-class GlobalParams {
-public:
-
-  // Initialize the global parameters by attempting to read a config
-  // file.
-  GlobalParams(const char *customPopplerDataDir = NULL);
-
-  ~GlobalParams();
-
-  void setBaseDir(char *dir);
-
-#if WITH_FONTCONFIGURATION_WIN32
-  void setupBaseFonts(char *dir);
-#endif
-
-  //----- accessors
-
-  CharCode getMacRomanCharCode(char *charName);
-
-  GooString *getBaseDir();
-  Unicode mapNameToUnicode(char *charName);
-  UnicodeMap *getResidentUnicodeMap(GooString *encodingName);
-  FILE *getUnicodeMapFile(GooString *encodingName);
-  FILE *findCMapFile(GooString *collection, GooString *cMapName);
-  FILE *findToUnicodeFile(GooString *name);
-  DisplayFontParam *getDisplayFont(GfxFont *font);
-  GBool getPSExpandSmaller();
-  GBool getPSShrinkLarger();
-  GBool getPSCenter();
-  PSLevel getPSLevel();
-  PSFontParam *getPSFont(GooString *fontName);
-  PSFontParam *getPSFont16(GooString *fontName, GooString *collection, int wMode);
-  GBool getPSEmbedType1();
-  GBool getPSEmbedTrueType();
-  GBool getPSEmbedCIDPostScript();
-  GBool getPSEmbedCIDTrueType();
-  GBool getPSSubstFonts();
-  GBool getPSPreload();
-  GBool getPSOPI();
-  GBool getPSASCIIHex();
-  GBool getPSBinary();
-  GooString *getTextEncodingName();
-  EndOfLineKind getTextEOL();
-  GBool getTextPageBreaks();
-  GBool getTextKeepTinyChars();
-  GooString *findFontFile(GooString *fontName, char **exts);
-  GBool getEnableFreeType();
-  GBool getAntialias();
-  GBool getVectorAntialias();
-  GBool getStrokeAdjust();
-  ScreenType getScreenType();
-  int getScreenSize();
-  int getScreenDotRadius();
-  double getScreenGamma();
-  double getScreenBlackThreshold();
-  double getScreenWhiteThreshold();
-  GBool getMapNumericCharNames();
-  GBool getMapUnknownCharNames();
-  GBool getPrintCommands();
-  GBool getProfileCommands();
-  GBool getErrQuiet();
-  double getSplashResolution();
-
-  CharCodeToUnicode *getCIDToUnicode(GooString *collection);
-  CharCodeToUnicode *getUnicodeToUnicode(GooString *fontName);
-  UnicodeMap *getUnicodeMap(GooString *encodingName);
-  CMap *getCMap(GooString *collection, GooString *cMapName, Stream *stream = NULL);
-  UnicodeMap *getTextEncoding();
-#ifdef ENABLE_PLUGINS
-  GBool loadPlugin(char *type, char *name);
-#endif
-
-  GooList *getEncodingNames();
-
-  //----- functions to set parameters
-  void setPSExpandSmaller(GBool expand);
-  void setPSShrinkLarger(GBool shrink);
-  void setPSCenter(GBool center);
-  void setPSLevel(PSLevel level);
-  void setPSEmbedType1(GBool embed);
-  void setPSEmbedTrueType(GBool embed);
-  void setPSEmbedCIDPostScript(GBool embed);
-  void setPSEmbedCIDTrueType(GBool embed);
-  void setPSSubstFonts(GBool substFonts);
-  void setPSPreload(GBool preload);
-  void setPSOPI(GBool opi);
-  void setPSASCIIHex(GBool hex);
-  void setPSBinary(GBool binary);
-  void setTextEncoding(char *encodingName);
-  GBool setTextEOL(char *s);
-  void setTextPageBreaks(GBool pageBreaks);
-  void setTextKeepTinyChars(GBool keep);
-  GBool setEnableFreeType(char *s);
-  GBool setAntialias(char *s);
-  GBool setVectorAntialias(char *s);
-  void setStrokeAdjust(GBool strokeAdjust);
-  void setScreenType(ScreenType st);
-  void setScreenSize(int size);
-  void setScreenDotRadius(int radius);
-  void setScreenGamma(double gamma);
-  void setScreenBlackThreshold(double blackThreshold);
-  void setScreenWhiteThreshold(double whiteThreshold);
-  void setMapNumericCharNames(GBool map);
-  void setMapUnknownCharNames(GBool map);
-  void setPrintCommands(GBool printCommandsA);
-  void setProfileCommands(GBool profileCommandsA);
-  void setErrQuiet(GBool errQuietA);
-  void setSplashResolution(double splashResolutionA);
-
-  //----- security handlers
-
-  void addSecurityHandler(XpdfSecurityHandler *handler);
-  XpdfSecurityHandler *getSecurityHandler(char *name);
+    static bool parseYesNo2(const char *token, bool *flag);
 
 private:
+    void parseNameToUnicode(const GooString *name);
 
-  void parseNameToUnicode(GooString *name);
-  GBool parseYesNo2(char *token, GBool *flag);
-  UnicodeMap *getUnicodeMap2(GooString *encodingName);
+    void scanEncodingDirs();
+    void addCIDToUnicode(const GooString *collection, const GooString *fileName);
+    void addUnicodeMap(const GooString *encodingName, const GooString *fileName);
+    void addCMapDir(const GooString *collection, const GooString *dir);
 
-  void scanEncodingDirs();
-  void addCIDToUnicode(GooString *collection, GooString *fileName);
-  void addUnicodeMap(GooString *encodingName, GooString *fileName);
-  void addCMapDir(GooString *collection, GooString *dir);
+    //----- static tables
 
-  //----- static tables
+    NameToCharCode * // mapping from char name to
+            macRomanReverseMap; //   MacRomanEncoding index
 
-  NameToCharCode *		// mapping from char name to
-    macRomanReverseMap;		//   MacRomanEncoding index
+    //----- user-modifiable settings
 
-  //----- user-modifiable settings
-
-  GooString *baseDir;		// base directory - for plugins, etc.
-  NameToCharCode *		// mapping from char name to Unicode
-    nameToUnicode;
-  GooHash *cidToUnicodes;		// files for mappings from char collections
-				//   to Unicode, indexed by collection name
-				//   [GooString]
-  GooHash *unicodeToUnicodes;	// files for Unicode-to-Unicode mappings,
-				//   indexed by font name pattern [GooString]
-  GooHash *residentUnicodeMaps;	// mappings from Unicode to char codes,
-				//   indexed by encoding name [UnicodeMap]
-  GooHash *unicodeMaps;		// files for mappings from Unicode to char
-				//   codes, indexed by encoding name [GooString]
-  GooHash *cMapDirs;		// list of CMap dirs, indexed by collection
-				//   name [GooList[GooString]]
-  GooList *toUnicodeDirs;		// list of ToUnicode CMap dirs [GooString]
-  GooHash *displayFonts;		// display font info, indexed by font name
-				//   [DisplayFontParam]
+    NameToCharCode * // mapping from char name to Unicode for ZapfDingbats
+            nameToUnicodeZapfDingbats;
+    NameToCharCode * // mapping from char name to Unicode for text
+            nameToUnicodeText; // extraction
+    // files for mappings from char collections
+    // to Unicode, indexed by collection name
+    std::unordered_map<std::string, std::string> cidToUnicodes;
+    // mappings from Unicode to char codes,
+    // indexed by encoding name
+    std::unordered_map<std::string, UnicodeMap> residentUnicodeMaps;
+    // files for mappings from Unicode to char
+    // codes, indexed by encoding name
+    std::unordered_map<std::string, std::string> unicodeMaps;
+    // list of CMap dirs, indexed by collection
+    std::unordered_multimap<std::string, std::string> cMapDirs;
+    std::vector<GooString *> toUnicodeDirs; // list of ToUnicode CMap dirs
+    bool baseFontsInitialized;
 #ifdef _WIN32
-  GBool baseFontsInitialized;
-  WinFontList *winFontList;	// system TrueType fonts
+    // windows font substitutes (for CID fonts)
+    std::unordered_map<std::string, std::string> substFiles;
 #endif
-  GBool psExpandSmaller;	// expand smaller pages to fill paper
-  GBool psShrinkLarger;		// shrink larger pages to fit paper
-  GBool psCenter;		// center pages on the paper
-  PSLevel psLevel;		// PostScript level to generate
-  GooHash *psFonts;		// PostScript font info, indexed by PDF
-				//   font name [PSFontParam]
-  GooList *psNamedFonts16;	// named 16-bit fonts [PSFontParam]
-  GooList *psFonts16;		// generic 16-bit fonts [PSFontParam]
-  GBool psEmbedType1;		// embed Type 1 fonts?
-  GBool psEmbedTrueType;	// embed TrueType fonts?
-  GBool psEmbedCIDPostScript;	// embed CID PostScript fonts?
-  GBool psEmbedCIDTrueType;	// embed CID TrueType fonts?
-  GBool psSubstFonts;		// substitute missing fonts?
-  GBool psPreload;		// preload PostScript images and forms into
-				//   memory
-  GBool psOPI;			// generate PostScript OPI comments?
-  GBool psASCIIHex;		// use ASCIIHex instead of ASCII85?
-  GBool psBinary;		// use binary instead of hex
-  GooString *textEncoding;	// encoding (unicodeMap) to use for text
-				//   output
-  EndOfLineKind textEOL;	// type of EOL marker to use for text
-				//   output
-  GBool textPageBreaks;		// insert end-of-page markers?
-  GBool textKeepTinyChars;	// keep all characters in text output
-  GooList *fontDirs;		// list of font dirs [GooString]
-  GBool enableFreeType;		// FreeType enable flag
-  GBool antialias;		// anti-aliasing enable flag
-  GBool vectorAntialias;	// vector anti-aliasing enable flag
-  GBool strokeAdjust;		// stroke adjustment enable flag
-  ScreenType screenType;	// halftone screen type
-  int screenSize;		// screen matrix size
-  int screenDotRadius;		// screen dot radius
-  double screenGamma;		// screen gamma correction
-  double screenBlackThreshold;	// screen black clamping threshold
-  double screenWhiteThreshold;	// screen white clamping threshold
-  GBool mapNumericCharNames;	// map numeric char names (from font subsets)?
-  GBool mapUnknownCharNames;	// map unknown char names?
-  GBool printCommands;		// print the drawing commands
-  GBool profileCommands;	// profile the drawing commands
-  GBool errQuiet;		// suppress error messages?
-  double splashResolution;	// resolution when rasterizing images
+    // font files: font name mapped to path
+    std::unordered_map<std::string, std::string> fontFiles;
+    SysFontList *sysFonts; // system fonts
+    GooString *textEncoding; // encoding (unicodeMap) to use for text
+                             //   output
+    bool printCommands; // print the drawing commands
+    bool profileCommands; // profile the drawing commands
+    bool errQuiet; // suppress error messages?
 
-  CharCodeToUnicodeCache *cidToUnicodeCache;
-  CharCodeToUnicodeCache *unicodeToUnicodeCache;
-  UnicodeMapCache *unicodeMapCache;
-  CMapCache *cMapCache;
-  
-#ifdef ENABLE_PLUGINS
-  GList *plugins;		// list of plugins [Plugin]
-  GList *securityHandlers;	// list of loaded security handlers
-				//   [XpdfSecurityHandler]
-#endif
+    CharCodeToUnicodeCache *cidToUnicodeCache;
+    CharCodeToUnicodeCache *unicodeToUnicodeCache;
+    UnicodeMapCache *unicodeMapCache;
+    CMapCache *cMapCache;
 
-#if MULTITHREADED
-  GooMutex mutex;
-  GooMutex unicodeMapCacheMutex;
-  GooMutex cMapCacheMutex;
-#endif
+    const UnicodeMap *utf8Map;
 
-  const char *popplerDataDir;
+    mutable std::recursive_mutex mutex;
+    mutable std::recursive_mutex unicodeMapCacheMutex;
+    mutable std::recursive_mutex cMapCacheMutex;
+
+    const char *popplerDataDir;
+};
+
+class POPPLER_PRIVATE_EXPORT GlobalParamsIniter
+{
+public:
+    explicit GlobalParamsIniter(ErrorCallback errorCallback);
+    ~GlobalParamsIniter();
+
+    GlobalParamsIniter(const GlobalParamsIniter &) = delete;
+    GlobalParamsIniter &operator=(const GlobalParamsIniter &) = delete;
+
+    static bool setCustomDataDir(const std::string &dir);
+
+private:
+    static std::mutex mutex;
+    static int count;
+
+    static std::string customDataDir;
 };
 
 #endif

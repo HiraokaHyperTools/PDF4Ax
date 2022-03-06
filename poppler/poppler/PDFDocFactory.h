@@ -5,16 +5,19 @@
 // This file is licensed under the GPLv2 or later
 //
 // Copyright 2010 Hib Eris <hib@hiberis.nl>
-// Copyright 2010 Albert Astals Cid <aacid@kde.org>
+// Copyright 2010, 2018, 2021 Albert Astals Cid <aacid@kde.org>
+// Copyright 2019, 2021 Oliver Sander <oliver.sander@tu-dresden.de>
 //
 //========================================================================
 
 #ifndef PDFDOCFACTORY_H
 #define PDFDOCFACTORY_H
 
-#include "PDFDoc.h"
+#include <memory>
 
-class GooList;
+#include "PDFDoc.h"
+#include "poppler_private_export.h"
+
 class GooString;
 class PDFDocBuilder;
 
@@ -30,26 +33,26 @@ class PDFDocBuilder;
 // the constructor, or by registering a new PDFDocBuilder afterwards.
 //------------------------------------------------------------------------
 
-class PDFDocFactory {
+class POPPLER_PRIVATE_EXPORT PDFDocFactory
+{
 
 public:
+    explicit PDFDocFactory(std::vector<PDFDocBuilder *> *pdfDocBuilders = nullptr);
+    ~PDFDocFactory();
 
-  PDFDocFactory(GooList *pdfDocBuilders = NULL);
-  ~PDFDocFactory();
+    PDFDocFactory(const PDFDocFactory &) = delete;
+    PDFDocFactory &operator=(const PDFDocFactory &) = delete;
 
-  // Create a PDFDoc. Returns a PDFDoc. You should check this PDFDoc
-  // with PDFDoc::isOk() for failures.
-  // The caller is responsible for deleting ownerPassword, userPassWord and guiData.
-  PDFDoc *createPDFDoc(const GooString &uri, GooString *ownerPassword = NULL,
-      GooString *userPassword = NULL, void *guiDataA = NULL);
+    // Create a PDFDoc. Returns a PDFDoc. You should check this PDFDoc
+    // with PDFDoc::isOk() for failures.
+    // The caller is responsible for deleting ownerPassword, userPassWord and guiData.
+    std::unique_ptr<PDFDoc> createPDFDoc(const GooString &uri, GooString *ownerPassword = nullptr, GooString *userPassword = nullptr, void *guiDataA = nullptr);
 
-  // Extend supported URIs with the ones from the PDFDocBuilder.
-  void registerPDFDocBuilder(PDFDocBuilder *pdfDocBuilder);
+    // Extend supported URIs with the ones from the PDFDocBuilder.
+    void registerPDFDocBuilder(PDFDocBuilder *pdfDocBuilder);
 
 private:
-
-  GooList *builders;
-
+    std::vector<PDFDocBuilder *> *builders;
 };
 
 #endif /* PDFDOCFACTORY_H */

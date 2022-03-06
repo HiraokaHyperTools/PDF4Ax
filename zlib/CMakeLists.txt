@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 2.4.4)
 set(CMAKE_ALLOW_LOOSE_LOOP_CONSTRUCTS ON)
 
 project(zlib C)
+set(VERSION 1.2.5)
 
 if(NOT DEFINED BUILD_SHARED_LIBS)
     option(BUILD_SHARED_LIBS "Build a shared library form of zlib" ON)
@@ -11,6 +12,7 @@ include(CheckTypeSize)
 include(CheckFunctionExists)
 include(CheckIncludeFile)
 include(CheckCSourceCompiles)
+include(GNUInstallDirs)
 enable_testing()
 
 check_include_file(sys/types.h HAVE_SYS_TYPES_H)
@@ -135,6 +137,15 @@ set_target_properties(zlib PROPERTIES DEFINE_SYMBOL ZLIB_DLL)
 
 set_target_properties(zlib PROPERTIES SOVERSION 1)
 
+set_target_properties(zlib PROPERTIES VERSION ${VERSION})
+set_target_properties(zlib PROPERTIES INSTALL_PREFIX ${CMAKE_INSTALL_PREFIX})
+set_target_properties(zlib PROPERTIES INSTALL_FULL_BINDIR "${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_BINDIR}")
+set_target_properties(zlib PROPERTIES INSTALL_FULL_LIBDIR "${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}")
+set_target_properties(zlib PROPERTIES INSTALL_FULL_INCLUDEDIR "${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_INCLUDEDIR}")
+
+file(GENERATE OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/zlib.$<CONFIG>.pc"
+    INPUT "${CMAKE_CURRENT_SOURCE_DIR}/zlib.pc.in" )
+
 if(NOT CYGWIN)
     # This property causes shared libraries on Linux to have the full version
     # encoded into their final filename.  We disable this on Cygwin because
@@ -156,9 +167,13 @@ endif()
 
 if(NOT SKIP_INSTALL_LIBRARIES AND NOT SKIP_INSTALL_ALL )
     install(TARGETS zlib
-        RUNTIME DESTINATION bin
-        ARCHIVE DESTINATION lib
-        LIBRARY DESTINATION lib )
+        INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR} )
+    install(FILES ${CMAKE_CURRENT_BINARY_DIR}/zlib.$<CONFIG>.pc
+        DESTINATION lib/pkgconfig
+        RENAME zlib.pc )
 endif()
 if(NOT SKIP_INSTALL_HEADERS AND NOT SKIP_INSTALL_ALL )
     install(FILES ${ZLIB_PUBLIC_HDRS} DESTINATION include)

@@ -14,6 +14,9 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2005 Marco Pesenti Gritti <mpg@redhat.com>
+// Copyright (C) 2016, 2018, 2021 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2019, 2020 Oliver Sander <oliver.sander@tu-dresden.de>
+// Copyright (C) 2021 RM <rm+git@arcsin.org>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -23,67 +26,96 @@
 #ifndef OUTLINE_H
 #define OUTLINE_H
 
-#ifdef USE_GCC_PRAGMAS
-#pragma interface
-#endif
-
+#include <memory>
 #include "Object.h"
 #include "CharTypes.h"
+#include "poppler_private_export.h"
 
+class PDFDoc;
 class GooString;
-class GooList;
 class XRef;
 class LinkAction;
+class OutlineItem;
 
 //------------------------------------------------------------------------
 
-class Outline {
+class POPPLER_PRIVATE_EXPORT Outline
+{
+    PDFDoc *doc;
+    XRef *xref;
+    Object *outlineObj; // outline dict in catalog
+
 public:
+    Outline(Object *outlineObj, XRef *xref, PDFDoc *doc);
+    ~Outline();
 
-  Outline(Object *outlineObj, XRef *xref);
-  ~Outline();
+    Outline(const Outline &) = delete;
+    Outline &operator=(const Outline &) = delete;
 
-  GooList *getItems() { return items; }
+    const std::vector<OutlineItem *> *getItems() const
+    {
+        if (!items || items->empty())
+            return nullptr;
+        else
+            return items;
+    }
+
+    struct OutlineTreeNode
+    {
+        std::string title;
+        int destPageNum;
+        std::vector<OutlineTreeNode> children;
+    };
+
+    // insert/remove child don't propagate changes to 'Count' up the entire
+    // tree
+    void setOutline(const std::vector<OutlineTreeNode> &nodeList);
+    void insertChild(const std::string &itemTitle, int destPageNum, unsigned int pos);
+    void removeChild(unsigned int pos);
 
 private:
-
-  GooList *items;		// NULL if document has no outline,
-				// otherwise, a list of OutlineItem
+    std::vector<OutlineItem *> *items; // nullptr if document has no outline
+    int addOutlineTreeNodeList(const std::vector<OutlineTreeNode> &nodeList, Ref &parentRef, Ref &firstRef, Ref &lastRef);
 };
 
 //------------------------------------------------------------------------
 
-class OutlineItem {
+class POPPLER_PRIVATE_EXPORT OutlineItem
+{
+    friend Outline;
+
 public:
-
-  OutlineItem(Dict *dict, XRef *xrefA);
-  ~OutlineItem();
-
-  static GooList *readItemList(Object *firstItemRef, Object *lastItemRef,
-			     XRef *xrefA);
-
-  void open();
-  void close();
-
-  Unicode *getTitle() { return title; }
-  int getTitleLength() { return titleLen; }
-  LinkAction *getAction() { return action; }
-  GBool isOpen() { return startsOpen; }
-  GBool hasKids() { return firstRef.isRef(); }
-  GooList *getKids() { return kids; }
+    OutlineItem(const Dict *dict, Ref refA, OutlineItem *parentA, XRef *xrefA, PDFDoc *docA);
+    ~OutlineItem();
+    OutlineItem(const OutlineItem &) = delete;
+    OutlineItem &operator=(const OutlineItem &) = delete;
+    static std::vector<OutlineItem *> *readItemList(OutlineItem *parent, const Object *firstItemRef, XRef *xrefA, PDFDoc *docA);
+    const Unicode *getTitle() const { return title; }
+    void setTitle(const std::string &titleA);
+    int getTitleLength() const { return titleLen; }
+    bool setPageDest(int i);
+    // OutlineItem keeps the ownership of the action
+    const LinkAction *getAction() const { return action.get(); }
+    void setStartsOpen(bool value);
+    bool isOpen() const { return startsOpen; }
+    bool hasKids();
+    void open();
+    const std::vector<OutlineItem *> *getKids();
+    int getRefNum() const { return ref.num; }
+    Ref getRef() const { return ref; }
+    void insertChild(const std::string &itemTitle, int destPageNum, unsigned int pos);
+    void removeChild(unsigned int pos);
 
 private:
-
-  XRef *xref;
-  Unicode *title;
-  int titleLen;
-  LinkAction *action;
-  Object firstRef;
-  Object lastRef;
-  Object nextRef;
-  GBool startsOpen;
-  GooList *kids;	// NULL if this item is closed or has no kids,
-			// otherwise a list of OutlineItem
+    Ref ref;
+    OutlineItem *parent;
+    PDFDoc *doc;
+    XRef *xref;
+    Unicode *title;
+    int titleLen;
+    std::unique_ptr<LinkAction> action;
+    bool startsOpen;
+    std::vector<OutlineItem *> *kids; // nullptr if this item is closed or has no kids
 };
 
 #endif
