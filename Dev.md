@@ -22,6 +22,10 @@ cmake -G "Visual Studio 16 2019" -A Win32
 #   cmake -B build -D BUILD_SHARED_LIBS=true -D CMAKE_BUILD_TYPE=Release
 ```
 
+## pkg-config
+
+- [How to install pkg config in windows? - Stack Overflow](https://stackoverflow.com/questions/1710922/how-to-install-pkg-config-in-windows/1711338#1711338)
+
 ## zlib
 
 ```bat
@@ -70,7 +74,7 @@ msbuild RUN_INSTALL.vcxproj /p:Configuration=debugoptimized /p:Platform=Win32
 ## lzo2
 
 ```bat
-path %path%;C:\msys32\mingw32\bin
+path %path%;H:\Proj\PDF4Ax\pkg-config\bin
 set PKG_CONFIG_PATH=H:\Proj\PDF4Ax\root32\lib\pkgconfig
 set PKG_CONFIG_LIBDIR=H:\Proj\PDF4Ax\root32\lib
 
