@@ -36,7 +36,7 @@ set_target_properties(libiconv PROPERTIES INSTALL_FULL_LIBDIR "${CMAKE_INSTALL_P
 set_target_properties(libiconv PROPERTIES INSTALL_FULL_INCLUDEDIR "${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_INCLUDEDIR}")
 
 file(GENERATE OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/libiconv.$<CONFIG>.pc"
-    INPUT "${CMAKE_CURRENT_SOURCE_DIR}/libiconv.pc.in"
+    INPUT "${CMAKE_CURRENT_SOURCE_DIR}/libiconv.pc.cmakein"
 )
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/libiconv.$<CONFIG>.pc
     DESTINATION lib/pkgconfig
