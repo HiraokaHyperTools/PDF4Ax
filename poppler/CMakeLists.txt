@@ -586,6 +586,8 @@ ADD_GPERF_FILE(ZapfDingbatsWidths)
 
 if(MSVC)
 add_definitions(-D_CRT_SECURE_NO_WARNINGS)
+add_compile_options(
+    $<IF:$<CONFIG:Debug>,/MTd,/MT>)
 add_library(poppler STATIC ${poppler_SRCS})
 else()
 add_library(poppler ${poppler_SRCS})

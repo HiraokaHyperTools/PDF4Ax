@@ -24,7 +24,14 @@ set(poppler_cpp_SRCS
   poppler-version.cpp
 )
 
+if(MSVC)
+add_definitions(-D_CRT_SECURE_NO_WARNINGS)
+add_compile_options(
+    $<IF:$<CONFIG:Debug>,/MTd,/MT>)
+add_library(poppler-cpp STATIC ${poppler_cpp_SRCS})
+else()
 add_library(poppler-cpp ${poppler_cpp_SRCS})
+endif()
 generate_export_header(poppler-cpp BASE_NAME poppler-cpp EXPORT_FILE_NAME "${CMAKE_CURRENT_BINARY_DIR}/poppler_cpp_export.h")
 set_target_properties(poppler-cpp PROPERTIES VERSION 0.9.0 SOVERSION 0)
 if(MINGW AND BUILD_SHARED_LIBS)
