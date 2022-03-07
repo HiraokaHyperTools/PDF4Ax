@@ -5,6 +5,12 @@ project(libiconv VERSION 0.1 LANGUAGES CXX)
 
 include(GNUInstallDirs)
 
+if(MSVC)
+    add_compile_options(
+        $<IF:$<CONFIG:Debug>,/MTd,/MT>
+    )
+endif()
+
 add_library(libiconv STATIC)
 
 set_target_properties(libiconv PROPERTIES DEBUG_POSTFIX "d")

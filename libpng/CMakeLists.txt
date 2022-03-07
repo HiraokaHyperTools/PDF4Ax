@@ -181,6 +181,12 @@ endif()
 # NOW BUILD OUR TARGET
 include_directories(${CMAKE_CURRENT_SOURCE_DIR} ${ZLIB_INCLUDE_DIR})
 
+if(MSVC)
+  add_compile_options(
+    $<IF:$<CONFIG:Debug>,/MTd,/MT>
+  )
+endif()
+
 if(PNG_SHARED)
   add_library(${PNG_LIB_NAME} SHARED ${libpng_sources})
   if(MSVC)

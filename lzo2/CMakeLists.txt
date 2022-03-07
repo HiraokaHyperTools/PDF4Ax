@@ -44,10 +44,6 @@ if(",${CMAKE_SOURCE_DIR}," STREQUAL ",${CMAKE_BINARY_DIR},")
     message(FATAL_ERROR "ERROR: In-source builds are not allowed.")
 endif()
 
-if(NOT CMAKE_BUILD_TYPE)
-    set(CMAKE_BUILD_TYPE "Release" CACHE STRING "" FORCE)
-endif()
-
 project(lzo VERSION 2.10 LANGUAGES C)
 
 # configuration options
@@ -66,6 +62,15 @@ if(NOT CMAKE_INSTALL_PREFIX)
 endif()
 include(FindPkgConfig QUIET)
 include(GNUInstallDirs)
+
+if(MSVC)
+    set(CMAKE_DEBUG_POSTFIX "d")
+    add_definitions(-D_CRT_SECURE_NO_DEPRECATE)
+    add_definitions(-D_CRT_NONSTDC_NO_DEPRECATE)
+    add_compile_options(
+        $<IF:$<CONFIG:Debug>,/MTd,/MT>
+    )
+endif()
 
 # /***********************************************************************
 # // targets

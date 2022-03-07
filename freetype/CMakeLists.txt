@@ -434,6 +434,13 @@ if (NOT DISABLE_FORCE_DEBUG_POSTFIX)
 endif ()
 
 
+if (MSVC)
+  add_compile_options(
+    $<IF:$<CONFIG:Debug>,/MTd,/MT>
+  )
+endif ()
+
+
 add_library(freetype
   ${PUBLIC_HEADERS}
   ${PUBLIC_CONFIG_HEADERS}
