@@ -17,6 +17,7 @@
 
 #define CAIRO_WIN32_STATIC_BUILD
 #include <cairo-win32.h>
+#include <cpp/poppler-page-printer.h>
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -1540,18 +1541,28 @@ void CAxVw::OnFilePrint() {
 	memcpy(m_printState.get()->devmode.GetData(), devmode, m_printState.get()->devmode.GetSize());
 
 	CUIntArray& targetPages = m_printState.get()->targetPages;
-	for (int y = 0; y < dlg.m_pdex.nPageRanges; y++) {
-		if (ranges[y].nFromPage < ranges[y].nToPage) {
-			// 昇順
-			for (int x = ranges[y].nFromPage; x <= ranges[y].nToPage; x++) {
-				targetPages.Add(x);
+	if (dlg.m_pdex.Flags & PD_CURRENTPAGE) {
+		targetPages.Add(1 + m_iPage);
+	}
+	else if (dlg.m_pdex.Flags & PD_PAGENUMS) {
+		for (int y = 0; y < dlg.m_pdex.nPageRanges; y++) {
+			if (ranges[y].nFromPage < ranges[y].nToPage) {
+				// 昇順
+				for (int x = ranges[y].nFromPage; x <= ranges[y].nToPage; x++) {
+					targetPages.Add(x);
+				}
+			}
+			else {
+				// 降順
+				for (int x = ranges[y].nFromPage; x >= ranges[y].nToPage; x--) {
+					targetPages.Add(x);
+				}
 			}
 		}
-		else {
-			// 降順
-			for (int x = ranges[y].nFromPage; x >= ranges[y].nToPage; x--) {
-				targetPages.Add(x);
-			}
+	}
+	else {
+		for (int x = dlg.m_pdex.nMinPage; x <= dlg.m_pdex.nMaxPage; x++) {
+			targetPages.Add(x);
 		}
 	}
 
@@ -1634,9 +1645,9 @@ bool CAxVw::PrintNextPage() {
 		}
 	};
 
-	std::unique_ptr<cairo_surface_t, cairo_surface_deleter> target(cairo_win32_printing_surface_create(printer.m_hDC));
+	std::unique_ptr<cairo_surface_t, cairo_surface_deleter> surface(cairo_win32_printing_surface_create(printer.m_hDC));
 
-	std::unique_ptr<poppler::page> pageOut(m_pdfdoc->create_page(iPage));
+	std::unique_ptr<poppler::page> pageOut(m_pdfdoc->create_page(iPage - 1));
 
 	{
 		auto mediaBox = m_pps[iPage - 1].mediaBox;
@@ -1657,12 +1668,25 @@ bool CAxVw::PrintNextPage() {
 		}
 
 		printer.ResetDC(devmode);
-		printer.StartPage();
-		CRect rc;
+		int x_dpi = printer.GetDeviceCaps(LOGPIXELSX);
+		int y_dpi = printer.GetDeviceCaps(LOGPIXELSY);
 		int ox = printer.GetDeviceCaps(PHYSICALOFFSETX);
 		int oy = printer.GetDeviceCaps(PHYSICALOFFSETY);
 		int cx = printer.GetDeviceCaps(PHYSICALWIDTH);
 		int cy = printer.GetDeviceCaps(PHYSICALHEIGHT);
+
+		XFORM xform;
+		xform.eM11 = x_dpi / 72.0;
+		xform.eM12 = 0;
+		xform.eM21 = 0;
+		xform.eM22 = y_dpi / 72.0;
+		xform.eDx = 0;
+		xform.eDy = 0;
+		printer.SetGraphicsMode(GM_ADVANCED);
+		printer.SetWorldTransform(&xform);
+
+		printer.StartPage();
+
 		if (!m_printState.get()->opts.m_bIgnoreMargin) {
 			cx -= ox + ox;
 			cy -= oy + oy;
@@ -1690,7 +1714,14 @@ bool CAxVw::PrintNextPage() {
 				-1
 			);
 
-		std::unique_ptr<cairo_t, cairo_deleter> renderer(cairo_create(target.get()));
+		std::unique_ptr<cairo_t, cairo_deleter> renderer(cairo_create(surface.get()));
+
+		cairo_surface_set_fallback_resolution(surface.get(), 72, 72);
+
+		poppler::page_printer print;
+		print.print_page(pageOut.get(), printer.GetSafeHdc(), renderer.get());
+
+		cairo_surface_finish(surface.get());
 
 		printer.EndPage();
 	}

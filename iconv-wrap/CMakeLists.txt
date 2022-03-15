@@ -13,8 +13,6 @@ endif()
 
 add_library(libiconv STATIC)
 
-set_target_properties(libiconv PROPERTIES DEBUG_POSTFIX "d")
-
 target_sources(
     libiconv
     PRIVATE

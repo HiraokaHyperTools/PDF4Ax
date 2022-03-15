@@ -38,7 +38,7 @@ if(CAIRO_FOUND)
   # set it back as false
   set(CAIRO_FOUND FALSE)
 
-  find_library(CAIRO_LIBRARY cairo
+  find_library(CAIRO_LIBRARY cairo libcairo
                HINTS ${_pc_cairo_LIBRARY_DIRS}
   )
   set(CAIRO_LIBRARIES "${CAIRO_LIBRARY}")

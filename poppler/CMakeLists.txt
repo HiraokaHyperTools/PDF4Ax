@@ -214,6 +214,7 @@ if(CAIRO_FOUND)
   set(CAIRO_REQ "cairo")
   set(POPPLER_GLIB_DISABLE_DEPRECATED "")
   set(POPPLER_GLIB_DISABLE_SINGLE_INCLUDES "")
+  include_directories(SYSTEM ${CAIRO_INCLUDE_DIRS})
   if(ENABLE_GLIB)
     macro_optional_find_package(GLIB)
     if(NOT GLIB_FOUND)
@@ -400,6 +401,9 @@ set(poppler_SRCS
   poppler/AnnotStampImageHelper.cc
   poppler/Array.cc
   poppler/CachedFile.cc
+  poppler/CairoFontEngine.cc
+  poppler/CairoOutputDev.cc
+  poppler/CairoRescaleBox.cc
   poppler/Catalog.cc
   poppler/CharCodeToUnicode.cc
   poppler/CMap.cc
@@ -537,6 +541,8 @@ if(WIN32)
   add_definitions(-DWIN32_LEAN_AND_MEAN)
   # gdi32 is needed under win32
   set(poppler_LIBS ${poppler_LIBS} gdi32)
+  # make cairo_public empty
+  add_definitions(-DCAIRO_WIN32_STATIC_BUILD)
 endif()
 if(PNG_FOUND)
   set(poppler_LIBS ${poppler_LIBS} PNG::PNG)

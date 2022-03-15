@@ -303,6 +303,7 @@ libcairo = library('cairo', cairo_sources,
   version: cairo_libversion,
   install: true,
   include_directories: incbase,
+  name_suffix : 'lib',
 )
 
 cairo_headers += [configure_file(output: 'cairo-features.h', configuration: feature_conf)]

@@ -109,7 +109,7 @@
 # FreeType explicitly marks the API to be exported and relies on the compiler
 # to hide all other symbols. CMake supports a C_VISBILITY_PRESET property
 # starting with 2.8.12.
-cmake_minimum_required(VERSION 2.8.12)
+cmake_minimum_required(VERSION 3.21)
 
 if (NOT CMAKE_VERSION VERSION_LESS 3.3)
   # Allow symbol visibility settings also on static libraries. CMake < 3.3
@@ -426,11 +426,6 @@ endif ()
 
 if (BUILD_FRAMEWORK)
   list(APPEND BASE_SRCS builds/mac/freetype-Info.plist)
-endif ()
-
-
-if (NOT DISABLE_FORCE_DEBUG_POSTFIX)
-  set(CMAKE_DEBUG_POSTFIX d)
 endif ()
 
 

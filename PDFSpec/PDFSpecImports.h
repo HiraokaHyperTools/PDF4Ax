@@ -2,17 +2,17 @@
 
 #ifdef _DEBUG
 
-#pragma comment(lib, "freetyped.lib")
+#pragma comment(lib, "freetype.lib")
 #pragma comment(lib, "jpeg-static.lib")
-#pragma comment(lib, "libcairo.a")
-#pragma comment(lib, "libiconvd.lib")
-#pragma comment(lib, "libpixman-1.a")
-#pragma comment(lib, "libpng15_staticd.lib")
-#pragma comment(lib, "lzo2d.lib")
-#pragma comment(lib, "poppler-cppd.lib")
-#pragma comment(lib, "popplerd.lib")
+#pragma comment(lib, "libcairo.lib")
+#pragma comment(lib, "libiconv.lib")
+#pragma comment(lib, "libpixman-1.lib")
+#pragma comment(lib, "libpng15.lib")
+#pragma comment(lib, "lzo2.lib")
+#pragma comment(lib, "poppler-cpp.lib")
+#pragma comment(lib, "poppler.lib")
 #pragma comment(lib, "turbojpeg-static.lib")
-#pragma comment(lib, "zlibd.lib")
+#pragma comment(lib, "zlib.lib")
 
 #else
 

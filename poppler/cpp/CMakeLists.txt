@@ -17,6 +17,7 @@ set(poppler_cpp_SRCS
   poppler-image.cpp
   poppler-page.cpp
   poppler-page-renderer.cpp
+  poppler-page-printer.cpp
   poppler-page-transition.cpp
   poppler-private.cpp
   poppler-rectangle.cpp
@@ -51,6 +52,7 @@ install(FILES
   poppler-image.h
   poppler-page.h
   poppler-page-renderer.h
+  poppler-page-printer.h
   poppler-page-transition.h
   poppler-rectangle.h
   poppler-toc.h

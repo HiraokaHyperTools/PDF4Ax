@@ -117,6 +117,7 @@ libpixman = library(
   dependencies : [dep_m, dep_threads],
   version : meson.project_version(),
   install : true,
+  name_suffix : 'lib',
 )
 
 inc_pixman = include_directories('.')

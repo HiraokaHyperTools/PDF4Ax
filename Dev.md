@@ -60,8 +60,6 @@ cmake -D CMAKE_INSTALL_PREFIX:PATH=H:\Proj\PDF4Ax\root32 -G "Visual Studio 17 20
 
 - [end to end build for win32](https://www.cairographics.org/end_to_end_build_for_win32/)
 
-no pkgconfig
-
 ```bat
 pip3 install meson
 meson build --backend vs2022 --prefix H:\Proj\PDF4Ax\root32 --buildtype debug --default-library static -Db_vscrt=static_from_buildtype
@@ -82,7 +80,7 @@ path %path%;H:\Proj\PDF4Ax\pkg-config\bin
 set PKG_CONFIG_PATH=H:\Proj\PDF4Ax\root32\lib\pkgconfig
 set PKG_CONFIG_LIBDIR=H:\Proj\PDF4Ax\root32\lib
 
-cmake -D CMAKE_INSTALL_PREFIX:PATH=H:\Proj\PDF4Ax\root32 -D CMAKE_DEBUG_POSTFIX=d -G "Visual Studio 17 2022" -A Win32 ..
+cmake -D CMAKE_INSTALL_PREFIX:PATH=H:\Proj\PDF4Ax\root32 -G "Visual Studio 17 2022" -A Win32 ..
 ```
 
 - pkg-config がないと .pc を作成しない。
@@ -94,7 +92,7 @@ path %path%;H:\Proj\PDF4Ax\pkg-config\bin
 set PKG_CONFIG_PATH=H:\Proj\PDF4Ax\root32\lib\pkgconfig
 set PKG_CONFIG_LIBDIR=H:\Proj\PDF4Ax\root32\lib
 
-meson build --backend vs2022 --prefix H:\Proj\PDF4Ax\root32 --buildtype debug -Dglib=disabled -Dspectre=disabled -Dfontconfig=disabled -Dfreetype=disabled -Dpng=disabled --default-library static -Db_vscrt=static_from_buildtype
+meson build --backend vs2022 --prefix H:\Proj\PDF4Ax\root32 --buildtype debug -Dglib=disabled -Dspectre=disabled -Dfontconfig=disabled -Dpng=disabled --default-library static -Db_vscrt=static_from_buildtype
 
 cd build
 
@@ -104,8 +102,6 @@ msbuild RUN_INSTALL.vcxproj /p:Configuration=debug /p:Platform=Win32
 
 ## poppler
 
-no pkg-config
-
 ```bat
-cmake -DCMAKE_INSTALL_PREFIX:PATH=H:\Proj\PDF4Ax\root32 -DCMAKE_BUILD_TYPE=DEBUG -DENABLE_BOOST=OFF -DENABLE_LIBOPENJPEG=none -DENABLE_UTILS:BOOL=OFF -DENABLE_ZLIB_UNCOMPRESS:BOOL=ON -DCMAKE_DEBUG_POSTFIX:STRING=d -DMSVC:BOOL=ON -DENABLE_UNSTABLE_API_ABI_HEADERS:BOOL=ON -G "Visual Studio 17 2022" -A Win32 ..
+cmake -DCMAKE_INSTALL_PREFIX:PATH=H:\Proj\PDF4Ax\root32 -DCMAKE_BUILD_TYPE=DEBUG -DENABLE_BOOST=OFF -DENABLE_LIBOPENJPEG=none -DENABLE_UTILS:BOOL=OFF -DENABLE_ZLIB_UNCOMPRESS:BOOL=ON -DMSVC:BOOL=ON -DENABLE_UNSTABLE_API_ABI_HEADERS:BOOL=ON -G "Visual Studio 17 2022" -A Win32 ..
 ```
