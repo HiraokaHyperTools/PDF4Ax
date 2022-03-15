@@ -8,5 +8,5 @@ Description: zlib compression library
 Version: $<TARGET_PROPERTY:zlib,VERSION>
 
 Requires:
-Libs: -L${libdir} -L${sharedlibdir} -l$<TARGET_FILE_BASE_NAME:zlib>
+Libs: -L${libdir} -l$<TARGET_FILE_BASE_NAME:zlib>
 Cflags: -I${includedir}
