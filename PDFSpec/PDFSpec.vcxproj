@@ -92,7 +92,7 @@
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <LanguageStandard>stdcpp17</LanguageStandard>
-      <AdditionalIncludeDirectories>.;../root32/include;../root32/include/libpng15;../root32/include/pixman-1;../root32/include/poppler;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.;../root32/include;../root32/include/libpng15;../root32/include/pixman-1;../root32/include/poppler;../root32/include/cairo;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>
@@ -162,12 +162,18 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="AxVw.h" />
+    <ClInclude Include="FitRect3.h" />
     <ClInclude Include="framework.h" />
+    <ClInclude Include="PaperSizeLite.h" />
+    <ClInclude Include="PaperSizeUtil.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="PDFSpec.h" />
     <ClInclude Include="PDFSpecImports.h" />
+    <ClInclude Include="PrintingNowDialog.h" />
+    <ClInclude Include="PrintOpts.h" />
     <ClInclude Include="res\PDFSpecResource.h" />
     <ClInclude Include="rijndael-alg-fst.h" />
+    <ClInclude Include="RUt.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AxVw.cpp" />
@@ -183,6 +189,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="PrintintNowDialog.cpp" />
     <ClCompile Include="rijndael-alg-fst.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
@@ -192,6 +199,25 @@
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="res\PDFSpecResource.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="res\about.bmp" />
+    <Image Include="res\disp.bmp" />
+    <Image Include="res\mag.bmp" />
+    <Image Include="res\magbtn.bmp" />
+    <Image Include="res\mask10.bmp" />
+    <Image Include="res\mask50.bmp" />
+    <Image Include="res\move.bmp" />
+    <Image Include="res\movebtn.bmp" />
+    <Image Include="res\next.bmp" />
+    <Image Include="res\prev.bmp" />
+    <Image Include="res\prt.bmp" />
+    <Image Include="res\zoomval.bmp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="res\zoom.cur" />
+    <None Include="res\zoomin.cur" />
+    <None Include="res\zoomout.cur" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

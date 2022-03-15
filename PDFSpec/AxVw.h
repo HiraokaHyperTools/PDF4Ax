@@ -4,6 +4,9 @@
 #pragma once
 
 #include <atlcoll.h>
+#include "PaperSizeLite.h"
+#include "PrintingNowDialog.h"
+#include "PrintOpts.h"
 #include <algorithm>
 #include <cpp/poppler-document.h>
 #include <cpp/poppler-page.h>
@@ -83,6 +86,57 @@ public:
 
 class CAxVw : public CWnd, public CPvRender
 {
+	class PrintState {
+	public:
+		PrintState()
+			: defaultPaperSize()
+			, di()
+			, indexTarget(0)
+			, startDocActive(false)
+			, opts()
+		{
+		}
+
+		virtual ~PrintState() {
+			if (startDocActive) {
+				printer.AbortDoc();
+			}
+		}
+
+		CByteArray devmode;
+		CDC printer;
+		DOCINFO di;
+		PaperSizeLite defaultPaperSize;
+		int indexTarget;
+		CUIntArray targetPages; // page 1~n
+
+		bool isFirstPage() {
+			return indexTarget == 0;
+		}
+		bool isPrintingDone() {
+			return indexTarget >= targetPages.GetSize();
+		}
+		int getTargetPage() {
+			return targetPages.GetAt(indexTarget);
+		}
+		void moveToNextPage() {
+			indexTarget++;
+		}
+		int getCurPage() {
+			return 1 + indexTarget;
+		}
+		int getMaxPage() {
+			return targetPages.GetSize();
+		}
+
+		bool startDocActive;
+		PrintOpts opts;
+	};
+	std::unique_ptr<PrintState> m_printState;
+	CPrintingNowDialog m_dlgPrint;
+
+	bool PrintNextPage();
+
 // コンストラクション
 public:
 	CAxVw();
@@ -212,6 +266,8 @@ public:
 		return m_pdfdoc != NULL;
 	}
 
+	void OnFilePrint();
+
 // オーバーライド
 protected:
 	virtual BOOL PreCreateWindow(CREATESTRUCT& cs);
@@ -259,4 +315,5 @@ public:
 	afx_msg LRESULT OnSetRenderInf(WPARAM, LPARAM);
 	afx_msg void OnKillFocus(CWnd* pNewWnd);
 	afx_msg void OnSetFocus(CWnd* pOldWnd);
+	afx_msg void OnTimer(UINT_PTR nIDEvent);
 };

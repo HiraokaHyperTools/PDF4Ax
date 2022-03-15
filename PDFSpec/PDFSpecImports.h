@@ -1,6 +1,7 @@
 #pragma once
 
 #ifdef _DEBUG
+
 #pragma comment(lib, "freetyped.lib")
 #pragma comment(lib, "jpeg-static.lib")
 #pragma comment(lib, "libcairo.a")
@@ -12,5 +13,7 @@
 #pragma comment(lib, "popplerd.lib")
 #pragma comment(lib, "turbojpeg-static.lib")
 #pragma comment(lib, "zlibd.lib")
+
 #else
+
 #endif

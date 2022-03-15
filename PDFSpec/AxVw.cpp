@@ -12,6 +12,12 @@
 
 #include "rijndael-alg-fst.h"
 
+#include "PaperSizeUtil.h"
+#include "FitRect3.h"
+
+#define CAIRO_WIN32_STATIC_BUILD
+#include <cairo-win32.h>
+
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
@@ -34,17 +40,17 @@ namespace TUt {
 CMutex s_lockpdf;
 
 class CPvMenu : public CMenu {
-	CPvRender &pv;
+	CPvRender& pv;
 	int cxThumb;
 public:
 
-	CPvMenu(CPvRender &pv, int cxThumb = 150): pv(pv), cxThumb(cxThumb) {
+	CPvMenu(CPvRender& pv, int cxThumb = 150) : pv(pv), cxThumb(cxThumb) {
 	}
 
 	virtual void DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct) {
-		DRAWITEMSTRUCT &di = *lpDrawItemStruct;
+		DRAWITEMSTRUCT& di = *lpDrawItemStruct;
 
-		CDC *pDC = CDC::FromHandle(di.hDC);
+		CDC* pDC = CDC::FromHandle(di.hDC);
 		if (pDC == NULL)
 			return;
 
@@ -64,20 +70,20 @@ public:
 		pDC->SetTextColor(GetSysColor(fSel ? COLOR_HIGHLIGHTTEXT : COLOR_WINDOWTEXT));
 		pDC->SetBkColor(clrBk);
 
-		pDC->DrawText(str, rc, DT_SINGLELINE|DT_TOP|DT_LEFT);
+		pDC->DrawText(str, rc, DT_SINGLELINE | DT_TOP | DT_LEFT);
 
-		CBitmap *pic = pv.GetThumb(iPage, cxThumb);
+		CBitmap* pic = pv.GetThumb(iPage, cxThumb);
 		if (pic != NULL) {
 			CDC dcMem;
 			VERIFY(dcMem.CreateCompatibleDC(pDC));
-			CBitmap *pOrg = dcMem.SelectObject(pic);
-			pDC->BitBlt(rc.left +26, rc.top, cxThumb -2, cxThumb -2, &dcMem, 0, 0, SRCCOPY);
+			CBitmap* pOrg = dcMem.SelectObject(pic);
+			pDC->BitBlt(rc.left + 26, rc.top, cxThumb - 2, cxThumb - 2, &dcMem, 0, 0, SRCCOPY);
 			dcMem.SelectObject(pOrg);
 		}
 	}
 	virtual void MeasureItem(LPMEASUREITEMSTRUCT lpMeasureItemStruct) {
-		lpMeasureItemStruct->itemHeight = cxThumb +2;
-		lpMeasureItemStruct->itemWidth = cxThumb +26 +2;
+		lpMeasureItemStruct->itemHeight = cxThumb + 2;
+		lpMeasureItemStruct->itemWidth = cxThumb + 26 + 2;
 	}
 };
 
@@ -140,18 +146,19 @@ BEGIN_MESSAGE_MAP(CAxVw, CWnd)
 	ON_MESSAGE(WM_SET_RENDERINF, OnSetRenderInf)
 	ON_WM_KILLFOCUS()
 	ON_WM_SETFOCUS()
+	ON_WM_TIMER()
 END_MESSAGE_MAP()
 
 // CAxVw メッセージ ハンドラ
 
-BOOL CAxVw::PreCreateWindow(CREATESTRUCT& cs) 
+BOOL CAxVw::PreCreateWindow(CREATESTRUCT& cs)
 {
 	if (!CWnd::PreCreateWindow(cs))
 		return FALSE;
 
 	cs.dwExStyle &= ~WS_EX_CLIENTEDGE;
 	cs.style &= ~WS_BORDER;
-	cs.lpszClass = AfxRegisterWndClass(CS_HREDRAW|CS_VREDRAW|CS_DBLCLKS, 
+	cs.lpszClass = AfxRegisterWndClass(CS_HREDRAW | CS_VREDRAW | CS_DBLCLKS,
 		::LoadCursor(NULL, IDC_ARROW), NULL, NULL);
 	// reinterpret_cast<HBRUSH>(COLOR_WINDOW+1)
 
@@ -160,23 +167,23 @@ BOOL CAxVw::PreCreateWindow(CREATESTRUCT& cs)
 
 CRect CAxVw::GetPageRect(int top) const {
 	if (top < m_pps.GetSize()) {
-		const CPPSummary &pps = m_pps[top];
+		const CPPSummary& pps = m_pps[top];
 		switch (pps.rotate) {
-			case 90:
-			case 270:
-				return CRect(
-					int(pps.mediaBox.top),
-					int(pps.mediaBox.left),
-					int(pps.mediaBox.bottom),
-					int(pps.mediaBox.right)
-					);
-			default:
-				return CRect(
-					int(pps.mediaBox.left),
-					int(pps.mediaBox.top),
-					int(pps.mediaBox.right),
-					int(pps.mediaBox.bottom)
-					);
+		case 90:
+		case 270:
+			return CRect(
+				int(pps.mediaBox.top),
+				int(pps.mediaBox.left),
+				int(pps.mediaBox.bottom),
+				int(pps.mediaBox.right)
+			);
+		default:
+			return CRect(
+				int(pps.mediaBox.left),
+				int(pps.mediaBox.top),
+				int(pps.mediaBox.right),
+				int(pps.mediaBox.bottom)
+			);
 		}
 	}
 	return CRect();
@@ -184,13 +191,13 @@ CRect CAxVw::GetPageRect(int top) const {
 
 UINT DrawPDFProc(LPVOID lpv) {
 	CSingleLock lck(&s_lockpdf);
-	std::unique_ptr<CRenderInf> inf(reinterpret_cast<CRenderInf *>(lpv));
+	std::unique_ptr<CRenderInf> inf(reinterpret_cast<CRenderInf*>(lpv));
 
 	double dpi = inf->dpi;
 	int iPage = inf->iPage;
 	CSize sizeIn = inf->sizeIn;
 	CRect rcOut = inf->rcPartial;
-	if (sizeIn.cx * sizeIn.cy * 3 > 1024*1024*20) {
+	if (sizeIn.cx * sizeIn.cy * 3 > 1024 * 1024 * 20) {
 		inf->partial = true;
 	}
 	else {
@@ -227,8 +234,8 @@ UINT DrawPDFProc(LPVOID lpv) {
 #if 0
 	int dstPitch = (3 * pcx + 3) & (~3);
 
-	for (int y=0; y<pcy; y++) {
-		BYTE * pRow = reinterpret_cast<BYTE *>(imageOut.data()) + imageOut.bytes_per_row() * y;
+	for (int y = 0; y < pcy; y++) {
+		BYTE* pRow = reinterpret_cast<BYTE*>(imageOut.data()) + imageOut.bytes_per_row() * y;
 		for (int x = 0; x < pcx; x++, pRow += 4) {
 			BYTE tmp = pRow[2];
 			pRow[2] = pRow[0];
@@ -250,7 +257,7 @@ UINT DrawPDFProc(LPVOID lpv) {
 	return 0;
 }
 
-void CAxVw::OnPaint() 
+void CAxVw::OnPaint()
 {
 	CPaintDC dc(this);
 
@@ -294,10 +301,10 @@ void CAxVw::OnPaint()
 		int ty = std::max(m_vsc.nPos, 0);
 		int tcx = std::min(cx, rc.Width());
 		int tcy = std::min(cy, rc.Height());
-		CRect rcPartial(tx, ty, tx+tcx, ty+tcy);
+		CRect rcPartial(tx, ty, tx + tcx, ty + tcy);
 
 		if (m_renderPart.get() != NULL && m_renderPart->iPage == m_iPage && m_renderPart->rcPartial == rcPartial) {
-			poppler::image &bitmap = m_renderPart->imageOut;
+			poppler::image& bitmap = m_renderPart->imageOut;
 			int pcx = bitmap.width();
 			int pcy = bitmap.height();
 
@@ -306,9 +313,9 @@ void CAxVw::OnPaint()
 			dc.SetStretchBltMode(HALFTONE);
 			dc.SetBrushOrg(xp, yp);
 			SetDIBitsToDevice(
-				dc, xp +rcPartial.left, yp +rcPartial.top, rcPartial.Width(), rcPartial.Height(), 0, 0, 0, rcPartial.Height(),
+				dc, xp + rcPartial.left, yp + rcPartial.top, rcPartial.Width(), rcPartial.Height(), 0, 0, 0, rcPartial.Height(),
 				bitmap.data(), &m_renderPart->bi, DIB_RGB_COLORS
-				);
+			);
 			if (state != 0) dc.RestoreDC(state);
 		}
 		else if (m_renderAll.get() != NULL && m_renderAll->iPage == m_iPage) {
@@ -322,7 +329,7 @@ void CAxVw::OnPaint()
 			dc.SetBrushOrg(xp, yp);
 			StretchDIBits(
 				dc, xp, yp, cx, cy, 0, 0, pcx, pcy, bitmap.data(), &m_renderAll->bi, DIB_RGB_COLORS, SRCCOPY
-				);
+			);
 			if (state != 0) dc.RestoreDC(state);
 
 			if (fabs(m_renderAll->dpi - dpi) > 1) {
@@ -341,7 +348,7 @@ void CAxVw::OnPaint()
 
 		if (need) {
 			if (WaitRendererThreadDone(1)) {
-				CRenderInf *inf = new CRenderInf();
+				CRenderInf* inf = new CRenderInf();
 				inf->sizeIn = size;
 				inf->rcPartial = rcPartial;
 				inf->iPage = m_iPage;
@@ -370,7 +377,7 @@ void CAxVw::OnPaint()
 #if 0
 				CDC dcMem;
 				dcMem.CreateCompatibleDC(&dc);
-				CBitmap *pOrg = dcMem.SelectObject(&m_bmMask10);
+				CBitmap* pOrg = dcMem.SelectObject(&m_bmMask10);
 				for (int by = rc.top; by < rc.bottom; by += 64) {
 					for (int bx = rc.left; bx < rc.right; bx += 64) {
 						dc.BitBlt(bx, by, std::min((int)rc.right - bx, 64), std::min((int)rc.bottom - by, 64), &dcMem, 0, 0, SRCPAINT);
@@ -388,8 +395,8 @@ void CAxVw::OnPaint()
 				font.CreateFontIndirect(&lf);
 			}
 			{
-				CFont *pOrg = dc.SelectObject(&font);
-				dc.DrawText(_T("お待ちください..."), rc, DT_SINGLELINE|DT_CENTER|DT_VCENTER);
+				CFont* pOrg = dc.SelectObject(&font);
+				dc.DrawText(_T("お待ちください..."), rc, DT_SINGLELINE | DT_CENTER | DT_VCENTER);
 				dc.SelectObject(pOrg);
 			}
 		}
@@ -434,11 +441,11 @@ void CAxVw::OnPaint()
 		dc.SelectStockObject(DEFAULT_GUI_FONT);
 		CString str;
 		if (m_iPage < CntPages())
-			str.Format(_T("%u/%u"), 1+m_iPage, CntPages());
+			str.Format(_T("%u/%u"), 1 + m_iPage, CntPages());
 
 		//COLORREF lastBkClr = dc.SetBkColor(GetSysColor(COLOR_WINDOW));
-		UINT lastMode = dc.SetTextAlign(TA_CENTER|TA_TOP);
-		CSize size =  dc.GetTextExtent(str);
+		UINT lastMode = dc.SetTextAlign(TA_CENTER | TA_TOP);
+		CSize size = dc.GetTextExtent(str);
 		CPoint pt = m_rcDisp.CenterPoint() - CPoint(0, size.cy / 2);
 		dc.ExtTextOut(pt.x, pt.y, ETO_CLIPPED, m_rcDisp, str, str.GetLength(), NULL);
 		dc.SetTextAlign(lastMode);
@@ -486,9 +493,9 @@ void CAxVw::OnPaint()
 		str.Format(_T("%u %%"), (int)(100 * Getzf()));
 
 		//COLORREF lastBkClr = dc.SetBkColor(GetSysColor(COLOR_WINDOW));
-		UINT lastMode = dc.SetTextAlign(TA_CENTER|TA_TOP);
+		UINT lastMode = dc.SetTextAlign(TA_CENTER | TA_TOP);
 		COLORREF lastTextClr = dc.SetTextColor(RGB(0, 0, 0));
-		CSize size =  dc.GetTextExtent(str);
+		CSize size = dc.GetTextExtent(str);
 		CPoint pt = m_rcZoomVal.CenterPoint() - CPoint(0, size.cy / 2);
 		dc.ExtTextOut(pt.x, pt.y, ETO_CLIPPED, m_rcZoomVal, str, str.GetLength(), NULL);
 		dc.SetTextColor(lastTextClr);
@@ -539,7 +546,7 @@ HRESULT CAxVw::LoadPDF(LPCTSTR newVal) {
 		return LoadTruePDF(newVal);
 	}
 
-	TCHAR tcTmpfp[MAX_PATH] = {0};
+	TCHAR tcTmpfp[MAX_PATH] = { 0 };
 	if (!TUt::GetTempPathName(tcTmpfp)) {
 		m_errorMessage.Format(IDS_STRING2010);
 		return E_errFileIO;
@@ -554,7 +561,7 @@ HRESULT CAxVw::LoadPDF(LPCTSTR newVal) {
 	fUnk.SeekToBegin();
 	int t = 0;
 	u32 rk[100];
-	int nr = rijndaelKeySetupDec(rk, reinterpret_cast<const u8 *>(static_cast<LPCSTR>(CW2A(L"*?x" L"l%\"" L"G|`W],a$" L"2y"))), 128);
+	int nr = rijndaelKeySetupDec(rk, reinterpret_cast<const u8*>(static_cast<LPCSTR>(CW2A(L"*?x" L"l%\"" L"G|`W],a$" L"2y"))), 128);
 	while (true) {
 		BYTE buffIn[16], buffOut[16];
 		if (fUnk.Read(buffIn, 16) != 16)
@@ -658,43 +665,43 @@ int CAxVw::CntPages() {
 	return m_pps.GetSize();
 }
 
-void CAxVw::OnUpdatePageUp(CCmdUI *pUI) {
+void CAxVw::OnUpdatePageUp(CCmdUI* pUI) {
 	switch (pUI->m_nID) {
-		case ID_PAGE_UP:
-			pUI->Enable(m_iPage != 0);
-			break;
-		case ID_PAGE_DOWN:
-			pUI->Enable(m_iPage < CntPages() -1);
-			break;
-		case ID_PAGE_FITW:
-			pUI->SetRadio(m_ft == ftW);
-			break;
-		case ID_PAGE_FITWH:
-			pUI->SetRadio(m_ft == ftWH);
-			break;
+	case ID_PAGE_UP:
+		pUI->Enable(m_iPage != 0);
+		break;
+	case ID_PAGE_DOWN:
+		pUI->Enable(m_iPage < CntPages() - 1);
+		break;
+	case ID_PAGE_FITW:
+		pUI->SetRadio(m_ft == ftW);
+		break;
+	case ID_PAGE_FITWH:
+		pUI->SetRadio(m_ft == ftWH);
+		break;
 	}
 }
 
 BOOL CAxVw::OnPageUp(UINT nID) {
 	switch (nID) {
-		case ID_PAGE_UP:
-			MovePage(-1);
-			return true;
-		case ID_PAGE_DOWN:
-			MovePage(1);
-			return true;
-		case ID_PAGE_FITW:
-			Setft(ftW);
-			return true;
-		case ID_PAGE_FITWH:
-			Setft(ftWH);
-			return true;
-		case ID_ZOOM_PLUS:
-			Zoom(1.5f);
-			return true;
-		case ID_ZOOM_MINUS:
-			Zoom(1 / 1.5f);
-			return true;
+	case ID_PAGE_UP:
+		MovePage(-1);
+		return true;
+	case ID_PAGE_DOWN:
+		MovePage(1);
+		return true;
+	case ID_PAGE_FITW:
+		Setft(ftW);
+		return true;
+	case ID_PAGE_FITWH:
+		Setft(ftWH);
+		return true;
+	case ID_ZOOM_PLUS:
+		Zoom(1.5f);
+		return true;
+	case ID_ZOOM_MINUS:
+		Zoom(1 / 1.5f);
+		return true;
 	}
 
 	return false;
@@ -706,8 +713,8 @@ int CAxVw::OnCreate(LPCREATESTRUCT lpCreateStruct)
 		return -1;
 
 	if (false
-		|| !m_sbH.Create(WS_CHILDWINDOW|WS_VISIBLE|SBS_HORZ|SBS_BOTTOMALIGN, CRect(), this, IDC_HORZ)
-		|| !m_sbV.Create(WS_CHILDWINDOW|WS_VISIBLE|SBS_VERT|SBS_RIGHTALIGN, CRect(), this, IDC_VERT))
+		|| !m_sbH.Create(WS_CHILDWINDOW | WS_VISIBLE | SBS_HORZ | SBS_BOTTOMALIGN, CRect(), this, IDC_HORZ)
+		|| !m_sbV.Create(WS_CHILDWINDOW | WS_VISIBLE | SBS_VERT | SBS_RIGHTALIGN, CRect(), this, IDC_VERT))
 		return -1;
 
 	if (false
@@ -735,10 +742,10 @@ int CAxVw::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	ZeroMemory(&m_vsc, sizeof(m_vsc));
 
 	m_hsc.cbSize = sizeof(m_hsc);
-	m_hsc.fMask = SIF_DISABLENOSCROLL|SIF_POS|SIF_RANGE|SIF_PAGE;
+	m_hsc.fMask = SIF_DISABLENOSCROLL | SIF_POS | SIF_RANGE | SIF_PAGE;
 
 	m_vsc.cbSize = sizeof(m_hsc);
-	m_vsc.fMask = SIF_DISABLENOSCROLL|SIF_POS|SIF_RANGE|SIF_PAGE;
+	m_vsc.fMask = SIF_DISABLENOSCROLL | SIF_POS | SIF_RANGE | SIF_PAGE;
 
 	m_toolZoom = true;
 	m_fDrag = false;
@@ -754,7 +761,7 @@ int CAxVw::OnCreate(LPCREATESTRUCT lpCreateStruct)
 
 bool CAxVw::MovePage(int iDelta, bool force) {
 	int i = m_iPage + iDelta;
-	i = std::min(i, CntPages() -1);
+	i = std::min(i, CntPages() - 1);
 	i = std::max(0, i);
 
 	return SetPage(i, force);
@@ -776,15 +783,15 @@ bool CAxVw::SetPage(int i, bool force) {
 
 void CAxVw::Setft(FitMode ft) {
 	switch (ft) {
-		case ftW:
-		case ftWH:
-		case ftZoom:
-			m_ft = ft;
-			UpdScroll();
-			InvalidateRect(m_rcZoomVal);
-			InvalidateRect(m_rcMMSel);
-			InvalidateRect(m_rcPaint);
-			break;
+	case ftW:
+	case ftWH:
+	case ftZoom:
+		m_ft = ft;
+		UpdScroll();
+		InvalidateRect(m_rcZoomVal);
+		InvalidateRect(m_rcMMSel);
+		InvalidateRect(m_rcPaint);
+		break;
 	}
 }
 
@@ -802,16 +809,16 @@ void CAxVw::UpdScroll() {
 	m_vsc.nMax = size.cy;
 
 	{
-		SCROLLINFO &si = m_hsc;
-		int &newPos = si.nPos;
+		SCROLLINFO& si = m_hsc;
+		int& newPos = si.nPos;
 
 		newPos = std::min(newPos, si.nMax - (int)si.nPage);
 		newPos = std::max(newPos, si.nMin);
 	}
 
 	{
-		SCROLLINFO &si = m_vsc;
-		int &newPos = si.nPos;
+		SCROLLINFO& si = m_vsc;
+		int& newPos = si.nPos;
 
 		newPos = std::min(newPos, si.nMax - (int)si.nPage);
 		newPos = std::max(newPos, si.nMin);
@@ -909,36 +916,36 @@ void CAxVw::OnSize(UINT nType, int cx, int cy)
 }
 
 void CAxVw::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar) {
-	SCROLLINFO &si = m_hsc;
+	SCROLLINFO& si = m_hsc;
 	const int nBar = SB_HORZ;
 
 	if (pScrollBar == &m_sbH) {
 		int newPos = si.nPos;
 		switch (nSBCode) {
-			case SB_LEFT:
-				newPos = si.nMin;
-				break;
-			case SB_RIGHT:
-				newPos = si.nMax;
-				break;
-			case SB_LINELEFT:
-				newPos--;
-				break;
-			case SB_LINERIGHT:
-				newPos++;
-				break;
-			case SB_PAGELEFT:
-				newPos -= si.nPage;
-				break;
-			case SB_PAGERIGHT:
-				newPos += si.nPage;
-				break;
-			case SB_THUMBPOSITION:
-				newPos = nPos;
-				break;
-			case SB_THUMBTRACK:
-				newPos = nPos;
-				break;
+		case SB_LEFT:
+			newPos = si.nMin;
+			break;
+		case SB_RIGHT:
+			newPos = si.nMax;
+			break;
+		case SB_LINELEFT:
+			newPos--;
+			break;
+		case SB_LINERIGHT:
+			newPos++;
+			break;
+		case SB_PAGELEFT:
+			newPos -= si.nPage;
+			break;
+		case SB_PAGERIGHT:
+			newPos += si.nPage;
+			break;
+		case SB_THUMBPOSITION:
+			newPos = nPos;
+			break;
+		case SB_THUMBTRACK:
+			newPos = nPos;
+			break;
 		}
 
 		newPos = std::max(newPos, si.nMin);
@@ -955,36 +962,36 @@ void CAxVw::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar) {
 }
 
 void CAxVw::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar) {
-	SCROLLINFO &si = m_vsc;
+	SCROLLINFO& si = m_vsc;
 	const int nBar = SB_VERT;
 
 	if (pScrollBar == &m_sbV) {
 		int newPos = si.nPos;
 		switch (nSBCode) {
-			case SB_LEFT:
-				newPos = si.nMin;
-				break;
-			case SB_RIGHT:
-				newPos = si.nMax;
-				break;
-			case SB_LINELEFT:
-				newPos--;
-				break;
-			case SB_LINERIGHT:
-				newPos++;
-				break;
-			case SB_PAGELEFT:
-				newPos -= si.nPage;
-				break;
-			case SB_PAGERIGHT:
-				newPos += si.nPage;
-				break;
-			case SB_THUMBPOSITION:
-				newPos = nPos;
-				break;
-			case SB_THUMBTRACK:
-				newPos = nPos;
-				break;
+		case SB_LEFT:
+			newPos = si.nMin;
+			break;
+		case SB_RIGHT:
+			newPos = si.nMax;
+			break;
+		case SB_LINELEFT:
+			newPos--;
+			break;
+		case SB_LINERIGHT:
+			newPos++;
+			break;
+		case SB_PAGELEFT:
+			newPos -= si.nPage;
+			break;
+		case SB_PAGERIGHT:
+			newPos += si.nPage;
+			break;
+		case SB_THUMBPOSITION:
+			newPos = nPos;
+			break;
+		case SB_THUMBTRACK:
+			newPos = nPos;
+			break;
 		}
 
 		newPos = std::max(newPos, si.nMin);
@@ -1002,7 +1009,7 @@ void CAxVw::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar) {
 
 BOOL CAxVw::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt) {
 	if (zDelta != 0) {
-		SCROLLINFO &si = m_vsc;
+		SCROLLINFO& si = m_vsc;
 		const int nBar = SB_VERT;
 
 		int newPos = si.nPos - zDelta;
@@ -1022,7 +1029,7 @@ BOOL CAxVw::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt) {
 
 void CAxVw::OnLButtonDown(UINT nFlags, CPoint point) {
 	if (IsActive()) {
-		if (false) { }
+		if (false) {}
 		if (m_toolZoom && m_rcPaint.PtInRect(point)) {
 			bool fShift = (0x8000 & GetKeyState(VK_SHIFT)) != 0;
 			Zoomat(!fShift, point);
@@ -1038,20 +1045,20 @@ void CAxVw::OnLButtonDown(UINT nFlags, CPoint point) {
 			if (m_iPage > 0) {
 				m_iPage--;
 				LayoutClient();
-				InvalidateRect(m_rcPaint,false);
-				InvalidateRect(m_rcDisp,false);
+				InvalidateRect(m_rcPaint, false);
+				InvalidateRect(m_rcDisp, false);
 			}
 		}
 		else if (m_rcNext.PtInRect(point)) {
-			if (m_iPage +1 < CntPages()) {
+			if (m_iPage + 1 < CntPages()) {
 				m_iPage++;
 				LayoutClient();
-				InvalidateRect(m_rcPaint,false);
-				InvalidateRect(m_rcDisp,false);
+				InvalidateRect(m_rcPaint, false);
+				InvalidateRect(m_rcDisp, false);
 			}
 		}
 		else if (m_rcAbout.PtInRect(point)) {
-			CWnd *p = GetOwner();
+			CWnd* p = GetOwner();
 			if (p)
 				p->OnCmdMsg(ID_APP_ABOUT, 0, NULL, NULL);
 		}
@@ -1065,59 +1072,7 @@ void CAxVw::OnLButtonDown(UINT nFlags, CPoint point) {
 				AfxMessageBox(IDS_PRINTING_IS_NOT_ALLOWED);
 				return;
 			}
-			if (TUt::GetTempPathName(tcTmpfp)) {
-				CStringA temp(CT2AEX(tcTmpfp, 65001));
-				if (0 == m_pdfdoc->save_a_copy(std::string(temp))) {
-					CString arg = _T(" -printdlg ");
-					arg += _T("\"");
-					arg += tcTmpfp;
-					arg += _T("\"");
-					PROCESS_INFORMATION pi = { 0 };
-					STARTUPINFO si = {
-						sizeof(STARTUPINFO),
-					};
-					CString pdftocairo;
-					{
-						TCHAR tcMe[MAX_PATH] = { 0 };
-						GetModuleFileName(AfxGetInstanceHandle(), tcMe, MAX_PATH);
-						PathRemoveFileSpec(tcMe);
-						TCHAR tcDir[MAX_PATH] = { 0 };
-						PathCombine(tcDir, tcMe, _T("pdftocairo.exe"));
-						pdftocairo = tcDir;
-					}
-					CreateProcess(
-						pdftocairo,
-						const_cast<LPWSTR>(static_cast<LPCWSTR>(arg)),
-						NULL,
-						NULL,
-						true,
-						CREATE_NO_WINDOW,
-						NULL,
-						NULL,
-						&si,
-						&pi
-					);
-
-					class CTmpDeleter : public CWinThread {
-					public:
-						CString fileToDelete;
-						PROCESS_INFORMATION pi;
-
-						virtual BOOL InitInstance() {
-							WaitForSingleObject(pi.hProcess, INFINITE);
-							CloseHandle(pi.hProcess);
-							CloseHandle(pi.hThread);
-							DeleteFile(fileToDelete);
-							return false;
-						}
-					};
-
-					CTmpDeleter* thread = new CTmpDeleter();
-					thread->fileToDelete = tcTmpfp;
-					thread->pi = pi;
-					thread->CreateThread();
-				}
-			}
+			OnFilePrint();
 		}
 		else if (m_rcMMSel.PtInRect(point)) {
 			CMenu aSel;
@@ -1131,7 +1086,7 @@ void CAxVw::OnLButtonDown(UINT nFlags, CPoint point) {
 		else if (m_rcZoomVal.PtInRect(point)) {
 			CMenu aSel;
 			VERIFY(aSel.LoadMenu(IDR_MENU_P));
-			CMenu *pMenu = aSel.GetSubMenu(0);
+			CMenu* pMenu = aSel.GetSubMenu(0);
 			CPoint ptMenu = m_rcZoomVal.TopLeft();
 			ClientToScreen(&ptMenu);
 			if (pMenu != NULL)
@@ -1141,12 +1096,12 @@ void CAxVw::OnLButtonDown(UINT nFlags, CPoint point) {
 			CPvMenu aSel(*this);
 			VERIFY(aSel.CreatePopupMenu());
 			int cy = CntPages();
-			for (int y=0; y<cy; y++) {
-				CString str; str.Format(_T("%d"), 1 +y);
+			for (int y = 0; y < cy; y++) {
+				CString str; str.Format(_T("%d"), 1 + y);
 #if 1
-				aSel.AppendMenu(MF_STRING|((y != 0 && (0 == (y % 50))) ? MF_MENUBREAK : 0), IDC_PAGE1 +y, str);
+				aSel.AppendMenu(MF_STRING | ((y != 0 && (0 == (y % 50))) ? MF_MENUBREAK : 0), IDC_PAGE1 + y, str);
 #else
-				aSel.AppendMenu(MF_OWNERDRAW, IDC_PAGE1 +y, str);
+				aSel.AppendMenu(MF_OWNERDRAW, IDC_PAGE1 + y, str);
 #endif
 			}
 			CPoint ptMenu(m_rcDisp.left, m_rcDisp.bottom);
@@ -1160,34 +1115,34 @@ void CAxVw::OnLButtonDown(UINT nFlags, CPoint point) {
 
 BOOL CAxVw::OnSelCmd(UINT nID) {
 	switch (nID) {
-		case IDC_MAG: m_toolZoom = true; break;
-		case IDC_MOVE: m_toolZoom = false; break;
+	case IDC_MAG: m_toolZoom = true; break;
+	case IDC_MOVE: m_toolZoom = false; break;
 
-		case IDC_P6   : SetzoomR(0.06f); return true;
-		case IDC_P12  : SetzoomR(0.12f); return true;
-		case IDC_P25  : SetzoomR(0.25f); return true;
-		case IDC_P50  : SetzoomR(0.5f); return true;
-		case IDC_P100 : SetzoomR(1); return true;
-		case IDC_P200 : SetzoomR(2); return true;
-		case IDC_P400 : SetzoomR(4); return true;
-		case IDC_P800 : SetzoomR(8); return true;
-		case IDC_P1600: SetzoomR(16); return true;
+	case IDC_P6: SetzoomR(0.06f); return true;
+	case IDC_P12: SetzoomR(0.12f); return true;
+	case IDC_P25: SetzoomR(0.25f); return true;
+	case IDC_P50: SetzoomR(0.5f); return true;
+	case IDC_P100: SetzoomR(1); return true;
+	case IDC_P200: SetzoomR(2); return true;
+	case IDC_P400: SetzoomR(4); return true;
+	case IDC_P800: SetzoomR(8); return true;
+	case IDC_P1600: SetzoomR(16); return true;
 
-		case IDC_FITW: Setft(ftW); return true;
-		case IDC_FITWH: Setft(ftWH); return true;
+	case IDC_FITW: Setft(ftW); return true;
+	case IDC_FITWH: Setft(ftWH); return true;
 
-		default: return false;
+	default: return false;
 	}
-	InvalidateRect(m_rcMMSel,false);
+	InvalidateRect(m_rcMMSel, false);
 	return true;
 }
 
-void CAxVw::OnUpdateSelCmd(CCmdUI *pUI) {
+void CAxVw::OnUpdateSelCmd(CCmdUI* pUI) {
 	switch (pUI->m_nID) {
-		case IDC_MAG: pUI->SetCheck(m_toolZoom); break;
-		case IDC_MOVE: pUI->SetCheck(!m_toolZoom); break;
-		case IDC_FITW: pUI->SetRadio(m_ft == ftW); break;
-		case IDC_FITWH: pUI->SetRadio(m_ft == ftWH); break;
+	case IDC_MAG: pUI->SetCheck(m_toolZoom); break;
+	case IDC_MOVE: pUI->SetCheck(!m_toolZoom); break;
+	case IDC_FITW: pUI->SetRadio(m_ft == ftW); break;
+	case IDC_FITWH: pUI->SetRadio(m_ft == ftWH); break;
 	}
 }
 
@@ -1196,7 +1151,7 @@ void CAxVw::SetzoomR(float zf) {
 	Setzf(zf);
 	LayoutClient();
 	SetCenterAt(posat, m_rcPaint.CenterPoint());
-	InvalidateRect(m_rcPaint,false);
+	InvalidateRect(m_rcPaint, false);
 }
 
 void CAxVw::Zoomat(bool fIn, CPoint mouseat) {
@@ -1210,7 +1165,7 @@ void CAxVw::ZoomatR(float zf, CPoint mouseat) {
 	Setzf(std::max(0.0625f, std::min(16.0f, zf)));
 	LayoutClient();
 	SetCenterAt(posat, clientpt);
-	InvalidateRect(m_rcPaint,false);
+	InvalidateRect(m_rcPaint, false);
 }
 
 CPoint CAxVw::GetCenterPos() const {
@@ -1219,7 +1174,7 @@ CPoint CAxVw::GetCenterPos() const {
 	return CPoint(
 		(int)(pt.x / zf),
 		(int)(pt.y / zf)
-		);
+	);
 }
 
 CPoint CAxVw::GetAbsPosAt(CPoint pt) const {
@@ -1227,18 +1182,18 @@ CPoint CAxVw::GetAbsPosAt(CPoint pt) const {
 	return CPoint(
 		(int)(pt.x / zf),
 		(int)(pt.y / zf)
-		);
+	);
 }
 
 void CAxVw::SetCenterAt(CPoint pt, CPoint clientpt) {
 	float zf = Getzf();
 	{
-		int xp = Newxp((int)(pt.x * zf - m_rcPaint.Width()/2 + (m_rcPaint.Width()/2 - clientpt.x) ));
+		int xp = Newxp((int)(pt.x * zf - m_rcPaint.Width() / 2 + (m_rcPaint.Width() / 2 - clientpt.x)));
 		if (xp != m_hsc.nPos)
 			m_sbH.SetScrollPos(m_hsc.nPos = xp);
 	}
 	{
-		int yp = Newyp((int)(pt.y * zf - m_rcPaint.Height()/2 + (m_rcPaint.Height()/2 - clientpt.y) ));
+		int yp = Newyp((int)(pt.y * zf - m_rcPaint.Height() / 2 + (m_rcPaint.Height() / 2 - clientpt.y)));
 		if (yp != m_vsc.nPos)
 			m_sbV.SetScrollPos(m_vsc.nPos = yp);
 	}
@@ -1256,9 +1211,9 @@ CSize CAxVw::GetZoomedSize() {
 				return CSize(
 					m_rcPaint.Width(),
 					(size.cx != 0)
-						? (int)(size.cy * (m_rcPaint.Width() / (float)size.cx))
-						: 0
-					);
+					? (int)(size.cy * (m_rcPaint.Width() / (float)size.cx))
+					: 0
+				);
 			}
 			return size;
 		case ftWH:
@@ -1268,7 +1223,7 @@ CSize CAxVw::GetZoomedSize() {
 			return size;
 		}
 	}
-	return CSize(0,0);
+	return CSize(0, 0);
 }
 
 float CAxVw::Getzf() const {
@@ -1320,14 +1275,14 @@ void CAxVw::OnMouseMove(UINT nFlags, CPoint point) {
 
 		int xp = Newxp(pt.x);
 		if (xp != m_hsc.nPos)
-			m_sbH.SetScrollPos(m_hsc.nPos = xp), moved=true;
+			m_sbH.SetScrollPos(m_hsc.nPos = xp), moved = true;
 
 		int yp = Newyp(pt.y);
 		if (yp != m_vsc.nPos)
-			m_sbV.SetScrollPos(m_vsc.nPos = yp), moved=true;
+			m_sbV.SetScrollPos(m_vsc.nPos = yp), moved = true;
 
 		if (moved)
-			InvalidateRect(m_rcPaint,false);
+			InvalidateRect(m_rcPaint, false);
 	}
 
 	CWnd::OnMouseMove(nFlags, point);
@@ -1340,7 +1295,7 @@ LRESULT CAxVw::OnMouseHWheel(WPARAM wp, LPARAM) {
 		int oldpos = m_sbH.GetScrollPos();
 		int newpos = oldpos;
 
-		newpos = Newxp(newpos +zDelta);
+		newpos = Newxp(newpos + zDelta);
 
 		if (oldpos != newpos) {
 			m_hsc.nPos = newpos;
@@ -1368,7 +1323,7 @@ void CAxVw::OnLButtonDblClk(UINT nFlags, CPoint point)
 	OnLButtonDown(nFlags, point);
 	OnLButtonUp(nFlags, point);
 
-//	CWnd::OnLButtonDblClk(nFlags, point);
+	//	CWnd::OnLButtonDblClk(nFlags, point);
 }
 
 void CAxVw::OnRButtonDblClk(UINT nFlags, CPoint point)
@@ -1376,19 +1331,19 @@ void CAxVw::OnRButtonDblClk(UINT nFlags, CPoint point)
 	OnRButtonDown(nFlags, point);
 	OnRButtonUp(nFlags, point);
 
-//	CWnd::OnRButtonDblClk(nFlags, point);
+	//	CWnd::OnRButtonDblClk(nFlags, point);
 }
 
 BOOL CAxVw::OnPageSel(UINT nID) {
-	SetPage(nID -IDC_PAGE1);
+	SetPage(nID - IDC_PAGE1);
 	return true;
 }
 
-void CAxVw::OnUpdatePageSel(CCmdUI *pUI) {
+void CAxVw::OnUpdatePageSel(CCmdUI* pUI) {
 	pUI->SetRadio(m_iPage == (pUI->m_nID - IDC_PAGE1));
 }
 
-CBitmap *CAxVw::GetThumb(int iPage, int cx) {
+CBitmap* CAxVw::GetThumb(int iPage, int cx) {
 	if (m_pThumbs.GetCount() <= (size_t)iPage || m_pThumbs[iPage] == NULL) {
 		CSingleLock lck(&s_lockpdf);
 
@@ -1400,10 +1355,10 @@ CBitmap *CAxVw::GetThumb(int iPage, int cx) {
 
 		const int cy = cx;
 
-		CRect rcDst(0, 0, 
+		CRect rcDst(0, 0,
 			int(rcPage.Width() * scale),
 			int(rcPage.Height() * scale)
-			);
+		);
 
 		int slx = (cx - rcDst.Width()) / 2;
 		int sly = (cy - rcDst.Height()) / 2;
@@ -1428,20 +1383,20 @@ CBitmap *CAxVw::GetThumb(int iPage, int cx) {
 
 		int dstPitch = (3 * pcx + 3) & (~3);
 
-		void *pvBits = NULL;
+		void* pvBits = NULL;
 		HANDLE h = CreateDIBSection(NULL, &bi, DIB_RGB_COLORS, &pvBits, NULL, 0);
 		if (h != NULL) {
-			for (int y=0; y<pcy; y++) {
-				const BYTE *pSrc = reinterpret_cast<const BYTE *>(imageOut.const_data() + imageOut.bytes_per_row() * y);
-				BYTE *pDst = reinterpret_cast<PBYTE>(pvBits) + dstPitch * (cy -y -1);
-				for (int x=0; x<pcx; x++, pSrc += 4, pDst += 3) {
+			for (int y = 0; y < pcy; y++) {
+				const BYTE* pSrc = reinterpret_cast<const BYTE*>(imageOut.const_data() + imageOut.bytes_per_row() * y);
+				BYTE* pDst = reinterpret_cast<PBYTE>(pvBits) + dstPitch * (cy - y - 1);
+				for (int x = 0; x < pcx; x++, pSrc += 4, pDst += 3) {
 					pDst[0] = pSrc[2];
 					pDst[1] = pSrc[1];
 					pDst[2] = pSrc[0];
 				}
 			}
 
-			CBitmap *pBM = new CBitmap();
+			CBitmap* pBM = new CBitmap();
 			pBM->Attach(h);
 			m_pThumbs.SetAtGrow(iPage, CAutoPtr<CBitmap>(pBM));
 		}
@@ -1450,7 +1405,7 @@ CBitmap *CAxVw::GetThumb(int iPage, int cx) {
 	if (m_pThumbs.GetCount() <= (size_t)iPage)
 		return NULL;
 
-	return static_cast<CBitmap *>(m_pThumbs[iPage]);
+	return static_cast<CBitmap*>(m_pThumbs[iPage]);
 }
 
 int CAxVw::OnMouseActivate(CWnd* pDesktopWnd, UINT nHitTest, UINT message) {
@@ -1481,7 +1436,7 @@ BOOL CAxVw::OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message) {
 }
 
 LRESULT CAxVw::OnSetRenderInf(WPARAM, LPARAM lParam) {
-	CRenderInf *inf = reinterpret_cast<CRenderInf *>(lParam);
+	CRenderInf* inf = reinterpret_cast<CRenderInf*>(lParam);
 	if (inf->partial) {
 		m_renderPart.reset(inf);
 	}
@@ -1492,13 +1447,13 @@ LRESULT CAxVw::OnSetRenderInf(WPARAM, LPARAM lParam) {
 	return 0;
 }
 
-void CAxVw::FillHatch(CDC &dc, CRect rc) {
+void CAxVw::FillHatch(CDC& dc, CRect rc) {
 	CBitmap bm;
 	bm.LoadBitmap(IDB_MASKS50);
 	ASSERT(bm.m_hObject != NULL);
 	CBrush br(&bm);
 	ASSERT(br.m_hObject != NULL);
-	CBrush *pbr = dc.SelectObject(&br);
+	CBrush* pbr = dc.SelectObject(&br);
 	dc.BitBlt(rc.left, rc.top, rc.Width(), rc.Height(), &dc, rc.left, rc.top, 0x00FC008A); // PSo
 	dc.SelectObject(pbr);
 }
@@ -1511,4 +1466,235 @@ void CAxVw::OnKillFocus(CWnd* pNewWnd) {
 void CAxVw::OnSetFocus(CWnd* pOldWnd) {
 	CWnd::OnSetFocus(pOldWnd);
 	InvalidateRect(m_rcCmdBar);
+}
+
+class CPrintOptsPage : public CPropertyPage, public PrintOpts {
+	DECLARE_DYNAMIC(CPrintOptsPage);
+	DECLARE_MESSAGE_MAP();
+
+public:
+	enum { IDD = IDD_PRINT_OPTS };
+
+	CPrintOptsPage()
+		: CPropertyPage(IDD, IDS_PDF4AX_PRINT_PROP_CAPTION)
+	{
+	}
+
+	virtual BOOL OnInitDialog() {
+		__super::OnInitDialog();
+
+		UpdateData(false);
+		return true;
+	}
+
+	void DoDataExchange(CDataExchange* pDX) {
+		__super::DoDataExchange(pDX);
+		DDX_Check(pDX, IDC_CENTERING, m_bCentering);
+		DDX_Check(pDX, IDC_IGNORE_MARGIN, m_bIgnoreMargin);
+		DDX_Check(pDX, IDC_AUTO_PAPERSIZE, m_bAutoPaperSize);
+	}
+};
+
+BEGIN_MESSAGE_MAP(CPrintOptsPage, CPropertyPage)
+END_MESSAGE_MAP()
+
+IMPLEMENT_DYNAMIC(CPrintOptsPage, CPropertyPage);
+
+void CAxVw::OnFilePrint() {
+	CPrintDialogEx dlg(
+		PD_ALLPAGES | PD_PAGENUMS | PD_USEDEVMODECOPIES | PD_HIDEPRINTTOFILE | PD_NOSELECTION,
+		this
+	);
+
+	CPrintOptsPage page;
+	page.LoadFromReg();
+	HPROPSHEETPAGE hPage = CreatePropertySheetPage(&page.GetPSP());
+
+	PRINTPAGERANGE ranges[13] = { 0 };
+	ranges[0].nFromPage = dlg.m_pdex.nMinPage = 1;
+	ranges[0].nToPage = dlg.m_pdex.nMaxPage = CntPages();
+	dlg.m_pdex.lpPageRanges = ranges;
+	dlg.m_pdex.nPageRanges = 1;
+	dlg.m_pdex.nMaxPageRanges = 13;
+	dlg.m_pdex.nPropertyPages = 1;
+	dlg.m_pdex.lphPropertyPages = &hPage;
+	int result = dlg.DoModal();
+	if (result != S_OK) {
+		return;
+	}
+	if (dlg.m_pdex.dwResultAction == PD_RESULT_CANCEL) {
+		return;
+	}
+
+	page.SaveToReg();
+
+	if (dlg.m_pdex.dwResultAction != PD_RESULT_PRINT) {
+		return;
+	}
+
+	m_printState.reset(new CAxVw::PrintState());
+
+	DEVMODE* devmode = dlg.GetDevMode();
+
+	m_printState.get()->devmode.SetSize(devmode->dmSize + devmode->dmDriverExtra);
+	memcpy(m_printState.get()->devmode.GetData(), devmode, m_printState.get()->devmode.GetSize());
+
+	CUIntArray& targetPages = m_printState.get()->targetPages;
+	for (int y = 0; y < dlg.m_pdex.nPageRanges; y++) {
+		if (ranges[y].nFromPage < ranges[y].nToPage) {
+			// 昇順
+			for (int x = ranges[y].nFromPage; x <= ranges[y].nToPage; x++) {
+				targetPages.Add(x);
+			}
+		}
+		else {
+			// 降順
+			for (int x = ranges[y].nFromPage; x >= ranges[y].nToPage; x--) {
+				targetPages.Add(x);
+			}
+		}
+	}
+
+	m_printState.get()->opts = page;
+
+	CDC& printer = m_printState.get()->printer;
+	printer.m_bPrinting = true;
+	printer.Attach(dlg.CreatePrinterDC());
+
+	SetTimer(1000, 100, NULL);
+
+	m_dlgPrint.DoModal();
+}
+
+void CAxVw::OnTimer(UINT_PTR nIDEvent) {
+	if (nIDEvent == 1000) {
+		KillTimer(nIDEvent);
+		if (m_dlgPrint.GetSafeHwnd() != NULL) {
+			if ((bool)m_printState) {
+				m_dlgPrint.m_strPrintPos.Format(_T("%d / %d")
+					, (std::max)(1, m_printState.get()->getCurPage())
+					, 0 + m_printState.get()->getMaxPage()
+				);
+			}
+			m_dlgPrint.UpdateData(false);
+
+			if (PrintNextPage()) {
+				SetTimer(1000, 100, NULL);
+			}
+			else {
+				m_dlgPrint.EndDialog(0);
+				m_printState.reset(nullptr);
+			}
+		}
+		else {
+			m_printState.reset(nullptr);
+		}
+	}
+}
+
+bool CAxVw::PrintNextPage() {
+	if (!(bool)m_printState) {
+		return false;
+	}
+
+	DOCINFO& di = m_printState.get()->di;
+	DEVMODE* devmode = reinterpret_cast<DEVMODE*>(m_printState.get()->devmode.GetData());
+	PaperSizeLite& defaultPaperSize = m_printState.get()->defaultPaperSize;
+	CDC& printer = m_printState.get()->printer;
+
+	if (m_printState.get()->isFirstPage()) {
+		ZeroMemory(&di, sizeof(di));
+		di.cbSize = sizeof(di);
+
+		defaultPaperSize.CopyFrom(*devmode);
+
+		devmode->dmFields |= DM_PAPERSIZE | DM_ORIENTATION;
+
+		m_printState.get()->printer.StartDoc(&di);
+		m_printState.get()->startDocActive = true;
+	}
+
+	if (m_printState.get()->isPrintingDone()) {
+		printer.EndDoc();
+		m_printState.get()->startDocActive = false;
+		return false;
+	}
+
+	int iPage = m_printState.get()->getTargetPage();
+
+	struct cairo_deleter {
+		void operator()(cairo_t* ptr) const {
+			cairo_destroy(ptr);
+		}
+	};
+
+	struct cairo_surface_deleter {
+		void operator()(cairo_surface_t* ptr) const {
+			cairo_surface_destroy(ptr);
+		}
+	};
+
+	std::unique_ptr<cairo_surface_t, cairo_surface_deleter> target(cairo_win32_printing_surface_create(printer.m_hDC));
+
+	std::unique_ptr<poppler::page> pageOut(m_pdfdoc->create_page(iPage));
+
+	{
+		auto mediaBox = m_pps[iPage - 1].mediaBox;
+
+		float mmWidth = mediaBox.Width() * 0.352777f;
+		float mmHeight = mediaBox.Height() * 0.352777f;
+
+		int dx = printer.GetDeviceCaps(LOGPIXELSX);
+		int dy = printer.GetDeviceCaps(LOGPIXELSY);
+
+		PaperSizeLite guessed;
+		if (m_printState.get()->opts.m_bAutoPaperSize && PaperSizeUtil::Guess(mmWidth, mmHeight, guessed)) {
+			guessed.CopyTo(*devmode);
+		}
+		else {
+			defaultPaperSize.CopyTo(*devmode);
+			devmode->dmOrientation = (mmWidth <= mmHeight) ? DMORIENT_PORTRAIT : DMORIENT_LANDSCAPE;
+		}
+
+		printer.ResetDC(devmode);
+		printer.StartPage();
+		CRect rc;
+		int ox = printer.GetDeviceCaps(PHYSICALOFFSETX);
+		int oy = printer.GetDeviceCaps(PHYSICALOFFSETY);
+		int cx = printer.GetDeviceCaps(PHYSICALWIDTH);
+		int cy = printer.GetDeviceCaps(PHYSICALHEIGHT);
+		if (!m_printState.get()->opts.m_bIgnoreMargin) {
+			cx -= ox + ox;
+			cy -= oy + oy;
+			ox = 0;
+			oy = 0;
+		}
+		CRect rcPaper(-ox, -oy, cx, cy);
+		CRect rcDraw = m_printState.get()->opts.m_bCentering
+			? FitRect3::Fit(
+				rcPaper,
+				CSize(
+					int(mmWidth),
+					int(mmHeight)
+				),
+				0,
+				0
+			)
+			: FitRect3::Fit(
+				rcPaper,
+				CSize(
+					int(mmWidth),
+					int(mmHeight)
+				),
+				-1,
+				-1
+			);
+
+		std::unique_ptr<cairo_t, cairo_deleter> renderer(cairo_create(target.get()));
+
+		printer.EndPage();
+	}
+
+	m_printState.get()->moveToNextPage();
+	return true;
 }

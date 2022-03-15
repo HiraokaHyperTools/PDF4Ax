@@ -13,13 +13,11 @@
 #undef APSTUDIO_READONLY_SYMBOLS
 
 /////////////////////////////////////////////////////////////////////////////
-// 日本語 resources
+// 日本語 (日本) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_JPN)
-#ifdef _WIN32
 LANGUAGE LANG_JAPANESE, SUBLANG_DEFAULT
 #pragma code_page(932)
-#endif //_WIN32
 
 #ifdef APSTUDIO_INVOKED
 /////////////////////////////////////////////////////////////////////////////
@@ -53,24 +51,63 @@ END
 //
 
 IDB_MAGBTN              BITMAP                  "magbtn.bmp"
+
 IDB_MOVEBTN             BITMAP                  "movebtn.bmp"
+
 IDB_NEXT                BITMAP                  "next.bmp"
+
 IDB_PREV                BITMAP                  "prev.bmp"
+
 IDB_ZOOMVAL             BITMAP                  "zoomval.bmp"
+
 IDB_ABOUT               BITMAP                  "about.bmp"
+
 IDB_MAG                 BITMAP                  "mag.bmp"
+
 IDB_MOVE                BITMAP                  "move.bmp"
+
 IDB_PAGE_DISP           BITMAP                  "disp.bmp"
+
 IDB_MASK10              BITMAP                  "mask10.bmp"
+
 IDB_MASKS50             BITMAP                  "mask50.bmp"
+
 IDB_PRT                 BITMAP                  "prt.bmp"
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog
+//
+
+IDD_PRINT_OPTS DIALOGEX 0, 0, 253, 108
+STYLE DS_SETFONT | DS_CONTROL | WS_CHILD | WS_VISIBLE
+FONT 9, "MS UI Gothic", 400, 0, 0x0
+BEGIN
+    GROUPBOX        "詳細",IDC_STATIC,7,7,229,82
+    CONTROL         "センタリングする (オフの場合は、左上に寄せる)",IDC_CENTERING,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,13,25,139,10
+    CONTROL         "ページ余白を無視する。ドキュメントの端が見切れる可能性があります",IDC_IGNORE_MARGIN,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,13,45,202,10
+    CONTROL         "ページサイズに合わせて用紙サイズを選択",IDC_AUTO_PAPERSIZE,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,13,65,127,10
+END
+
+IDD_PRINTING DIALOGEX 0, 0, 189, 56
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "印刷中"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    PUSHBUTTON      "キャンセル",IDCANCEL,132,35,50,14
+    LTEXT           "印刷しています。完了するまでお待ちください。",IDC_STATIC,7,7,175,8
+    LTEXT           "...",IDC_PRINT_POS,7,22,175,8
+END
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
 // Menu
 //
 
-IDR_MENU_P MENU 
+IDR_MENU_P MENU
 BEGIN
     POPUP "Zoom factor"
     BEGIN
@@ -96,9 +133,23 @@ END
 //
 
 IDC_ZOOM_IN             CURSOR                  "zoomin.cur"
+
 IDC_ZOOM_OUT            CURSOR                  "zoomout.cur"
+
 IDC_ZOOM                CURSOR                  "zoom.cur"
-#endif    // 日本語 resources
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// String Table
+//
+
+STRINGTABLE
+BEGIN
+    IDS_PDF4AX_PRINT_PROP_CAPTION "印刷"
+END
+
+#endif    // 日本語 (日本) resources
 /////////////////////////////////////////////////////////////////////////////
 
 
