@@ -64,12 +64,16 @@ no pkgconfig
 
 ```bat
 pip3 install meson
-meson build --backend vs2022 --prefix H:\Proj\PDF4Ax\root32 --buildtype debugoptimized --default-library static
-msbuild pixman.sln /p:Configuration=debugoptimized /p:Platform=Win32
-msbuild RUN_INSTALL.vcxproj /p:Configuration=debugoptimized /p:Platform=Win32
+meson build --backend vs2022 --prefix H:\Proj\PDF4Ax\root32 --buildtype debug --default-library static -Db_vscrt=static_from_buildtype
+cd build
+msbuild pixman.sln /p:Configuration=debug /p:Platform=Win32
+msbuild RUN_INSTALL.vcxproj /p:Configuration=debug /p:Platform=Win32
 ```
 
 - [MesonでVisual Studioのソリューションファイルを生成 - Mugichoko’s blog](https://mugichoko.hatenablog.com/entry/2020/02/14/184358)
+- `b_vscrt`
+  - [Make a fully statically linked .exe · Issue #1104 · mesonbuild/meson](https://github.com/mesonbuild/meson/issues/1104)
+  - [Built-in options](https://mesonbuild.com/Builtin-options.html)
 
 ## lzo2
 
@@ -86,12 +90,16 @@ cmake -D CMAKE_INSTALL_PREFIX:PATH=H:\Proj\PDF4Ax\root32 -D CMAKE_DEBUG_POSTFIX=
 ## cairo
 
 ```bat
-path %path%;C:\msys32\mingw32\bin
+path %path%;H:\Proj\PDF4Ax\pkg-config\bin
+set PKG_CONFIG_PATH=H:\Proj\PDF4Ax\root32\lib\pkgconfig
+set PKG_CONFIG_LIBDIR=H:\Proj\PDF4Ax\root32\lib
 
-meson build --backend vs2022 --prefix H:\Proj\PDF4Ax\root32 --buildtype debugoptimized -Dglib=disabled -Dspectre=disabled -Dfontconfig=disabled -Dfreetype=disabled -Dpng=disabled --default-library static
+meson build --backend vs2022 --prefix H:\Proj\PDF4Ax\root32 --buildtype debug -Dglib=disabled -Dspectre=disabled -Dfontconfig=disabled -Dfreetype=disabled -Dpng=disabled --default-library static -Db_vscrt=static_from_buildtype
 
-msbuild cairo.sln /p:Configuration=debugoptimized /p:Platform=Win32
-msbuild RUN_INSTALL.vcxproj /p:Configuration=debugoptimized /p:Platform=Win32
+cd build
+
+msbuild cairo.sln /p:Configuration=debug /p:Platform=Win32
+msbuild RUN_INSTALL.vcxproj /p:Configuration=debug /p:Platform=Win32
 ```
 
 ## poppler
