@@ -104,8 +104,9 @@ std::unique_ptr<GlobalParams> globalParams;
 
 /* search for data relative to where we are installed */
 
-static HMODULE hmodule;
+static HMODULE hmodule = NULL;
 
+#if 0
 extern "C" {
 /* Provide declaration to squelch -Wmissing-declarations warning */
 BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved);
@@ -121,6 +122,7 @@ BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved)
     return TRUE;
 }
 }
+#endif
 
 static void get_poppler_localdir(char *retval, const char *suffix)
 {

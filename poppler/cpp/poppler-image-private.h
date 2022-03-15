@@ -42,7 +42,7 @@ public:
     int height;
     int bytes_per_row;
     int bytes_num;
-    image::format_enum format : 3;
+    image::format_enum format;
     bool own_data : 1;
 };
 
