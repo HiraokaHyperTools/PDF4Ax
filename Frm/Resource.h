@@ -5,12 +5,6 @@
 #define IDD_ABOUTBOX                    100
 #define IDR_MAINFRAME                   128
 #define IDR_FrmTYPE                     129
-#define ID_PAGE_UP                      32771
-#define ID_PAGE_DOWN                    32772
-#define ID_PAGE_FITW                    32775
-#define ID_PAGE_FITWH                   32776
-#define ID_ZOOM_PLUS                    32777
-#define ID_ZOOM_MINUS                   32778
 
 // Next default values for new objects
 // 

@@ -1,5 +1,10 @@
 ﻿#pragma once
 
+#define _AFX_NO_OLE_SUPPORT 1
+#define _AFX_NO_AFXCMN_SUPPORT 1
+#define _AFX_NO_DB_SUPPORT 1
+#define _AFX_NO_DAO_SUPPORT 1
+
 // stdafx.h : 標準のシステム インクルード ファイルのインクルード ファイル、または
 // 参照回数が多く、かつあまり変更されない、プロジェクト専用のインクルード ファイル
 // を記述します。
@@ -7,6 +12,8 @@
 #ifndef VC_EXTRALEAN
 #define VC_EXTRALEAN		// Windows ヘッダーから使用されていない部分を除外します。
 #endif
+
+#define NOMINMAX
 
 // 下で指定された定義の前に対象プラットフォームを指定しなければならない場合、以下の定義を変更してください。
 // 異なるプラットフォームに対応する値に関する最新情報については、MSDN を参照してください。
@@ -52,16 +59,15 @@
 #endif // _WIN64
 
 #include <atlcoll.h>
+
 #include <afxmt.h>
 
 #include <objsafe.h>
 #include <shlwapi.h>
 
-#include <pdfdoc.h>
-#include <PDFDocFactory.h>
-#include <splash/SplashBitmap.h>
-#include <splash/Splash.h>
-#include <SplashOutputDev.h>
+#include <optional>
+#include <memory>
+#include <algorithm>
 
 #include <shlwapi.h>
 #include <Wininet.h>

@@ -3,8 +3,11 @@
 
 #pragma once
 
-//#include "UseG.h"
-#include "memory"
+#include <atlcoll.h>
+#include <algorithm>
+#include <cpp/poppler-document.h>
+#include <cpp/poppler-page.h>
+#include <cpp/poppler-page-renderer.h>
 
 #define E_errOpenFile MAKE_HRESULT(SEVERITY_ERROR,FACILITY_ITF,2001)
 #define E_errBadCatalog MAKE_HRESULT(SEVERITY_ERROR,FACILITY_ITF,2002)
@@ -22,28 +25,13 @@ public:
 	virtual CBitmap *GetThumb(int iPage, int cx) = NULL;
 };
 
-class CRenderInf {
-public:
-	int iPage; // in. zero based
-	double dpi; // in
-	CSize sizeIn; // in
-	CRect rcPartial; // in
-	std::auto_ptr<SplashOutputDev> splashOut; // out
-	BITMAPINFO bi; // out
-	bool partial; // out
-	PDFDoc *pdfdoc; // in
-	CComPtr<IUnknown> prefcnt;
-
-	HWND hwndCb; // in
-	UINT nMsg; // in
-};
-
+class CRenderInf;
 class CPDFRef : public IUnknown {
 public:
 	LONG locks;
-	PDFDoc *ref_pdfdoc;
+	poppler::document*ref_pdfdoc;
 
-	CPDFRef(PDFDoc *ref_pdfdoc)
+	CPDFRef(poppler::document*ref_pdfdoc)
 		: locks(0)
 		, ref_pdfdoc(ref_pdfdoc)
 	{
@@ -106,7 +94,7 @@ public:
 
 protected:
 	CComPtr<CPDFRef> m_prefpdf;
-	PDFDoc *m_pdfdoc;
+	poppler::document*m_pdfdoc;
 	int m_iPage;
 	float m_fZoom;
 	typedef enum {
@@ -116,8 +104,8 @@ protected:
 	} FitMode;
 	FitMode m_ft;
 	SCROLLINFO m_hsc, m_vsc;
-	std::auto_ptr<CRenderInf> m_renderAll;
-	std::auto_ptr<CRenderInf> m_renderPart;
+	std::unique_ptr<CRenderInf> m_renderAll;
+	std::unique_ptr<CRenderInf> m_renderPart;
 	CBitmap m_bmMask10;
 	CWinThread *m_threadRenderer;
 
@@ -173,10 +161,10 @@ public:
 	float Getzf() const;
 
 	int Newxp(int v) {
-		return max(m_hsc.nMin, min(m_hsc.nMax - (int)m_hsc.nPage + 1, v));
+		return (std::max)(m_hsc.nMin, (std::min)(m_hsc.nMax - (int)m_hsc.nPage + 1, v));
 	}
 	int Newyp(int v) const {
-		return max(m_vsc.nMin, min(m_vsc.nMax - (int)m_vsc.nPage + 1, v));
+		return (std::max)(m_vsc.nMin, (std::min)(m_vsc.nMax - (int)m_vsc.nPage + 1, v));
 	}
 	CSize GetZoomedSize();
 

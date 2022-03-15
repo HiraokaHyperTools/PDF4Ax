@@ -1,11 +1,9 @@
 ﻿// AxVw.cpp : CAxVw クラスの実装
 //
 
-#include "stdafx.h"
-#include "resource.h"
-#include "AxRes.h"
+#include "pch.h"
+#include "res/PDFSpecResource.h"
 #include "AxVw.h"
-#include "ErrorCodes.h"
 
 #undef max
 #undef min
@@ -14,13 +12,22 @@
 
 #include "rijndael-alg-fst.h"
 
-#include "TUt.h"
-
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
 
 #define WM_SET_RENDERINF (WM_APP+0x0010)
+
+namespace TUt {
+	bool GetTempPathName(TCHAR tctmp[MAX_PATH], LPCTSTR pszPrefix = NULL) {
+		TCHAR tcdir[MAX_PATH] = { 0 };
+		GetTempPath(256, tcdir);
+		ZeroMemory(tctmp, sizeof(tctmp));
+		if (GetTempFileName(tcdir, pszPrefix, 0, tctmp))
+			return true;
+		return false;
+	}
+};
 
 // CPvMenu
 
@@ -72,6 +79,24 @@ public:
 		lpMeasureItemStruct->itemHeight = cxThumb +2;
 		lpMeasureItemStruct->itemWidth = cxThumb +26 +2;
 	}
+};
+
+// CRenderInf
+
+class CRenderInf {
+public:
+	int iPage; // in. zero based
+	double dpi; // in
+	CSize sizeIn; // in
+	CRect rcPartial; // in
+	poppler::image imageOut; // out
+	BITMAPINFO bi; // out
+	bool partial; // out
+	poppler::document* pdfdoc; // in
+	CComPtr<IUnknown> prefcnt;
+
+	HWND hwndCb; // in
+	UINT nMsg; // in
 };
 
 // CAxVw
@@ -159,15 +184,7 @@ CRect CAxVw::GetPageRect(int top) const {
 
 UINT DrawPDFProc(LPVOID lpv) {
 	CSingleLock lck(&s_lockpdf);
-	std::auto_ptr<CRenderInf> inf(reinterpret_cast<CRenderInf *>(lpv));
-
-	SplashColor paperColor;
-	paperColor[0] = 255;
-	paperColor[1] = 255;
-	paperColor[2] = 255;
-	std::auto_ptr<SplashOutputDev> splashOut;
-	splashOut.reset(new SplashOutputDev(splashModeRGB8, 4, gFalse, paperColor));
-	splashOut->startDoc(inf->pdfdoc->getXRef());
+	std::unique_ptr<CRenderInf> inf(reinterpret_cast<CRenderInf *>(lpv));
 
 	double dpi = inf->dpi;
 	int iPage = inf->iPage;
@@ -182,19 +199,19 @@ UINT DrawPDFProc(LPVOID lpv) {
 		rcOut = CRect(CPoint(0, 0), inf->sizeIn);
 	}
 
-	inf->pdfdoc->displayPageSlice(
-		splashOut.get(), 
-		1 +iPage, dpi, dpi, 
-		0,
-		gTrue, gFalse, gFalse,
-		rcOut.left, rcOut.top, rcOut.Width(), rcOut.Height()
-		);
+	std::unique_ptr<poppler::page> pageOut(inf->pdfdoc->create_page(iPage));
+
+	poppler::page_renderer renderer;
+	renderer.set_image_format(poppler::image::format_bgr24);
+
+	poppler::image imageOut(
+		renderer.render_page(pageOut.get(), dpi, dpi, rcOut.left, rcOut.top, rcOut.Width(), rcOut.Height())
+	);
 
 	lck.Unlock();
 
-	SplashBitmap *bitmap = splashOut->getBitmap();
-	int pcx = bitmap->getWidth();
-	int pcy = bitmap->getHeight();
+	int pcx = imageOut.width();
+	int pcy = imageOut.height();
 	BITMAPINFO bi;
 	ZeroMemory(&bi, sizeof(bi));
 	bi.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
@@ -203,17 +220,25 @@ UINT DrawPDFProc(LPVOID lpv) {
 	bi.bmiHeader.biBitCount = 24;
 	bi.bmiHeader.biPlanes = 1;
 
+	const int dstPitch = (3 * pcx + 3) & (~3);
+
+	ASSERT(imageOut.bytes_per_row() >= dstPitch);
+
+#if 0
+	int dstPitch = (3 * pcx + 3) & (~3);
+
 	for (int y=0; y<pcy; y++) {
-		SplashColorPtr pRow = bitmap->getDataPtr() + bitmap->getRowSize() * y;
-		for (int x=0; x<pcx; x++, pRow += 3) {
-			Guchar tmp = pRow[2];
+		BYTE * pRow = reinterpret_cast<BYTE *>(imageOut.data()) + imageOut.bytes_per_row() * y;
+		for (int x = 0; x < pcx; x++, pRow += 4) {
+			BYTE tmp = pRow[2];
 			pRow[2] = pRow[0];
 			pRow[0] = tmp;
 		}
 	}
+#endif
 
 	inf->dpi = dpi;
-	inf->splashOut = splashOut;
+	inf->imageOut = imageOut;
 	inf->bi = bi;
 	if (::PostMessage(inf->hwndCb, inf->nMsg, 0, reinterpret_cast<LPARAM>(inf.get()))) {
 		inf.release();
@@ -272,30 +297,31 @@ void CAxVw::OnPaint()
 		CRect rcPartial(tx, ty, tx+tcx, ty+tcy);
 
 		if (m_renderPart.get() != NULL && m_renderPart->iPage == m_iPage && m_renderPart->rcPartial == rcPartial) {
-			SplashBitmap *bitmap = m_renderPart->splashOut->getBitmap();
-			int pcx = bitmap->getWidth();
-			int pcy = bitmap->getHeight();
+			poppler::image &bitmap = m_renderPart->imageOut;
+			int pcx = bitmap.width();
+			int pcy = bitmap.height();
 
 			int state = dc.SaveDC();
 			dc.IntersectClipRect(m_rcPaint);
 			dc.SetStretchBltMode(HALFTONE);
 			dc.SetBrushOrg(xp, yp);
 			SetDIBitsToDevice(
-				dc, xp +rcPartial.left, yp +rcPartial.top, rcPartial.Width(), rcPartial.Height(), 0, 0, 0, rcPartial.Height(), bitmap->getDataPtr(), &m_renderPart->bi, DIB_RGB_COLORS
+				dc, xp +rcPartial.left, yp +rcPartial.top, rcPartial.Width(), rcPartial.Height(), 0, 0, 0, rcPartial.Height(),
+				bitmap.data(), &m_renderPart->bi, DIB_RGB_COLORS
 				);
 			if (state != 0) dc.RestoreDC(state);
 		}
 		else if (m_renderAll.get() != NULL && m_renderAll->iPage == m_iPage) {
-			SplashBitmap *bitmap = m_renderAll->splashOut->getBitmap();
-			int pcx = bitmap->getWidth();
-			int pcy = bitmap->getHeight();
+			poppler::image& bitmap = m_renderAll->imageOut;
+			int pcx = bitmap.width();
+			int pcy = bitmap.height();
 
 			int state = dc.SaveDC();
 			dc.IntersectClipRect(m_rcPaint);
 			dc.SetStretchBltMode(HALFTONE);
 			dc.SetBrushOrg(xp, yp);
 			StretchDIBits(
-				dc, xp, yp, cx, cy, 0, 0, pcx, pcy, bitmap->getDataPtr(), &m_renderAll->bi, DIB_RGB_COLORS, SRCCOPY
+				dc, xp, yp, cx, cy, 0, 0, pcx, pcy, bitmap.data(), &m_renderAll->bi, DIB_RGB_COLORS, SRCCOPY
 				);
 			if (state != 0) dc.RestoreDC(state);
 
@@ -585,14 +611,14 @@ HRESULT CAxVw::LoadTruePDF(LPCTSTR newVal) {
 	CStringW str = newVal;
 
 	ErrorCatcher::text.Empty();
-	setErrorFunction(ErrorCatcher::Capture);
+	//setErrorFunction(ErrorCatcher::Capture);
 
-	m_pdfdoc = new PDFDoc(const_cast<wchar_t *>(static_cast<LPCWSTR>(str)), str.GetLength(), 0, 0);
+	m_pdfdoc = poppler::document::load_from_file(std::string(CW2AEX(str, 65001)));
 
-	setErrorFunction(ErrorCatcher::Empty);
+	//setErrorFunction(ErrorCatcher::Empty);
 
-	int errorCode = m_pdfdoc->getErrorCode();
-	if (!m_pdfdoc->isOk()) {
+	int errorCode = 1;//TODO m_pdfdoc->getErrorCode();
+	if (m_pdfdoc == NULL) {
 		UnloadPDF();
 		m_errorMessage = ErrorCatcher::text;
 		return MAKE_HRESULT(SEVERITY_ERROR, FACILITY_ITF, 2000 + errorCode);
@@ -606,20 +632,19 @@ HRESULT CAxVw::LoadTruePDF(LPCTSTR newVal) {
 	m_fZoom = 1;
 
 	m_pps.RemoveAll();
-	int cx = std::min(1000, m_pdfdoc->getNumPages());
+	int cx = std::min(1000, m_pdfdoc->pages());
 	for (int x = 0; x < cx; x++) {
 		CPPSummary pps;
-		Page *page = m_pdfdoc->getPage(1 +x);
+		std::unique_ptr<poppler::page> page(m_pdfdoc->create_page(x));
 		if (page != NULL) {
-			PDFRectangle *prc = page->getMediaBox();
-			if (prc != NULL)
-				pps.mediaBox.SetRect((int)prc->x1, (int)prc->y1, (int)prc->x2, (int)prc->y2);
-			pps.rotate = page->getRotate();
+			poppler::rectf prc = page->page_rect(poppler::page_box_enum::media_box);
+			pps.mediaBox.SetRect((int)prc.left(), (int)prc.top(), (int)prc.right(), (int)prc.bottom());
+			pps.rotate = 0;//TODO page->getRotate();
 		}
 		m_pps.Add(pps);
 	}
 
-	m_canPrintThisPDF = m_pdfdoc->okToPrint() ? true : false;
+	m_canPrintThisPDF = true; //TODO m_pdfdoc->okToPrint() ? true : false;
 
 	LayoutClient();
 
@@ -1041,8 +1066,8 @@ void CAxVw::OnLButtonDown(UINT nFlags, CPoint point) {
 				return;
 			}
 			if (TUt::GetTempPathName(tcTmpfp)) {
-				GooString temp(static_cast<LPCSTR>(CT2A(tcTmpfp)));
-				if (0 == m_pdfdoc->saveWithoutChangesAs(&temp)) {
+				CStringA temp(CT2AEX(tcTmpfp, 65001));
+				if (0 == m_pdfdoc->save_a_copy(std::string(temp))) {
 					CString arg = _T(" -printdlg ");
 					arg += _T("\"");
 					arg += tcTmpfp;
@@ -1373,14 +1398,6 @@ CBitmap *CAxVw::GetThumb(int iPage, int cx) {
 
 		double dpi = 72 * scale;
 
-		SplashColor paperColor;
-		paperColor[0] = 255;
-		paperColor[1] = 255;
-		paperColor[2] = 255;
-		std::auto_ptr<SplashOutputDev> splashOut;
-		splashOut.reset(new SplashOutputDev(splashModeRGB8, 4, gFalse, paperColor));
-		splashOut->startDoc(m_pdfdoc->getXRef());
-
 		const int cy = cx;
 
 		CRect rcDst(0, 0, 
@@ -1391,19 +1408,16 @@ CBitmap *CAxVw::GetThumb(int iPage, int cx) {
 		int slx = (cx - rcDst.Width()) / 2;
 		int sly = (cy - rcDst.Height()) / 2;
 
-		m_pdfdoc->displayPageSlice(
-			splashOut.get(), 
-			1 +iPage, dpi, dpi, 
-			0,
-			gTrue, gFalse, gFalse,
-			slx, sly, rcDst.Width(), rcDst.Height()
-			);
+		std::unique_ptr<poppler::page> pageOut(m_pdfdoc->create_page(iPage));
+
+		poppler::image imageOut(
+			poppler::page_renderer().render_page(pageOut.get(), dpi, dpi, slx, sly, rcDst.Width(), rcDst.Height())
+		);
 
 		lck.Unlock();
 
-		SplashBitmap *bitmap = splashOut->getBitmap();
-		int pcx = bitmap->getWidth();
-		int pcy = bitmap->getHeight();
+		int pcx = imageOut.width();
+		int pcy = imageOut.height();
 		BITMAPINFO bi;
 		ZeroMemory(&bi, sizeof(bi));
 		bi.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
@@ -1412,13 +1426,15 @@ CBitmap *CAxVw::GetThumb(int iPage, int cx) {
 		bi.bmiHeader.biBitCount = 24;
 		bi.bmiHeader.biPlanes = 1;
 
+		int dstPitch = (3 * pcx + 3) & (~3);
+
 		void *pvBits = NULL;
 		HANDLE h = CreateDIBSection(NULL, &bi, DIB_RGB_COLORS, &pvBits, NULL, 0);
 		if (h != NULL) {
 			for (int y=0; y<pcy; y++) {
-				SplashColorPtr pSrc = bitmap->getDataPtr() + bitmap->getRowSize() * y;
-				BYTE *pDst = reinterpret_cast<PBYTE>(pvBits) +bitmap->getRowSize() * (cy -y -1);
-				for (int x=0; x<pcx; x++, pSrc += 3, pDst += 3) {
+				const BYTE *pSrc = reinterpret_cast<const BYTE *>(imageOut.const_data() + imageOut.bytes_per_row() * y);
+				BYTE *pDst = reinterpret_cast<PBYTE>(pvBits) + dstPitch * (cy -y -1);
+				for (int x=0; x<pcx; x++, pSrc += 4, pDst += 3) {
 					pDst[0] = pSrc[2];
 					pDst[1] = pSrc[1];
 					pDst[2] = pSrc[0];

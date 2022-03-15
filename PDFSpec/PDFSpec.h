@@ -1,7 +1,7 @@
 ﻿
 #pragma once
 
-namespace Ext {
+namespace PDFSpec {
 	extern void CreateGlobalParams(const char *customPopplerDataDir = NULL);
 	extern void DestroyGlobalParams();
 }

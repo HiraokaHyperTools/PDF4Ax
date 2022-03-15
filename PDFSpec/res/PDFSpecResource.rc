@@ -1,0 +1,115 @@
+// Microsoft Visual C++ generated resource script.
+//
+#include "PDFSpecResource.h"
+
+#define APSTUDIO_READONLY_SYMBOLS
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 2 resource.
+//
+#include "afxres.h"
+
+/////////////////////////////////////////////////////////////////////////////
+#undef APSTUDIO_READONLY_SYMBOLS
+
+/////////////////////////////////////////////////////////////////////////////
+// 日本語 resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_JPN)
+#ifdef _WIN32
+LANGUAGE LANG_JAPANESE, SUBLANG_DEFAULT
+#pragma code_page(932)
+#endif //_WIN32
+
+#ifdef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// TEXTINCLUDE
+//
+
+1 TEXTINCLUDE 
+BEGIN
+    "PDFSpecResource.h\0"
+END
+
+2 TEXTINCLUDE 
+BEGIN
+    "#include ""afxres.h""\r\n"
+    "\0"
+END
+
+3 TEXTINCLUDE 
+BEGIN
+    "\r\n"
+    "\0"
+END
+
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Bitmap
+//
+
+IDB_MAGBTN              BITMAP                  "magbtn.bmp"
+IDB_MOVEBTN             BITMAP                  "movebtn.bmp"
+IDB_NEXT                BITMAP                  "next.bmp"
+IDB_PREV                BITMAP                  "prev.bmp"
+IDB_ZOOMVAL             BITMAP                  "zoomval.bmp"
+IDB_ABOUT               BITMAP                  "about.bmp"
+IDB_MAG                 BITMAP                  "mag.bmp"
+IDB_MOVE                BITMAP                  "move.bmp"
+IDB_PAGE_DISP           BITMAP                  "disp.bmp"
+IDB_MASK10              BITMAP                  "mask10.bmp"
+IDB_MASKS50             BITMAP                  "mask50.bmp"
+IDB_PRT                 BITMAP                  "prt.bmp"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Menu
+//
+
+IDR_MENU_P MENU 
+BEGIN
+    POPUP "Zoom factor"
+    BEGIN
+        MENUITEM "幅フィット",                       IDC_FITW
+        MENUITEM "全体フィット",                      IDC_FITWH
+        MENUITEM SEPARATOR
+        MENUITEM "6 %",                         IDC_P6
+        MENUITEM "12 %",                        IDC_P12
+        MENUITEM "25 %",                        IDC_P25
+        MENUITEM "50 %",                        IDC_P50
+        MENUITEM "100 %",                       IDC_P100
+        MENUITEM "200 %",                       IDC_P200
+        MENUITEM "400 %",                       IDC_P400
+        MENUITEM "800 %",                       IDC_P800
+        MENUITEM "1600 %",                      IDC_P1600
+    END
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Cursor
+//
+
+IDC_ZOOM_IN             CURSOR                  "zoomin.cur"
+IDC_ZOOM_OUT            CURSOR                  "zoomout.cur"
+IDC_ZOOM                CURSOR                  "zoom.cur"
+#endif    // 日本語 resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+
+#ifndef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 3 resource.
+//
+
+
+/////////////////////////////////////////////////////////////////////////////
+#endif    // not APSTUDIO_INVOKED
+
