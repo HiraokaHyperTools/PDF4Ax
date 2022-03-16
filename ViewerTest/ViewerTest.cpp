@@ -12,9 +12,11 @@
 #include "ViewerTestDoc.h"
 #include "ViewerTestView.h"
 
-#include "PDFSpecImports.h"
+#include <PDFSpecImports.h>
 
 #pragma comment(lib, "PDFSpec.lib")
+
+#include <PDFSpec.h>
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -73,6 +75,8 @@ BOOL CViewerTestApp::InitInstance()
 	if (!AfxOleInit()) {
 		return false;
 	}
+
+	PDFSpec::InitPopplerDataDir("H:\\Proj\\PDF4Ax\\poppler-data");
 
 	// RichEdit コントロールを使用するには AfxInitRichEdit2() が必要です
 	// AfxInitRichEdit2();
