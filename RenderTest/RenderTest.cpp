@@ -13,6 +13,10 @@
 #include <cpp/poppler-page-renderer.h>
 #include <memory>
 
+#include <PDFSpecImports.h>
+
+#pragma comment(lib, "PDFSpec.lib")
+
 CWinApp theApp;
 
 int _tmain(int argc, TCHAR** argv) {

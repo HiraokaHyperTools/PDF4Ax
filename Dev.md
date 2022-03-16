@@ -32,11 +32,27 @@ cmake -G "Visual Studio 16 2019" -A Win32
 cmake -DCMAKE_INSTALL_PREFIX:PATH=H:\Proj\PDF4Ax\root32 -D BUILD_SHARED_LIBS:BOOL=OFF -G "Visual Studio 17 2022" -A Win32 ..
 ```
 
+buildr:
+
+```bat
+cmake -DCMAKE_INSTALL_PREFIX:PATH=H:\Proj\PDF4Ax\root32r -D BUILD_SHARED_LIBS:BOOL=OFF -G "Visual Studio 17 2022" -A Win32 ..
+msbuild INSTALL.vcxproj /p:Configuration=Release /p:Platform=Win32
+```
+
+
 ## jpeg
 
 ```bat
 cmake -DCMAKE_INSTALL_PREFIX:PATH=H:\Proj\PDF4Ax\root32 -D ENABLE_STATIC:BOOL=ON -D ENABLE_SHARED:BOOL=OFF -G "Visual Studio 17 2022" -A Win32 ..
 ```
+
+buildr:
+
+```bat
+cmake -DCMAKE_INSTALL_PREFIX:PATH=H:\Proj\PDF4Ax\root32r -D ENABLE_STATIC:BOOL=ON -D ENABLE_SHARED:BOOL=OFF -G "Visual Studio 17 2022" -A Win32 ..
+msbuild INSTALL.vcxproj /p:Configuration=Release /p:Platform=Win32
+```
+
 
 ## libpng
 
@@ -44,10 +60,25 @@ cmake -DCMAKE_INSTALL_PREFIX:PATH=H:\Proj\PDF4Ax\root32 -D ENABLE_STATIC:BOOL=ON
 cmake -DCMAKE_INSTALL_PREFIX:PATH=H:\Proj\PDF4Ax\root32 -D PNG_STATIC:BOOL=ON -D PNG_SHARED:BOOL=OFF -G "Visual Studio 17 2022" -A Win32 ..
 ```
 
+buildr:
+
+```bat
+cmake -DCMAKE_INSTALL_PREFIX:PATH=H:\Proj\PDF4Ax\root32r -D PNG_STATIC:BOOL=ON -D PNG_SHARED:BOOL=OFF -G "Visual Studio 17 2022" -A Win32 ..
+msbuild INSTALL.vcxproj /p:Configuration=Release /p:Platform=Win32
+```
+
+
 ## freetype
 
 ```bat
 cmake -D CMAKE_INSTALL_PREFIX:PATH=H:\Proj\PDF4Ax\root32 -D BUILD_SHARED_LIBS:BOOL=OFF -D FT_REQUIRE_BZIP2:BOOL=OFF -D FT_REQUIRE_BROTLI:BOOL=OFF -G "Visual Studio 17 2022" -A Win32 ..
+```
+
+buildr:
+
+```bat
+cmake -D CMAKE_INSTALL_PREFIX:PATH=H:\Proj\PDF4Ax\root32r -D BUILD_SHARED_LIBS:BOOL=OFF -D FT_REQUIRE_BZIP2:BOOL=OFF -D FT_REQUIRE_BROTLI:BOOL=OFF -G "Visual Studio 17 2022" -A Win32 ..
+msbuild INSTALL.vcxproj /p:Configuration=Release /p:Platform=Win32
 ```
 
 ## iconv-wrap
@@ -56,7 +87,20 @@ cmake -D CMAKE_INSTALL_PREFIX:PATH=H:\Proj\PDF4Ax\root32 -D BUILD_SHARED_LIBS:BO
 cmake -D CMAKE_INSTALL_PREFIX:PATH=H:\Proj\PDF4Ax\root32 -G "Visual Studio 17 2022" -A Win32 ..
 ```
 
+buildr:
+
+```bat
+cmake -D CMAKE_INSTALL_PREFIX:PATH=H:\Proj\PDF4Ax\root32r -G "Visual Studio 17 2022" -A Win32 ..
+msbuild INSTALL.vcxproj /p:Configuration=Release /p:Platform=Win32
+```
+
 ## pixman
+
+```bat
+path %path%;H:\Proj\PDF4Ax\pkg-config\bin
+set PKG_CONFIG_PATH=H:\Proj\PDF4Ax\root32\lib\pkgconfig
+set PKG_CONFIG_LIBDIR=H:\Proj\PDF4Ax\root32\lib
+```
 
 - [end to end build for win32](https://www.cairographics.org/end_to_end_build_for_win32/)
 
@@ -73,17 +117,30 @@ msbuild RUN_INSTALL.vcxproj /p:Configuration=debug /p:Platform=Win32
   - [Make a fully statically linked .exe · Issue #1104 · mesonbuild/meson](https://github.com/mesonbuild/meson/issues/1104)
   - [Built-in options](https://mesonbuild.com/Builtin-options.html)
 
+buildr:
+
+```bat
+meson setup buildr --backend vs2022 --prefix H:\Proj\PDF4Ax\root32r --buildtype release --default-library static -Db_vscrt=static_from_buildtype
+msbuild pixman.sln /p:Configuration=release /p:Platform=Win32
+msbuild RUN_INSTALL.vcxproj /p:Configuration=release /p:Platform=Win32
+```
+
+
 ## lzo2
 
 ```bat
-path %path%;H:\Proj\PDF4Ax\pkg-config\bin
-set PKG_CONFIG_PATH=H:\Proj\PDF4Ax\root32\lib\pkgconfig
-set PKG_CONFIG_LIBDIR=H:\Proj\PDF4Ax\root32\lib
-
 cmake -D CMAKE_INSTALL_PREFIX:PATH=H:\Proj\PDF4Ax\root32 -G "Visual Studio 17 2022" -A Win32 ..
 ```
 
 - pkg-config がないと .pc を作成しない。
+
+buildr:
+
+```bat
+cmake -D CMAKE_INSTALL_PREFIX:PATH=H:\Proj\PDF4Ax\root32r -G "Visual Studio 17 2022" -A Win32 ..
+msbuild INSTALL.vcxproj /p:Configuration=Release /p:Platform=Win32
+```
+
 
 ## cairo
 
@@ -100,8 +157,24 @@ msbuild cairo.sln /p:Configuration=debug /p:Platform=Win32
 msbuild RUN_INSTALL.vcxproj /p:Configuration=debug /p:Platform=Win32
 ```
 
+buildr:
+
+```bat
+meson setup buildr --backend vs2022 --prefix H:\Proj\PDF4Ax\root32r --buildtype release -Dglib=disabled -Dspectre=disabled -Dfontconfig=disabled -Dpng=disabled --default-library static -Db_vscrt=static_from_buildtype
+msbuild cairo.sln /p:Configuration=release /p:Platform=Win32
+msbuild RUN_INSTALL.vcxproj /p:Configuration=release /p:Platform=Win32
+```
+
+
 ## poppler
 
 ```bat
 cmake -DCMAKE_INSTALL_PREFIX:PATH=H:\Proj\PDF4Ax\root32 -DCMAKE_BUILD_TYPE=DEBUG -DENABLE_BOOST=OFF -DENABLE_LIBOPENJPEG=none -DENABLE_UTILS:BOOL=OFF -DENABLE_ZLIB_UNCOMPRESS:BOOL=ON -DMSVC:BOOL=ON -DENABLE_UNSTABLE_API_ABI_HEADERS:BOOL=ON -G "Visual Studio 17 2022" -A Win32 ..
+```
+
+buildr:
+
+```bat
+cmake -DCMAKE_INSTALL_PREFIX:PATH=H:\Proj\PDF4Ax\root32r -DCMAKE_BUILD_TYPE=RELEASE -DENABLE_BOOST=OFF -DENABLE_LIBOPENJPEG=none -DENABLE_UTILS:BOOL=OFF -DENABLE_ZLIB_UNCOMPRESS:BOOL=ON -DMSVC:BOOL=ON -DENABLE_UNSTABLE_API_ABI_HEADERS:BOOL=ON -G "Visual Studio 17 2022" -A Win32 ..
+msbuild INSTALL.vcxproj /p:Configuration=Release /p:Platform=Win32
 ```

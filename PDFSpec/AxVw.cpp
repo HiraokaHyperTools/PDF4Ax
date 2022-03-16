@@ -1404,7 +1404,8 @@ CBitmap* CAxVw::GetThumb(int iPage, int cx) {
 
 			CBitmap* pBM = new CBitmap();
 			pBM->Attach(h);
-			m_pThumbs.SetAtGrow(iPage, CAutoPtr<CBitmap>(pBM));
+			CAutoPtr<CBitmap> autoBM(pBM);
+			m_pThumbs.SetAtGrow(iPage, autoBM);
 		}
 	}
 
