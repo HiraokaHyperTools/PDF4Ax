@@ -2,8 +2,8 @@
 // Microsoft Visual C++ で生成されたインクルード ファイル。
 // PDFSpecResource.rc で使用
 //
-#define IDS_PRINTING_IS_NOT_ALLOWED     1001
-#define IDS_PDF4AX_PRINT_PROP_CAPTION   1002
+#define IDS_PRINTING_IS_NOT_ALLOWED     5001
+#define IDS_PDF4AX_PRINT_PROP_CAPTION   5002
 #define IDC_POINTER                     1004
 #define IDC_ZOOM_IN                     1005
 #define IDC_ZOOM_OUT                    1006

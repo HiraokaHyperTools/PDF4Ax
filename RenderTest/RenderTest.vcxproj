@@ -90,11 +90,14 @@
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>.;../Ax;../res;../root32/include;../root32/include/libpng15;../root32/include/pixman-1;../root32/include/poppler;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>../root32/lib/freetyped.lib;../root32/lib/jpeg-static.lib;../root32/lib/libcairo.a;../root32/lib/libiconvd.lib;../root32/lib/libpixman-1.a;../root32/lib/libpng15_staticd.lib;../root32/lib/lzo2d.lib;../root32/lib/poppler-cppd.lib;../root32/lib/popplerd.lib;../root32/lib/turbojpeg-static.lib;../root32/lib/zlibd.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>
+      </AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">

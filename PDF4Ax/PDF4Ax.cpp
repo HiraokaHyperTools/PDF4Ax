@@ -3,7 +3,9 @@
 #include "stdafx.h"
 #include "PDF4Ax.h"
 
-#include "Ext.h"
+#include <PDFSpecImports.h>
+
+#pragma comment(lib, "PDFSpec.lib")
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -31,7 +33,7 @@ BOOL CPDF4AxApp::InitInstance()
 		PathRemoveFileSpec(tcMe);
 		TCHAR tcDir[MAX_PATH] = {0};
 		PathCombine(tcDir, tcMe, _T("share\\poppler"));
-		Ext::CreateGlobalParams(CT2A(tcDir));
+		//Ext::CreateGlobalParams(CT2A(tcDir));
 	}
 
 	return bInit;
@@ -43,7 +45,7 @@ BOOL CPDF4AxApp::InitInstance()
 
 int CPDF4AxApp::ExitInstance()
 {
-	Ext::DestroyGlobalParams();
+	//Ext::DestroyGlobalParams();
 
 	return COleControlModule::ExitInstance();
 }

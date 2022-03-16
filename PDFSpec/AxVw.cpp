@@ -25,7 +25,7 @@
 
 #define WM_SET_RENDERINF (WM_APP+0x0010)
 
-namespace TUt {
+namespace {
 	bool GetTempPathName(TCHAR tctmp[MAX_PATH], LPCTSTR pszPrefix = NULL) {
 		TCHAR tcdir[MAX_PATH] = { 0 };
 		GetTempPath(256, tcdir);
@@ -550,7 +550,7 @@ HRESULT CAxVw::LoadPDF(LPCTSTR newVal) {
 	}
 
 	TCHAR tcTmpfp[MAX_PATH] = { 0 };
-	if (!TUt::GetTempPathName(tcTmpfp)) {
+	if (!GetTempPathName(tcTmpfp)) {
 		m_errorMessage.Format(IDS_STRING2010);
 		return E_errFileIO;
 	}

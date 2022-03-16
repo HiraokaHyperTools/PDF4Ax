@@ -4,6 +4,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 VisualStudioVersion = 17.0.32126.317
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "PDF4Ax", "PDF4Ax\PDF4Ax.vcxproj", "{A49352C1-7D99-40FA-A381-F2D9242C83E7}"
+	ProjectSection(ProjectDependencies) = postProject
+		{F8F10C02-54D9-40DE-AF27-E048B5B74D87} = {F8F10C02-54D9-40DE-AF27-E048B5B74D87}
+	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "RenderTest", "RenderTest\RenderTest.vcxproj", "{8C279682-E962-46AB-A8C7-C3F443E67E61}"
 EndProject
@@ -23,6 +26,7 @@ Global
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{A49352C1-7D99-40FA-A381-F2D9242C83E7}.Debug|Win32.ActiveCfg = Debug|Win32
+		{A49352C1-7D99-40FA-A381-F2D9242C83E7}.Debug|Win32.Build.0 = Debug|Win32
 		{A49352C1-7D99-40FA-A381-F2D9242C83E7}.Debug|x64.ActiveCfg = Debug|Win32
 		{A49352C1-7D99-40FA-A381-F2D9242C83E7}.Release|Win32.ActiveCfg = Release|Win32
 		{A49352C1-7D99-40FA-A381-F2D9242C83E7}.Release|Win32.Build.0 = Release|Win32
