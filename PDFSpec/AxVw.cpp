@@ -1655,9 +1655,6 @@ bool CAxVw::PrintNextPage() {
 		float mmWidth = mediaBox.Width() * 0.352777f;
 		float mmHeight = mediaBox.Height() * 0.352777f;
 
-		int dx = printer.GetDeviceCaps(LOGPIXELSX);
-		int dy = printer.GetDeviceCaps(LOGPIXELSY);
-
 		PaperSizeLite guessed;
 		if (m_printState.get()->opts.m_bAutoPaperSize && PaperSizeUtil::Guess(mmWidth, mmHeight, guessed)) {
 			guessed.CopyTo(*devmode);
@@ -1675,44 +1672,48 @@ bool CAxVw::PrintNextPage() {
 		int cx = printer.GetDeviceCaps(PHYSICALWIDTH);
 		int cy = printer.GetDeviceCaps(PHYSICALHEIGHT);
 
-		XFORM xform;
-		xform.eM11 = x_dpi / 72.0;
-		xform.eM12 = 0;
-		xform.eM21 = 0;
-		xform.eM22 = y_dpi / 72.0;
-		xform.eDx = 0;
-		xform.eDy = 0;
-		printer.SetGraphicsMode(GM_ADVANCED);
-		printer.SetWorldTransform(&xform);
+		int pixelWidth = int(mediaBox.Width() / 72.0f * x_dpi);
+		int pixelHeight = int(mediaBox.Height() / 72.0f * y_dpi);
 
-		printer.StartPage();
-
-		if (!m_printState.get()->opts.m_bIgnoreMargin) {
-			cx -= ox + ox;
-			cy -= oy + oy;
-			ox = 0;
-			oy = 0;
-		}
-		CRect rcPaper(-ox, -oy, cx, cy);
+		CRect rcMax(-ox, -oy, cx, cy);
+		CRect rcPrint = m_printState.get()->opts.m_bIgnoreMargin
+			? rcMax
+			: CRect(0, 0, cx - ox - ox, cy - oy - oy);
 		CRect rcDraw = m_printState.get()->opts.m_bCentering
 			? FitRect3::Fit(
-				rcPaper,
+				rcPrint,
 				CSize(
-					int(mmWidth),
-					int(mmHeight)
+					pixelWidth,
+					pixelHeight
 				),
 				0,
 				0
 			)
 			: FitRect3::Fit(
-				rcPaper,
+				rcPrint,
 				CSize(
-					int(mmWidth),
-					int(mmHeight)
+					pixelWidth,
+					pixelHeight
 				),
 				-1,
 				-1
 			);
+
+		float xScale = (rcDraw.Width() * 1.0f / (std::max)(1, pixelWidth));
+		float yScale = (rcDraw.Height() * 1.0f / (std::max)(1, pixelHeight));
+		float xyScale = (std::min)(xScale, yScale);
+
+		XFORM xform;
+		xform.eM11 = x_dpi / 72.0 * xyScale;
+		xform.eM12 = 0;
+		xform.eM21 = 0;
+		xform.eM22 = y_dpi / 72.0 * xyScale;
+		xform.eDx = rcDraw.left;
+		xform.eDy = rcDraw.top;
+		printer.SetGraphicsMode(GM_ADVANCED);
+		printer.SetWorldTransform(&xform);
+
+		printer.StartPage();
 
 		std::unique_ptr<cairo_t, cairo_deleter> renderer(cairo_create(surface.get()));
 

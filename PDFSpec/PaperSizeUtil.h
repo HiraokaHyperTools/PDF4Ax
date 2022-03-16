@@ -9,7 +9,7 @@ public:
 		float X = (std::min)(mmWidth, mmHeight) / 10;
 		float Y = (std::max)(mmWidth, mmHeight) / 10;
 
-		ps.dmOrientation = (X <= Y) ? DMORIENT_PORTRAIT : DMORIENT_LANDSCAPE;
+		ps.dmOrientation = (mmWidth <= mmHeight) ? DMORIENT_PORTRAIT : DMORIENT_LANDSCAPE;
 
 		{ 	// B5
 			float D = 2, Px = 18.2f, Py = 25.72f;
