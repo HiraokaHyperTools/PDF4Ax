@@ -211,6 +211,8 @@ UINT DrawPDFProc(LPVOID lpv) {
 
 	poppler::page_renderer renderer;
 	renderer.set_image_format(poppler::image::format_bgr24);
+	renderer.set_render_hint(poppler::page_renderer::antialiasing);
+	renderer.set_render_hint(poppler::page_renderer::text_antialiasing);
 
 	poppler::image imageOut(
 		renderer.render_page(pageOut.get(), dpi, dpi, rcOut.left, rcOut.top, rcOut.Width(), rcOut.Height())
@@ -652,7 +654,7 @@ HRESULT CAxVw::LoadTruePDF(LPCTSTR newVal) {
 		m_pps.Add(pps);
 	}
 
-	m_canPrintThisPDF = true; //TODO m_pdfdoc->okToPrint() ? true : false;
+	m_canPrintThisPDF = m_pdfdoc->has_permission(poppler::perm_print);
 
 	LayoutClient();
 
@@ -1366,8 +1368,11 @@ CBitmap* CAxVw::GetThumb(int iPage, int cx) {
 
 		std::unique_ptr<poppler::page> pageOut(m_pdfdoc->create_page(iPage));
 
+		poppler::page_renderer renderer;
+		renderer.set_image_format(poppler::image::format_bgr24);
+
 		poppler::image imageOut(
-			poppler::page_renderer().render_page(pageOut.get(), dpi, dpi, slx, sly, rcDst.Width(), rcDst.Height())
+			renderer.render_page(pageOut.get(), dpi, dpi, slx, sly, rcDst.Width(), rcDst.Height())
 		);
 
 		lck.Unlock();
@@ -1389,11 +1394,11 @@ CBitmap* CAxVw::GetThumb(int iPage, int cx) {
 		if (h != NULL) {
 			for (int y = 0; y < pcy; y++) {
 				const BYTE* pSrc = reinterpret_cast<const BYTE*>(imageOut.const_data() + imageOut.bytes_per_row() * y);
-				BYTE* pDst = reinterpret_cast<PBYTE>(pvBits) + dstPitch * (cy - y - 1);
-				for (int x = 0; x < pcx; x++, pSrc += 4, pDst += 3) {
-					pDst[0] = pSrc[2];
+				BYTE* pDst = reinterpret_cast<PBYTE>(pvBits) + dstPitch * (pcy - y - 1);
+				for (int x = 0; x < pcx; x++, pSrc += 3, pDst += 3) {
+					pDst[0] = pSrc[0];
 					pDst[1] = pSrc[1];
-					pDst[2] = pSrc[0];
+					pDst[2] = pSrc[2];
 				}
 			}
 
@@ -1614,8 +1619,14 @@ bool CAxVw::PrintNextPage() {
 	CDC& printer = m_printState.get()->printer;
 
 	if (m_printState.get()->isFirstPage()) {
+		std::wstring title(reinterpret_cast<LPCWSTR>(m_pdfdoc->get_title().c_str()));
+		if (title.empty()) {
+			title = L"PDF document";
+		}
+
 		ZeroMemory(&di, sizeof(di));
 		di.cbSize = sizeof(di);
+		di.lpszDocName = title.c_str();
 
 		defaultPaperSize.CopyFrom(*devmode);
 
