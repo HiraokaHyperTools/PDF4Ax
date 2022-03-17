@@ -86,6 +86,56 @@ public:
 
 class CAxVw : public CWnd, public CPvRender
 {
+	class TargetPages {
+		CArray<PRINTPAGERANGE> ranges;
+	public:
+		void AddRanges(LPPRINTPAGERANGE items, int count) {
+			ASSERT(items != nullptr);
+			for (int x = 0; x < count; x++) {
+				ranges.Add(items[x]);
+			}
+		}
+
+		void AddPages(int from, int to) {
+			PRINTPAGERANGE range = { from, to };
+			ranges.Add(range);
+		}
+
+		int GetSize() const {
+			int size = 0;
+			for (INT_PTR y = 0; y < ranges.GetSize(); y++) {
+				const PRINTPAGERANGE& range = ranges[y];
+				if (range.nFromPage <= range.nToPage) {
+					size += range.nToPage - range.nFromPage + 1;
+				}
+				else {
+					size += range.nFromPage - range.nToPage + 1;
+				}
+			}
+			return size;
+		}
+
+		int GetAt(int index) const {
+			for (INT_PTR y = 0; y < ranges.GetSize(); y++) {
+				DWORD from = ranges[y].nFromPage;
+				DWORD to = ranges[y].nToPage;
+				bool advance = from < to;
+				while (true) {
+					if (index <= 0) {
+						return from;
+					}
+					index--;
+					if (from == to) {
+						break;
+					}
+					from += (advance ? 1 : -1);
+				}
+			}
+			ASSERT(false); // out of range
+			return -1;
+		}
+	};
+
 	class PrintState {
 	public:
 		PrintState()
@@ -108,7 +158,7 @@ class CAxVw : public CWnd, public CPvRender
 		DOCINFO di;
 		PaperSizeLite defaultPaperSize;
 		int indexTarget;
-		CUIntArray targetPages; // page 1~n
+		TargetPages targetPages; // page 1~n
 
 		bool isFirstPage() {
 			return indexTarget == 0;
@@ -145,6 +195,7 @@ public:
 public:
 	CString m_strUrl;
 	CString m_errorMessage;
+	CString m_title;
 
 protected:
 	CComPtr<CPDFRef> m_prefpdf;

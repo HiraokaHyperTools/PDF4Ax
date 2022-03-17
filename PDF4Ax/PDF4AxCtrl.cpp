@@ -40,6 +40,7 @@ BEGIN_DISPATCH_MAP(CPDF4AxCtrl, COleControl)
 	DISP_FUNCTION_ID(CPDF4AxCtrl, "AboutBox", DISPID_ABOUTBOX, AboutBox, VT_EMPTY, VTS_NONE)
 	DISP_PROPERTY_EX_ID(CPDF4AxCtrl, "src", dispidsrc, Getsrc, Setsrc, VT_BSTR)
 	DISP_PROPERTY_NOTIFY_ID(CPDF4AxCtrl, "iv", dispidiv, m_iv, OnivChanged, VT_BSTR)
+	DISP_PROPERTY_EX_ID(CPDF4AxCtrl, "title", dispidtitle, Gettitle, Settitle, VT_BSTR)
 END_DISPATCH_MAP()
 
 
@@ -248,6 +249,19 @@ void CPDF4AxCtrl::DoPropExchange(CPropExchange* pPX)
 
 #pragma comment(lib, "shlwapi.lib")
 
+namespace {
+	CString GetTitleFrom(IStream* pStream) {
+		CString title;
+		STATSTG statstg = { 0 };
+		HRESULT hr = pStream->Stat(&statstg, 0);
+		if (SUCCEEDED(hr)) {
+			title = statstg.pwcsName;
+			CoTaskMemFree(statstg.pwcsName);
+		}
+		return title;
+	}
+}
+
 void CPDF4AxCtrl::LoadFromMoniker(LPBC pibc, LPMONIKER pimkDL) {
 	HRESULT hr;
 
@@ -263,7 +277,7 @@ void CPDF4AxCtrl::LoadFromMoniker(LPBC pibc, LPMONIKER pimkDL) {
 				DWORD cchfp = 256;
 				if (!ok && UrlIsFileUrl(lpcw)) {
 					if (SUCCEEDED(hr = PathCreateFromUrl(lpcw, wcfp, &cchfp, NULL))) {
-						TRY {
+						TRY{
 							Setsrc(CW2T(wcfp));
 							ok = true;
 						}
@@ -285,14 +299,16 @@ void CPDF4AxCtrl::LoadFromMoniker(LPBC pibc, LPMONIKER pimkDL) {
 			CComPtr<IBindCtx> pibcAsync;
 			if (SUCCEEDED(hr = CreateAsyncBindCtx(0, &m_xBSC, NULL, &pibcAsync))) {
 				CComPtr<IStream> pSt;
+				m_fAsyncLoadOk = false;
 				hr = pimkDL->BindToStorage(pibcAsync, NULL, IID_IStream, reinterpret_cast<void **>(&pSt));
 				if (hr == S_OK) {
-					if (LoadSyncSt(pSt))
-						ok = true;
+					// OnStopBinding でロード済み
+					ok = m_fAsyncLoadOk;
 				}
 				else if (hr == MK_S_ASYNCHRONOUS) {
-					if (m_frm.m_hWnd != NULL)
+					if (m_frm.m_hWnd != NULL) {
 						m_frm.ShowWindow(SW_HIDE);
+					}
 					m_fAsyncDownload = true;
 					m_curPos = m_maxPos = 0;
 					m_statusText.Empty();
@@ -305,12 +321,14 @@ void CPDF4AxCtrl::LoadFromMoniker(LPBC pibc, LPMONIKER pimkDL) {
 			// URL等のモニカ読み込み(not asynchronous moniker)
 			CComPtr<IStream> pSt;
 			if (SUCCEEDED(hr = pimkDL->BindToStorage(pibc, NULL, IID_IStream, reinterpret_cast<void **>(&pSt)))) {
-				if (LoadSyncSt(pSt))
+				if (LoadSyncSt(pSt)) {
 					return;
+				}
 			}
 		}
-		if (ok)
+		if (ok) {
 			return;
+		}
 	}
 	AfxThrowFileException(CFileException::fileNotFound);
 }
@@ -383,6 +401,20 @@ void CPDF4AxCtrl::Setsrc(LPCTSTR newVal)
 	}
 }
 
+BSTR CPDF4AxCtrl::Gettitle(void)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	return m_frm.m_wndView.m_title.AllocSysString();
+}
+
+void CPDF4AxCtrl::Settitle(LPCTSTR newVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	m_frm.m_wndView.m_title = newVal;
+}
+
 int CPDF4AxCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct) {
 	if (COleControl::OnCreate(lpCreateStruct) == -1)
 		return -1;
@@ -393,7 +425,6 @@ int CPDF4AxCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct) {
 	m_frm.InitialUpdateFrame(NULL, true);
 
 	CString &m_src = m_frm.m_wndView.m_strUrl;
-	CString m_title;
 
 	if (m_src.IsEmpty())
 		return 0;
@@ -428,7 +459,6 @@ int CPDF4AxCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct) {
 			if (pimkDL != NULL) {
 				LPOLESTR pszDisplayName = NULL;
 				if (SUCCEEDED(hr = pimkDL->GetDisplayName(pibc, NULL, &pszDisplayName))) {
-					m_title = pszDisplayName;
 					CoTaskMemFree(pszDisplayName);
 				}
 			}
@@ -465,6 +495,7 @@ bool CPDF4AxCtrl::LoadSyncSt(IStream *pSt) {
 			}
 			fOut.Close();
 			Setsrc(CW2T(tctmp));
+			m_frm.m_wndView.m_title = GetTitleFrom(pSt);
 			return true;
 		}
 	CATCH_ALL(e) 
@@ -707,7 +738,7 @@ STDMETHODIMP CPDF4AxCtrl::XBSC::OnStopBinding(/* [in] */ HRESULT hresult,/* [uni
 	pThis->m_binding.Release();
 
 	if (hresult == S_OK && pThis->m_pStAsync != NULL) {
-		pThis->LoadSyncSt(pThis->m_pStAsync);
+		pThis->m_fAsyncLoadOk = pThis->LoadSyncSt(pThis->m_pStAsync);
 	}
 	return S_OK;
 }

@@ -1546,30 +1546,16 @@ void CAxVw::OnFilePrint() {
 	m_printState.get()->devmode.SetSize(devmode->dmSize + devmode->dmDriverExtra);
 	memcpy(m_printState.get()->devmode.GetData(), devmode, m_printState.get()->devmode.GetSize());
 
-	CUIntArray& targetPages = m_printState.get()->targetPages;
+	auto& targetPages = m_printState.get()->targetPages;
+
 	if (dlg.m_pdex.Flags & PD_CURRENTPAGE) {
-		targetPages.Add(1 + m_iPage);
+		targetPages.AddPages(1 + m_iPage, 1 + m_iPage);
 	}
 	else if (dlg.m_pdex.Flags & PD_PAGENUMS) {
-		for (int y = 0; y < dlg.m_pdex.nPageRanges; y++) {
-			if (ranges[y].nFromPage < ranges[y].nToPage) {
-				// 昇順
-				for (int x = ranges[y].nFromPage; x <= ranges[y].nToPage; x++) {
-					targetPages.Add(x);
-				}
-			}
-			else {
-				// 降順
-				for (int x = ranges[y].nFromPage; x >= ranges[y].nToPage; x--) {
-					targetPages.Add(x);
-				}
-			}
-		}
+		targetPages.AddRanges(ranges, dlg.m_pdex.nPageRanges);
 	}
 	else {
-		for (int x = dlg.m_pdex.nMinPage; x <= dlg.m_pdex.nMaxPage; x++) {
-			targetPages.Add(x);
-		}
+		targetPages.AddPages(dlg.m_pdex.nMinPage, dlg.m_pdex.nMaxPage);
 	}
 
 	m_printState.get()->opts = page;
@@ -1621,6 +1607,9 @@ bool CAxVw::PrintNextPage() {
 
 	if (m_printState.get()->isFirstPage()) {
 		std::wstring title(reinterpret_cast<LPCWSTR>(m_pdfdoc->get_title().c_str()));
+		if (title.empty()) {
+			title = m_title;
+		}
 		if (title.empty()) {
 			title = L"PDF document";
 		}
