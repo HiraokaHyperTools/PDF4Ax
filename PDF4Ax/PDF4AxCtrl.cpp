@@ -279,6 +279,7 @@ void CPDF4AxCtrl::LoadFromMoniker(LPBC pibc, LPMONIKER pimkDL) {
 					if (SUCCEEDED(hr = PathCreateFromUrl(lpcw, wcfp, &cchfp, NULL))) {
 						TRY{
 							Setsrc(CW2T(wcfp));
+							m_frm.m_wndView.m_title = lpcw;
 							ok = true;
 						}
 						CATCH_ALL(e) {

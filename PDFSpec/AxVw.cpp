@@ -623,7 +623,11 @@ HRESULT CAxVw::LoadTruePDF(LPCTSTR newVal) {
 	ErrorCatcher::text.Empty();
 	//setErrorFunction(ErrorCatcher::Capture);
 
-	m_pdfdoc = poppler::document::load_from_file(std::string(CW2AEX(str, 65001)));
+	{
+		CSingleLock lck(&s_lockpdf);
+
+		m_pdfdoc = poppler::document::load_from_file(std::string(CW2AEX(str, 65001)));
+	}
 
 	//setErrorFunction(ErrorCatcher::Empty);
 
