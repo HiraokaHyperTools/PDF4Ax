@@ -5,6 +5,8 @@
 // This file is licensed under the GPLv2 or later
 //
 // Copyright 2011 Pino Toscano <pino@kde.org>
+// Copyright 2017, 2020 Albert Astals Cid <aacid@kde.org>
+// Copyright 2019 Marek Kasik <mkasik@redhat.com>
 //
 //========================================================================
 
@@ -17,101 +19,105 @@
 
 ViewerPreferences::ViewerPreferences(Dict *prefDict)
 {
-  init();
+    init();
 
-  Object obj;
+    hideToolbar = prefDict->lookup("HideToolbar").getBoolWithDefaultValue(false);
 
-  if (prefDict->lookup("HideToolbar", &obj)->isBool()) {
-    hideToolbar = obj.getBool();
-  }
-  obj.free();
+    hideMenubar = prefDict->lookup("HideMenubar").getBoolWithDefaultValue(false);
 
-  if (prefDict->lookup("HideMenubar", &obj)->isBool()) {
-    hideMenubar = obj.getBool();
-  }
-  obj.free();
+    hideWindowUI = prefDict->lookup("HideWindowUI").getBoolWithDefaultValue(false);
 
-  if (prefDict->lookup("HideWindowUI", &obj)->isBool()) {
-    hideWindowUI = obj.getBool();
-  }
-  obj.free();
+    fitWindow = prefDict->lookup("FitWindow").getBoolWithDefaultValue(false);
 
-  if (prefDict->lookup("FitWindow", &obj)->isBool()) {
-    fitWindow = obj.getBool();
-  }
-  obj.free();
+    centerWindow = prefDict->lookup("CenterWindow").getBoolWithDefaultValue(false);
 
-  if (prefDict->lookup("CenterWindow", &obj)->isBool()) {
-    centerWindow = obj.getBool();
-  }
-  obj.free();
+    displayDocTitle = prefDict->lookup("DisplayDocTitle").getBoolWithDefaultValue(false);
 
-  if (prefDict->lookup("DisplayDocTitle", &obj)->isBool()) {
-    displayDocTitle = obj.getBool();
-  }
-  obj.free();
-
-  if (prefDict->lookup("NonFullScreenPageMode", &obj)->isName()) {
-    const char *mode = obj.getName();
-    if (!strcmp(mode, "UseNone")) {
-      nonFullScreenPageMode = nfpmUseNone;
-    } else if (!strcmp(mode, "UseOutlines")) {
-      nonFullScreenPageMode = nfpmUseOutlines;
-    } else if (!strcmp(mode, "UseThumbs")) {
-      nonFullScreenPageMode = nfpmUseThumbs;
-    } else if (!strcmp(mode, "UseOC")) {
-      nonFullScreenPageMode = nfpmUseOC;
+    Object obj = prefDict->lookup("NonFullScreenPageMode");
+    if (obj.isName()) {
+        const char *mode = obj.getName();
+        if (!strcmp(mode, "UseNone")) {
+            nonFullScreenPageMode = nfpmUseNone;
+        } else if (!strcmp(mode, "UseOutlines")) {
+            nonFullScreenPageMode = nfpmUseOutlines;
+        } else if (!strcmp(mode, "UseThumbs")) {
+            nonFullScreenPageMode = nfpmUseThumbs;
+        } else if (!strcmp(mode, "UseOC")) {
+            nonFullScreenPageMode = nfpmUseOC;
+        }
     }
-  }
-  obj.free();
 
-  if (prefDict->lookup("Direction", &obj)->isName()) {
-    const char *dir = obj.getName();
-    if (!strcmp(dir, "L2R")) {
-      direction = directionL2R;
-    } else if (!strcmp(dir, "R2L")) {
-      direction = directionR2L;
+    obj = prefDict->lookup("Direction");
+    if (obj.isName()) {
+        const char *dir = obj.getName();
+        if (!strcmp(dir, "L2R")) {
+            direction = directionL2R;
+        } else if (!strcmp(dir, "R2L")) {
+            direction = directionR2L;
+        }
     }
-  }
-  obj.free();
 
-  if (prefDict->lookup("PrintScaling", &obj)->isName()) {
-    const char *ps = obj.getName();
-    if (!strcmp(ps, "None")) {
-      printScaling = printScalingNone;
-    } else if (!strcmp(ps, "AppDefault")) {
-      printScaling = printScalingAppDefault;
+    obj = prefDict->lookup("PrintScaling");
+    if (obj.isName()) {
+        const char *ps = obj.getName();
+        if (!strcmp(ps, "None")) {
+            printScaling = printScalingNone;
+        } else if (!strcmp(ps, "AppDefault")) {
+            printScaling = printScalingAppDefault;
+        }
     }
-  }
-  obj.free();
 
-  if (prefDict->lookup("Duplex", &obj)->isName()) {
-    const char *d = obj.getName();
-    if (!strcmp(d, "Simplex")) {
-      duplex = duplexSimplex;
-    } else if (!strcmp(d, "DuplexFlipShortEdge")) {
-      duplex = duplexDuplexFlipShortEdge;
-    } else if (!strcmp(d, "DuplexFlipLongEdge")) {
-      duplex = duplexDuplexFlipLongEdge;
+    obj = prefDict->lookup("Duplex");
+    if (obj.isName()) {
+        const char *d = obj.getName();
+        if (!strcmp(d, "Simplex")) {
+            duplex = duplexSimplex;
+        } else if (!strcmp(d, "DuplexFlipShortEdge")) {
+            duplex = duplexDuplexFlipShortEdge;
+        } else if (!strcmp(d, "DuplexFlipLongEdge")) {
+            duplex = duplexDuplexFlipLongEdge;
+        }
     }
-  }
-  obj.free();
+
+    pickTrayByPDFSize = prefDict->lookup("PickTrayByPDFSize").getBoolWithDefaultValue(false);
+
+    obj = prefDict->lookup("NumCopies");
+    if (obj.isInt()) {
+        numCopies = obj.getInt();
+        if (numCopies < 2)
+            numCopies = 1;
+    }
+
+    obj = prefDict->lookup("PrintPageRange");
+    if (obj.isArray()) {
+        Array *range = obj.getArray();
+        int length = range->getLength();
+        int pageNumber1, pageNumber2;
+
+        if (length % 2 == 1)
+            length--;
+
+        for (int i = 0; i < length; i += 2) {
+            Object obj2 = range->get(i);
+            Object obj3 = range->get(i + 1);
+
+            if (obj2.isInt() && (pageNumber1 = obj2.getInt()) >= 1 && obj3.isInt() && (pageNumber2 = obj3.getInt()) >= 1 && pageNumber1 < pageNumber2) {
+                printPageRange.emplace_back(pageNumber1, pageNumber2);
+            } else {
+                printPageRange.clear();
+                break;
+            }
+        }
+    }
 }
 
-ViewerPreferences::~ViewerPreferences()
-{
-}
+ViewerPreferences::~ViewerPreferences() { }
 
 void ViewerPreferences::init()
 {
-  hideToolbar = gFalse;
-  hideMenubar = gFalse;
-  hideWindowUI = gFalse;
-  fitWindow = gFalse;
-  centerWindow = gFalse;
-  displayDocTitle = gFalse;
-  nonFullScreenPageMode = nfpmUseNone;
-  direction = directionL2R;
-  printScaling = printScalingAppDefault;
-  duplex = duplexNone;
+    nonFullScreenPageMode = nfpmUseNone;
+    direction = directionL2R;
+    printScaling = printScalingAppDefault;
+    duplex = duplexNone;
+    numCopies = 1;
 }

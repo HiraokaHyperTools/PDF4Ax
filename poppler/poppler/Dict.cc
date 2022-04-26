@@ -16,8 +16,13 @@
 // Copyright (C) 2005 Kristian Høgsberg <krh@redhat.com>
 // Copyright (C) 2006 Krzysztof Kowalczyk <kkowalczyk@gmail.com>
 // Copyright (C) 2007-2008 Julien Rebetez <julienr@svn.gnome.org>
-// Copyright (C) 2008, 2010 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2008, 2010, 2013, 2014, 2017, 2019, 2020 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2010 Paweł Wiejacha <pawel.wiejacha@gmail.com>
+// Copyright (C) 2012 Fabio D'Urso <fabiodurso@hotmail.it>
+// Copyright (C) 2013 Thomas Freitag <Thomas.Freitag@alfa.de>
+// Copyright (C) 2014 Scott West <scott.gregory.west@gmail.com>
+// Copyright (C) 2017 Adrian Johnson <ajohnson@redneon.com>
+// Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -26,15 +31,8 @@
 
 #include <config.h>
 
-#ifdef USE_GCC_PRAGMAS
-#pragma implementation
-#endif
-
 #include <algorithm>
-#include <stddef.h>
-#include <string.h>
-#include "goo/gmem.h"
-#include "Object.h"
+
 #include "XRef.h"
 #include "Dict.h"
 
@@ -42,197 +40,209 @@
 // Dict
 //------------------------------------------------------------------------
 
-static const int SORT_LENGTH_LOWER_LIMIT = 32;
+#define dictLocker() std::unique_lock<std::recursive_mutex> locker(mutex)
 
-static inline bool cmpDictEntries(const DictEntry &e1, const DictEntry &e2)
+constexpr int SORT_LENGTH_LOWER_LIMIT = 32;
+
+struct Dict::CmpDictEntry
 {
-  return strcmp(e1.key, e2.key) < 0;
+    bool operator()(const DictEntry &lhs, const DictEntry &rhs) const { return lhs.first < rhs.first; }
+    bool operator()(const DictEntry &lhs, const char *rhs) const { return lhs.first < rhs; }
+    bool operator()(const char *lhs, const DictEntry &rhs) const { return lhs < rhs.first; }
+};
+
+Dict::Dict(XRef *xrefA)
+{
+    xref = xrefA;
+    ref = 1;
+
+    sorted = false;
 }
 
-static int binarySearch(const char *key, DictEntry *entries, int length)
+Dict::Dict(const Dict *dictA)
 {
-  int first = 0;
-  int end = length - 1;
-  while (first <= end) {
-    const int middle = (first + end) / 2;
-    const int res = strcmp(key, entries[middle].key);
-    if (res == 0) {
-      return middle;
-    } else if (res < 0) {
-      end = middle - 1;
+    xref = dictA->xref;
+    ref = 1;
+
+    entries.reserve(dictA->entries.size());
+    for (const auto &entry : dictA->entries) {
+        entries.emplace_back(entry.first, entry.second.copy());
+    }
+
+    sorted = dictA->sorted.load();
+}
+
+Dict *Dict::copy(XRef *xrefA) const
+{
+    dictLocker();
+    Dict *dictA = new Dict(this);
+    dictA->xref = xrefA;
+    for (auto &entry : dictA->entries) {
+        if (entry.second.getType() == objDict) {
+            entry.second = Object(entry.second.getDict()->copy(xrefA));
+        }
+    }
+    return dictA;
+}
+
+Dict *Dict::deepCopy() const
+{
+    dictLocker();
+    Dict *dictA = new Dict(xref);
+
+    dictA->entries.reserve(entries.size());
+    for (auto &entry : entries) {
+        dictA->entries.emplace_back(entry.first, entry.second.deepCopy());
+    }
+    return dictA;
+}
+
+void Dict::add(const char *key, Object &&val)
+{
+    dictLocker();
+    entries.emplace_back(key, std::move(val));
+    sorted = false;
+}
+
+inline const Dict::DictEntry *Dict::find(const char *key) const
+{
+    if (entries.size() >= SORT_LENGTH_LOWER_LIMIT) {
+        if (!sorted) {
+            dictLocker();
+            if (!sorted) {
+                Dict *that = const_cast<Dict *>(this);
+
+                std::sort(that->entries.begin(), that->entries.end(), CmpDictEntry {});
+                that->sorted = true;
+            }
+        }
+    }
+
+    if (sorted) {
+        const auto pos = std::lower_bound(entries.begin(), entries.end(), key, CmpDictEntry {});
+        if (pos != entries.end() && pos->first == key) {
+            return &*pos;
+        }
     } else {
-      first = middle + 1;
+        const auto pos = std::find_if(entries.rbegin(), entries.rend(), [key](const DictEntry &entry) { return entry.first == key; });
+        if (pos != entries.rend()) {
+            return &*pos;
+        }
     }
-  }
-  return -1;
+    return nullptr;
 }
 
-Dict::Dict(XRef *xrefA) {
-  xref = xrefA;
-  entries = NULL;
-  size = length = 0;
-  ref = 1;
-  sorted = gFalse;
-}
-
-Dict::Dict(Dict* dictA) {
-  xref = dictA->xref;
-  size = length = dictA->length;
-  ref = 1;
-
-  sorted = dictA->sorted;
-  entries = (DictEntry *)gmallocn(size, sizeof(DictEntry));
-  for (int i=0; i<length; i++) {
-    entries[i].key = strdup(dictA->entries[i].key);
-    dictA->entries[i].val.copy(&entries[i].val);
-  }
-}
-
-Dict::~Dict() {
-  int i;
-
-  for (i = 0; i < length; ++i) {
-    gfree(entries[i].key);
-    entries[i].val.free();
-  }
-  gfree(entries);
-}
-
-void Dict::add(char *key, Object *val) {
-  if (sorted) {
-    // We use add on very few occasions so
-    // virtually this will never be hit
-    sorted = gFalse;
-  }
-
-  if (length == size) {
-    if (length == 0) {
-      size = 8;
-    } else {
-      size *= 2;
-    }
-    entries = (DictEntry *)greallocn(entries, size, sizeof(DictEntry));
-  }
-  entries[length].key = key;
-  entries[length].val = *val;
-  ++length;
-}
-
-inline DictEntry *Dict::find(char *key) {
-  if (!sorted && length >= SORT_LENGTH_LOWER_LIMIT)
-  {
-      sorted = gTrue;
-      std::sort(entries, entries+length, cmpDictEntries);
-  }
-
-  if (sorted) {
-    const int pos = binarySearch(key, entries, length);
-    if (pos != -1) {
-      return &entries[pos];
-    }
-  } else {
-    int i;
-
-    for (i = length - 1; i >=0; --i) {
-      if (!strcmp(key, entries[i].key))
-        return &entries[i];
-    }
-  }
-  return NULL;
-}
-
-GBool Dict::hasKey(char *key) {
-  return find(key) != NULL;
-}
-
-void Dict::remove(char *key) {
-  if (sorted) {
-    const int pos = binarySearch(key, entries, length);
-    if (pos != -1) {
-      length -= 1;
-      if (pos != length) {
-        memmove(&entries[pos], &entries[pos + 1], (length - pos) * sizeof(DictEntry));
-      }
-    }
-  } else {
-    int i; 
-    bool found = false;
-    DictEntry tmp;
-    if(length == 0) return;
-
-    for(i=0; i<length; i++) {
-      if (!strcmp(key, entries[i].key)) {
-        found = true;
-        break;
-      }
-    }
-    if(!found) return;
-    //replace the deleted entry with the last entry
-    length -= 1;
-    tmp = entries[length];
-    if (i!=length) //don't copy the last entry if it is deleted 
-      entries[i] = tmp;
-  }
-}
-
-void Dict::set(char *key, Object *val) {
-  DictEntry *e;
-  e = find (key);
-  if (e) {
-    e->val.free();
-    e->val = *val;
-  } else {
-    add (copyString(key), val);
-  }
-}
-
-
-GBool Dict::is(char *type) {
-  DictEntry *e;
-
-  return (e = find("Type")) && e->val.isName(type);
-}
-
-Object *Dict::lookup(char *key, Object *obj, std::set<int> *fetchOriginatorNums) {
-  DictEntry *e;
-
-  return (e = find(key)) ? e->val.fetch(xref, obj, fetchOriginatorNums) : obj->initNull();
-}
-
-Object *Dict::lookupNF(char *key, Object *obj) {
-  DictEntry *e;
-
-  return (e = find(key)) ? e->val.copy(obj) : obj->initNull();
-}
-
-GBool Dict::lookupInt(const char *key, const char *alt_key, int *value)
+inline Dict::DictEntry *Dict::find(const char *key)
 {
-  Object obj1;
-  GBool success = gFalse;
-  
-  lookup ((char *) key, &obj1);
-  if (obj1.isNull () && alt_key != NULL) {
-    obj1.free ();
-    lookup ((char *) alt_key, &obj1);
-  }
-  if (obj1.isInt ()) {
-    *value = obj1.getInt ();
-    success = gTrue;
-  }
-
-  obj1.free ();
-
-  return success;
+    return const_cast<DictEntry *>(const_cast<const Dict *>(this)->find(key));
 }
 
-char *Dict::getKey(int i) {
-  return entries[i].key;
+void Dict::remove(const char *key)
+{
+    dictLocker();
+    if (auto *entry = find(key)) {
+        if (sorted) {
+            const auto index = entry - &entries.front();
+            entries.erase(entries.begin() + index);
+        } else {
+            swap(*entry, entries.back());
+            entries.pop_back();
+        }
+    }
 }
 
-Object *Dict::getVal(int i, Object *obj) {
-  return entries[i].val.fetch(xref, obj);
+void Dict::set(const char *key, Object &&val)
+{
+    if (val.isNull()) {
+        remove(key);
+        return;
+    }
+    dictLocker();
+    if (auto *entry = find(key)) {
+        entry->second = std::move(val);
+    } else {
+        add(key, std::move(val));
+    }
 }
 
-Object *Dict::getValNF(int i, Object *obj) {
-  return entries[i].val.copy(obj);
+bool Dict::is(const char *type) const
+{
+    if (const auto *entry = find("Type")) {
+        return entry->second.isName(type);
+    }
+    return false;
+}
+
+Object Dict::lookup(const char *key, int recursion) const
+{
+    if (const auto *entry = find(key)) {
+        return entry->second.fetch(xref, recursion);
+    }
+    return Object(objNull);
+}
+
+Object Dict::lookup(const char *key, Ref *returnRef, int recursion) const
+{
+    if (const auto *entry = find(key)) {
+        if (entry->second.getType() == objRef) {
+            *returnRef = entry->second.getRef();
+        } else {
+            *returnRef = Ref::INVALID();
+        }
+        return entry->second.fetch(xref, recursion);
+    }
+    *returnRef = Ref::INVALID();
+    return Object(objNull);
+}
+
+Object Dict::lookupEnsureEncryptedIfNeeded(const char *key) const
+{
+    const auto *entry = find(key);
+    if (!entry)
+        return Object(objNull);
+
+    if (entry->second.getType() == objRef && xref->isEncrypted() && !xref->isRefEncrypted(entry->second.getRef())) {
+        error(errSyntaxError, -1, "{0:s} is not encrypted and the document is. This may be a hacking attempt", key);
+        return Object(objNull);
+    }
+
+    return entry->second.fetch(xref);
+}
+
+const Object &Dict::lookupNF(const char *key) const
+{
+    if (const auto *entry = find(key)) {
+        return entry->second;
+    }
+    static Object nullObj(objNull);
+    return nullObj;
+}
+
+bool Dict::lookupInt(const char *key, const char *alt_key, int *value) const
+{
+    auto obj1 = lookup(key);
+    if (obj1.isNull() && alt_key != nullptr) {
+        obj1 = lookup(alt_key);
+    }
+    if (obj1.isInt()) {
+        *value = obj1.getInt();
+        return true;
+    }
+    return false;
+}
+
+Object Dict::getVal(int i, Ref *returnRef) const
+{
+    const DictEntry &entry = entries[i];
+    if (entry.second.getType() == objRef) {
+        *returnRef = entry.second.getRef();
+    } else {
+        *returnRef = Ref::INVALID();
+    }
+    return entry.second.fetch(xref);
+}
+
+bool Dict::hasKey(const char *key) const
+{
+    return find(key) != nullptr;
 }

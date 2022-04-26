@@ -1,0 +1,12 @@
+prefix=$<TARGET_PROPERTY:libiconv,INSTALL_PREFIX>
+exec_prefix=$<TARGET_PROPERTY:libiconv,INSTALL_FULL_BINDIR>
+libdir=$<TARGET_PROPERTY:libiconv,INSTALL_FULL_LIBDIR>
+includedir=$<TARGET_PROPERTY:libiconv,INSTALL_FULL_INCLUDEDIR>
+
+Name: libiconv
+Description: libiconv thin wrapper library for Win32
+Version: $<TARGET_PROPERTY:libiconv,VERSION>
+
+Requires:
+Libs: -L${libdir} -l$<TARGET_FILE_BASE_NAME:libiconv>
+Cflags: -I${includedir}

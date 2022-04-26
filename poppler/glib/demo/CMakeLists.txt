@@ -1,8 +1,9 @@
 include_directories(
-  ${GTK2_INCLUDE_DIRS}
+  SYSTEM
+  ${GTK3_INCLUDE_DIRS}
 )
 
-add_definitions(${GTK2_CFLAGS_OTHER})
+add_definitions(${GTK3_CFLAGS_OTHER})
 
 set(poppler_glib_demo_SRCS
   main.c
@@ -23,6 +24,8 @@ set(poppler_glib_demo_SRCS
   attachments.c
   layers.c
   selections.c
+  taggedstruct.c
 )
 poppler_add_test(poppler-glib-demo BUILD_GTK_TESTS ${poppler_glib_demo_SRCS})
-target_link_libraries(poppler-glib-demo poppler-glib ${GTK2_LIBRARIES})
+
+target_link_libraries(poppler-glib-demo ${CAIRO_LIBRARIES} poppler-glib PkgConfig::GTK3)

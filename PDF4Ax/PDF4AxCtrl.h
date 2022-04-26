@@ -43,6 +43,7 @@ protected:
 	DWORD m_tickLastInv;
 	CComPtr<IBinding> m_binding;
 	CString m_errorMessage;
+	bool m_fAsyncLoadOk;
 
 	DECLARE_OLECREATE_EX(CPDF4AxCtrl)    // クラス ファクトリ と guid
 	DECLARE_OLETYPELIB(CPDF4AxCtrl)      // GetTypeInfo
@@ -81,12 +82,15 @@ protected:
 // ディスパッチ と イベント ID
 public:
 	enum {
+		dispidtitle = 1003,
 		dispidiv = 1002,
 		dispidsrc = 1001
 	};
 protected:
 	BSTR Getsrc(void);
 	void Setsrc(LPCTSTR newVal);
+	BSTR Gettitle(void);
+	void Settitle(LPCTSTR newVal);
 public:
 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
 	afx_msg void OnSize(UINT nType, int cx, int cy);

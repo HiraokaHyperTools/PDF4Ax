@@ -3,39 +3,33 @@
 // ProfileData.h
 //
 // Copyright 2005 Jonathan Blandford <jrb@gnome.org>
+// Copyright 2018 Adam Reichold <adam.reichold@t-online.de>
+// Copyright 2021 Albert Astals Cid <aacid@kde.org>
 //
 //========================================================================
 
 #ifndef PROFILE_DATA_H
 #define PROFILE_DATA_H
 
-#ifdef USE_GCC_PRAGMAS
-#pragma interface
-#endif
-
 //------------------------------------------------------------------------
 // ProfileData
 //------------------------------------------------------------------------
 
-class ProfileData {
+class ProfileData
+{
 public:
+    void addElement(double elapsed);
 
-  // Constructor.
-  ProfileData ();
+    int getCount() const { return count; }
+    double getTotal() const { return total; }
+    double getMin() const { return min; }
+    double getMax() const { return max; }
 
-  // Destructor.
-  ~ProfileData() {}
-
-  void addElement (double elapsed);
-  int getCount () { return count; }
-  double getTotal () { return total; }
-  double getMin () { return max; }
-  double getMax () { return max; }
 private:
-  int count;			// size of <elems> array
-  double total;			// number of elements in array
-  double min;			// reference count
-  double max;			// reference count
+    int count = 0; // size of <elems> array
+    double total = 0.0; // number of elements in array
+    double min = 0.0; // reference count
+    double max = 0.0; // reference count
 };
 
 #endif

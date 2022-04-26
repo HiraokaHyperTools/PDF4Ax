@@ -8,15 +8,12 @@ get any visual feedback during testing.
 
 #include "splash/SplashBitmap.h"
 
-void PreviewBitmapSplash(SplashBitmap *bmpSplash)
-{
-}
+void PreviewBitmapInit();
+void PreviewBitmapDestroy();
+void PreviewBitmapSplash(SplashBitmap *bmpSplash);
 
-void PreviewBitmapDestroy(void)
-{
-}
+void PreviewBitmapSplash(SplashBitmap *bmpSplash) { }
 
-void PreviewBitmapInit(void)
-{
-}
+void PreviewBitmapDestroy() { }
 
+void PreviewBitmapInit() { }

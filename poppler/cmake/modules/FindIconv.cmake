@@ -6,6 +6,10 @@
 #  ICONV_LIBRARIES - Link these to use Iconv 
 #  ICONV_SECOND_ARGUMENT_IS_CONST - the second argument for iconv() is const
 # 
+
+# NOTE: Once required CMake >=3.11, consider using built-in FindIconv
+#       See Poppler issue #955 for details
+
 include(CheckCXXSourceCompiles)
 
 IF (ICONV_INCLUDE_DIR AND ICONV_LIBRARIES)
@@ -15,7 +19,7 @@ ENDIF (ICONV_INCLUDE_DIR AND ICONV_LIBRARIES)
 
 FIND_PATH(ICONV_INCLUDE_DIR iconv.h) 
  
-FIND_LIBRARY(ICONV_LIBRARIES NAMES iconv libiconv libiconv-2 c)
+FIND_LIBRARY(ICONV_LIBRARIES NAMES iconv libiconv${CMAKE_${CMAKE_BUILD_TYPE}_POSTFIX} libiconv-2 c)
  
 IF(ICONV_INCLUDE_DIR AND ICONV_LIBRARIES) 
    SET(ICONV_FOUND TRUE) 

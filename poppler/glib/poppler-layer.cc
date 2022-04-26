@@ -29,70 +29,60 @@
 typedef struct _PopplerLayerClass PopplerLayerClass;
 struct _PopplerLayerClass
 {
-  GObjectClass parent_class;
+    GObjectClass parent_class;
 };
 
-G_DEFINE_TYPE (PopplerLayer, poppler_layer, G_TYPE_OBJECT)
+G_DEFINE_TYPE(PopplerLayer, poppler_layer, G_TYPE_OBJECT)
 
-static void
-poppler_layer_finalize (GObject *object)
+static void poppler_layer_finalize(GObject *object)
 {
-  PopplerLayer *poppler_layer = POPPLER_LAYER (object);
+    PopplerLayer *poppler_layer = POPPLER_LAYER(object);
 
-  if (poppler_layer->document)
-    {
-      g_object_unref (poppler_layer->document);
-      poppler_layer->document = NULL;
+    if (poppler_layer->document) {
+        g_object_unref(poppler_layer->document);
+        poppler_layer->document = nullptr;
     }
 
-  if (poppler_layer->title)
-    {
-      g_free (poppler_layer->title);
-      poppler_layer->title = NULL;
+    if (poppler_layer->title) {
+        g_free(poppler_layer->title);
+        poppler_layer->title = nullptr;
     }
-  poppler_layer->layer = NULL;
-  poppler_layer->rbgroup = NULL;
+    poppler_layer->layer = nullptr;
+    poppler_layer->rbgroup = nullptr;
 
-  G_OBJECT_CLASS (poppler_layer_parent_class)->finalize (object);
+    G_OBJECT_CLASS(poppler_layer_parent_class)->finalize(object);
 }
 
-static void
-poppler_layer_init (PopplerLayer *layer)
+static void poppler_layer_init(PopplerLayer *layer) { }
+
+static void poppler_layer_class_init(PopplerLayerClass *klass)
 {
+    GObjectClass *gobject_class = G_OBJECT_CLASS(klass);
+
+    gobject_class->finalize = poppler_layer_finalize;
 }
 
-static void
-poppler_layer_class_init (PopplerLayerClass *klass)
+PopplerLayer *_poppler_layer_new(PopplerDocument *document, Layer *layer, GList *rbgroup)
 {
-  GObjectClass *gobject_class = G_OBJECT_CLASS (klass);
+    PopplerLayer *poppler_layer;
+    const GooString *layer_name;
 
-  gobject_class->finalize = poppler_layer_finalize;
-}
+    g_return_val_if_fail(POPPLER_IS_DOCUMENT(document), NULL);
+    g_return_val_if_fail(layer != nullptr, NULL);
 
-PopplerLayer *
-_poppler_layer_new (PopplerDocument *document,
-		    Layer           *layer,
-		    GList           *rbgroup)
-{
-  PopplerLayer *poppler_layer;
-  GooString    *layer_name;
+    poppler_layer = POPPLER_LAYER(g_object_new(POPPLER_TYPE_LAYER, nullptr));
 
-  g_return_val_if_fail (POPPLER_IS_DOCUMENT (document), NULL);
-  g_return_val_if_fail (layer != NULL, NULL);
+    poppler_layer->document = (PopplerDocument *)g_object_ref(document);
+    poppler_layer->layer = layer;
+    poppler_layer->rbgroup = rbgroup;
+    layer_name = layer->oc->getName();
+    poppler_layer->title = layer_name ? _poppler_goo_string_to_utf8(layer_name) : nullptr;
 
-  poppler_layer = POPPLER_LAYER (g_object_new (POPPLER_TYPE_LAYER, NULL));
-
-  poppler_layer->document = (PopplerDocument *)g_object_ref (document);
-  poppler_layer->layer = layer;
-  poppler_layer->rbgroup = rbgroup;
-  layer_name = layer->oc->getName ();
-  poppler_layer->title = layer_name ? _poppler_goo_string_to_utf8 (layer_name) : NULL;
-  
-  return poppler_layer;
+    return poppler_layer;
 }
 
 /**
- * poppler_layer_get_title
+ * poppler_layer_get_title:
  * @layer: a #PopplerLayer
  *
  * Returns the name of the layer suitable for
@@ -102,16 +92,15 @@ _poppler_layer_new (PopplerDocument *document,
  *
  * Since: 0.12
  **/
-const gchar *
-poppler_layer_get_title (PopplerLayer *poppler_layer)
+const gchar *poppler_layer_get_title(PopplerLayer *poppler_layer)
 {
-  g_return_val_if_fail (POPPLER_IS_LAYER (poppler_layer), NULL);
+    g_return_val_if_fail(POPPLER_IS_LAYER(poppler_layer), NULL);
 
-  return poppler_layer->title;
+    return poppler_layer->title;
 }
 
 /**
- * poppler_layer_is_visible
+ * poppler_layer_is_visible:
  * @layer: a #PopplerLayer
  *
  * Returns whether @layer is visible
@@ -120,47 +109,45 @@ poppler_layer_get_title (PopplerLayer *poppler_layer)
  *
  * Since: 0.12
  **/
-gboolean
-poppler_layer_is_visible (PopplerLayer *poppler_layer)
+gboolean poppler_layer_is_visible(PopplerLayer *poppler_layer)
 {
-  g_return_val_if_fail (POPPLER_IS_LAYER (poppler_layer), FALSE);
+    g_return_val_if_fail(POPPLER_IS_LAYER(poppler_layer), FALSE);
 
-  return poppler_layer->layer->oc->getState () == OptionalContentGroup::On;
+    return poppler_layer->layer->oc->getState() == OptionalContentGroup::On;
 }
 
 /**
- * poppler_layer_show
+ * poppler_layer_show:
  * @layer: a #PopplerLayer
  *
  * Shows @layer
  *
  * Since: 0.12
  **/
-void
-poppler_layer_show (PopplerLayer *poppler_layer)
+void poppler_layer_show(PopplerLayer *poppler_layer)
 {
-  GList *l;
-  Layer *layer;
-  
-  g_return_if_fail (POPPLER_IS_LAYER (poppler_layer));
+    GList *l;
+    Layer *layer;
 
-  layer = poppler_layer->layer;
+    g_return_if_fail(POPPLER_IS_LAYER(poppler_layer));
 
-  if (layer->oc->getState () == OptionalContentGroup::On)
-    return;
-  
-  layer->oc->setState (OptionalContentGroup::On);
-  
-  for (l = poppler_layer->rbgroup; l && l->data; l = g_list_next (l)) {
-    OptionalContentGroup *oc = (OptionalContentGroup *)l->data;
+    layer = poppler_layer->layer;
 
-    if (oc != layer->oc)
-      oc->setState (OptionalContentGroup::Off);
-  }
+    if (layer->oc->getState() == OptionalContentGroup::On)
+        return;
+
+    layer->oc->setState(OptionalContentGroup::On);
+
+    for (l = poppler_layer->rbgroup; l && l->data; l = g_list_next(l)) {
+        OptionalContentGroup *oc = (OptionalContentGroup *)l->data;
+
+        if (oc != layer->oc)
+            oc->setState(OptionalContentGroup::Off);
+    }
 }
 
 /**
- * poppler_layer_hide
+ * poppler_layer_hide:
  * @layer: a #PopplerLayer
  *
  * Hides @layer. If @layer is the parent of other nested layers,
@@ -169,24 +156,22 @@ poppler_layer_show (PopplerLayer *poppler_layer)
  *
  * Since: 0.12
  **/
-void
-poppler_layer_hide (PopplerLayer *poppler_layer)
+void poppler_layer_hide(PopplerLayer *poppler_layer)
 {
-  Layer *layer;
-  
-  g_return_if_fail (POPPLER_IS_LAYER (poppler_layer));
+    Layer *layer;
 
-  layer = poppler_layer->layer;
-  
-  if (layer->oc->getState () == OptionalContentGroup::Off)
-    return;
-  
-  layer->oc->setState (OptionalContentGroup::Off);
+    g_return_if_fail(POPPLER_IS_LAYER(poppler_layer));
+
+    layer = poppler_layer->layer;
+
+    if (layer->oc->getState() == OptionalContentGroup::Off)
+        return;
+
+    layer->oc->setState(OptionalContentGroup::Off);
 }
 
-
 /**
- * poppler_layer_is_parent
+ * poppler_layer_is_parent:
  * @layer: a #PopplerLayer
  *
  * Returns whether @layer is parent of other nested layers.
@@ -195,16 +180,15 @@ poppler_layer_hide (PopplerLayer *poppler_layer)
  *
  * Since: 0.12
  **/
-gboolean
-poppler_layer_is_parent (PopplerLayer *poppler_layer)
+gboolean poppler_layer_is_parent(PopplerLayer *poppler_layer)
 {
-  g_return_val_if_fail (POPPLER_IS_LAYER (poppler_layer), FALSE);
+    g_return_val_if_fail(POPPLER_IS_LAYER(poppler_layer), FALSE);
 
-  return poppler_layer->layer->kids != NULL;
+    return poppler_layer->layer->kids != nullptr;
 }
 
 /**
- * poppler_layer_get_radio_button_group_id
+ * poppler_layer_get_radio_button_group_id:
  * @layer: a #PopplerLayer
  *
  * Returns the numeric ID the radio button group associated with @layer.
@@ -214,10 +198,9 @@ poppler_layer_is_parent (PopplerLayer *poppler_layer)
  *
  * Since: 0.12
  **/
-gint 
-poppler_layer_get_radio_button_group_id (PopplerLayer *poppler_layer)
+gint poppler_layer_get_radio_button_group_id(PopplerLayer *poppler_layer)
 {
-  g_return_val_if_fail (POPPLER_IS_LAYER (poppler_layer), FALSE);
+    g_return_val_if_fail(POPPLER_IS_LAYER(poppler_layer), FALSE);
 
-  return GPOINTER_TO_INT (poppler_layer->rbgroup);
+    return GPOINTER_TO_INT(poppler_layer->rbgroup);
 }

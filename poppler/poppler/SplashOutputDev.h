@@ -14,12 +14,15 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2005 Takashi Iwai <tiwai@suse.de>
-// Copyright (C) 2009-2011 Thomas Freitag <Thomas.Freitag@alfa.de>
+// Copyright (C) 2009-2016 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2009 Carlos Garcia Campos <carlosgc@gnome.org>
-// Copyright (C) 2010 Christian Feuers�nger <cfeuersaenger@googlemail.com>
+// Copyright (C) 2010 Christian Feuersänger <cfeuersaenger@googlemail.com>
 // Copyright (C) 2011 Andreas Hartmetz <ahartmetz@gmail.com>
 // Copyright (C) 2011 Andrea Canciani <ranma42@gmail.com>
-// Copyright (C) 2011 Adrian Johnson <ajohnson@redneon.com>
+// Copyright (C) 2011, 2017 Adrian Johnson <ajohnson@redneon.com>
+// Copyright (C) 2012, 2015, 2018-2021 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2015, 2016 William Bader <williambader@hotmail.com>
+// Copyright (C) 2018 Stefan Brüns <stefan.bruens@rwth-aachen.de>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -29,17 +32,15 @@
 #ifndef SPLASHOUTPUTDEV_H
 #define SPLASHOUTPUTDEV_H
 
-#ifdef USE_GCC_PRAGMAS
-#pragma interface
-#endif
-
-#include "goo/gtypes.h"
 #include "splash/SplashTypes.h"
 #include "splash/SplashPattern.h"
 #include "poppler-config.h"
+#include "poppler_private_export.h"
 #include "OutputDev.h"
 #include "GfxState.h"
+#include "GlobalParams.h"
 
+class PDFDoc;
 class Gfx8BitFont;
 class SplashBitmap;
 class Splash;
@@ -52,135 +53,132 @@ struct T3GlyphStack;
 struct SplashTransparencyGroup;
 
 //------------------------------------------------------------------------
-// SplashOverprintColor
-//------------------------------------------------------------------------
-
-class SplashOverprintColor: public SplashPattern {
-public:
-  SplashOverprintColor(GfxColorSpace *colorSpace, SplashColorPtr colorA, Guchar tolerance);
-
-  virtual SplashPattern *copy() { return new SplashOverprintColor(colorSpace, color, tolerance); }
-
-  virtual ~SplashOverprintColor();
-
-  virtual GBool getColor(int x, int y, SplashColorPtr c);
-
-  virtual GBool testPosition(int x, int y) { return gFalse; }
-
-  virtual GBool isStatic() { return gTrue; }
-
-  virtual void overprint(GBool op, Guchar alphaSrc, SplashColorPtr colorSrc, 
-                         Guchar alphaDest, SplashColorPtr colorDest, SplashColorPtr colorResult);
-
-private:
-  GfxColorSpace *colorSpace;
-  SplashColor color;
-  Guchar tolerance;
-};
-
-//------------------------------------------------------------------------
 // Splash dynamic pattern
 //------------------------------------------------------------------------
 
-class SplashUnivariatePattern: public SplashPattern {
+class SplashFunctionPattern : public SplashPattern
+{
 public:
+    SplashFunctionPattern(SplashColorMode colorMode, GfxState *state, GfxFunctionShading *shading);
 
-  SplashUnivariatePattern(SplashColorMode colorMode, GfxState *state, GfxUnivariateShading *shading);
+    SplashPattern *copy() const override { return new SplashFunctionPattern(colorMode, state, (GfxFunctionShading *)shading); }
 
-  virtual ~SplashUnivariatePattern();
+    ~SplashFunctionPattern() override;
 
-  virtual GBool getColor(int x, int y, SplashColorPtr c);
+    bool testPosition(int x, int y) override { return true; }
 
-  virtual GBool testPosition(int x, int y);
+    bool isStatic() override { return false; }
 
-  virtual GBool isStatic() { return gFalse; }
+    bool getColor(int x, int y, SplashColorPtr c) override;
 
-  virtual GBool getParameter(double xs, double ys, double *t) = 0;
+    virtual GfxFunctionShading *getShading() { return shading; }
 
-  virtual GfxUnivariateShading *getShading() { return shading; }
+    bool isCMYK() override { return gfxMode == csDeviceCMYK; }
 
 protected:
-  Matrix ictm;
-  double t0, t1, dt;
-  GfxUnivariateShading *shading;
-  GfxState *state;
-  SplashColorMode colorMode;
+    Matrix ictm;
+    double xMin, yMin, xMax, yMax;
+    GfxFunctionShading *shading;
+    GfxState *state;
+    SplashColorMode colorMode;
+    GfxColorSpaceMode gfxMode;
 };
 
-class SplashAxialPattern: public SplashUnivariatePattern {
+class SplashUnivariatePattern : public SplashPattern
+{
 public:
+    SplashUnivariatePattern(SplashColorMode colorMode, GfxState *state, GfxUnivariateShading *shading);
 
-  SplashAxialPattern(SplashColorMode colorMode, GfxState *state, GfxAxialShading *shading);
+    ~SplashUnivariatePattern() override;
 
-  virtual SplashPattern *copy() { return new SplashAxialPattern(colorMode, state, (GfxAxialShading *) shading); }
+    bool getColor(int x, int y, SplashColorPtr c) override;
 
-  virtual ~SplashAxialPattern();
+    bool testPosition(int x, int y) override;
 
-  virtual GBool getParameter(double xs, double ys, double *t);
+    bool isStatic() override { return false; }
 
-  virtual void overprint(GBool op, Guchar alphaSrc, SplashColorPtr colorSrc, 
-                         Guchar alphaDest, SplashColorPtr colorDest, SplashColorPtr colorResult);
+    virtual bool getParameter(double xs, double ys, double *t) = 0;
+
+    virtual GfxUnivariateShading *getShading() { return shading; }
+
+    bool isCMYK() override { return gfxMode == csDeviceCMYK; }
+
+protected:
+    Matrix ictm;
+    double t0, t1, dt;
+    GfxUnivariateShading *shading;
+    GfxState *state;
+    SplashColorMode colorMode;
+    GfxColorSpaceMode gfxMode;
+};
+
+class SplashAxialPattern : public SplashUnivariatePattern
+{
+public:
+    SplashAxialPattern(SplashColorMode colorMode, GfxState *state, GfxAxialShading *shading);
+
+    SplashPattern *copy() const override { return new SplashAxialPattern(colorMode, state, (GfxAxialShading *)shading); }
+
+    ~SplashAxialPattern() override;
+
+    bool getParameter(double xc, double yc, double *t) override;
 
 private:
-  double x0, y0, x1, y1;
-  double dx, dy, mul;
-  SplashOverprintColor *opPattern;
+    double x0, y0, x1, y1;
+    double dx, dy, mul;
 };
 
 // see GfxState.h, GfxGouraudTriangleShading
-class SplashGouraudPattern: public SplashGouraudColor {
+class SplashGouraudPattern : public SplashGouraudColor
+{
 public:
+    SplashGouraudPattern(bool bDirectColorTranslation, GfxState *state, GfxGouraudTriangleShading *shading);
 
-  SplashGouraudPattern(GBool bDirectColorTranslation, GfxState *state, GfxGouraudTriangleShading *shading, SplashColorMode mode);
+    SplashPattern *copy() const override { return new SplashGouraudPattern(bDirectColorTranslation, state, shading); }
 
-  virtual SplashPattern *copy() { return new SplashGouraudPattern(bDirectColorTranslation, state, shading, mode); }
+    ~SplashGouraudPattern() override;
 
-  virtual ~SplashGouraudPattern();
+    bool getColor(int x, int y, SplashColorPtr c) override { return false; }
 
-  virtual GBool getColor(int x, int y, SplashColorPtr c) { return gFalse; }
+    bool testPosition(int x, int y) override { return false; }
 
-  virtual GBool testPosition(int x, int y) { return gFalse; }
+    bool isStatic() override { return false; }
 
-  virtual GBool isStatic() { return gFalse; }
+    bool isCMYK() override { return gfxMode == csDeviceCMYK; }
 
-  virtual GBool isParameterized() { return shading->isParameterized(); }
-  virtual int getNTriangles() { return shading->getNTriangles(); }
-  virtual  void getTriangle(int i, double *x0, double *y0, double *color0,
-                            double *x1, double *y1, double *color1,
-                            double *x2, double *y2, double *color2)
-  { return shading->getTriangle(i, x0, y0, color0, x1, y1, color1, x2, y2, color2); }
+    bool isParameterized() override { return shading->isParameterized(); }
+    int getNTriangles() override { return shading->getNTriangles(); }
+    void getParametrizedTriangle(int i, double *x0, double *y0, double *color0, double *x1, double *y1, double *color1, double *x2, double *y2, double *color2) override
+    {
+        shading->getTriangle(i, x0, y0, color0, x1, y1, color1, x2, y2, color2);
+    }
 
-  virtual void getParameterizedColor(double t, SplashColorMode mode, SplashColorPtr c);
+    void getNonParametrizedTriangle(int i, SplashColorMode mode, double *x0, double *y0, SplashColorPtr color0, double *x1, double *y1, SplashColorPtr color1, double *x2, double *y2, SplashColorPtr color2) override;
 
-  virtual void overprint(GBool op, Guchar alphaSrc, SplashColorPtr colorSrc, 
-                         Guchar alphaDest, SplashColorPtr colorDest, SplashColorPtr colorResult);
+    void getParameterizedColor(double colorinterp, SplashColorMode mode, SplashColorPtr dest) override;
+
 private:
-  GfxGouraudTriangleShading *shading;
-  GfxState *state;
-  GBool bDirectColorTranslation;
-  SplashOverprintColor *opPattern;
-  SplashColorMode mode;
+    GfxGouraudTriangleShading *shading;
+    GfxState *state;
+    bool bDirectColorTranslation;
+    GfxColorSpaceMode gfxMode;
 };
 
 // see GfxState.h, GfxRadialShading
-class SplashRadialPattern: public SplashUnivariatePattern {
+class SplashRadialPattern : public SplashUnivariatePattern
+{
 public:
+    SplashRadialPattern(SplashColorMode colorMode, GfxState *state, GfxRadialShading *shading);
 
-  SplashRadialPattern(SplashColorMode colorMode, GfxState *state, GfxRadialShading *shading);
+    SplashPattern *copy() const override { return new SplashRadialPattern(colorMode, state, (GfxRadialShading *)shading); }
 
-  virtual SplashPattern *copy() { return new SplashRadialPattern(colorMode, state, (GfxRadialShading *) shading); }
+    ~SplashRadialPattern() override;
 
-  virtual ~SplashRadialPattern();
-
-  virtual GBool getParameter(double xs, double ys, double *t);
-
-  virtual void overprint(GBool op, Guchar alphaSrc, SplashColorPtr colorSrc, 
-                         Guchar alphaDest, SplashColorPtr colorDest, SplashColorPtr colorResult);
+    bool getParameter(double xs, double ys, double *t) override;
 
 private:
-  double x0, y0, r0, dx, dy, dr;
-  double a, inva;
-  SplashOverprintColor *opPattern;
+    double x0, y0, r0, dx, dy, dr;
+    double a, inva;
 };
 
 //------------------------------------------------------------------------
@@ -192,249 +190,224 @@ private:
 // SplashOutputDev
 //------------------------------------------------------------------------
 
-class SplashOutputDev: public OutputDev {
+class POPPLER_PRIVATE_EXPORT SplashOutputDev : public OutputDev
+{
 public:
+    // Constructor.
+    SplashOutputDev(SplashColorMode colorModeA, int bitmapRowPadA, bool reverseVideoA, SplashColorPtr paperColorA, bool bitmapTopDownA = true, SplashThinLineMode thinLineMode = splashThinLineDefault, bool overprintPreviewA = false);
 
-  // Constructor.
-  SplashOutputDev(SplashColorMode colorModeA, int bitmapRowPadA,
-		  GBool reverseVideoA, SplashColorPtr paperColorA,
-		  GBool bitmapTopDownA = gTrue,
-		  GBool allowAntialiasA = gTrue);
+    // Destructor.
+    ~SplashOutputDev() override;
 
-  // Destructor.
-  virtual ~SplashOutputDev();
+    //----- get info about output device
 
-  //----- get info about output device
+    // Does this device use tilingPatternFill()?  If this returns false,
+    // tiling pattern fills will be reduced to a series of other drawing
+    // operations.
+    bool useTilingPatternFill() override { return true; }
 
-  // Does this device use tilingPatternFill()?  If this returns false,
-  // tiling pattern fills will be reduced to a series of other drawing
-  // operations.
-  virtual GBool useTilingPatternFill() { return gTrue; }
+    // Does this device use functionShadedFill(), axialShadedFill(), and
+    // radialShadedFill()?  If this returns false, these shaded fills
+    // will be reduced to a series of other drawing operations.
+    bool useShadedFills(int type) override { return (type >= 1 && type <= 5) ? true : false; }
 
-  // Does this device use functionShadedFill(), axialShadedFill(), and
-  // radialShadedFill()?  If this returns false, these shaded fills
-  // will be reduced to a series of other drawing operations.
-  virtual GBool useShadedFills(int type)
-  { return (type >= 2 && type <= 5) ? gTrue : gFalse; }
+    // Does this device use upside-down coordinates?
+    // (Upside-down means (0,0) is the top left corner of the page.)
+    bool upsideDown() override { return bitmapTopDown; }
 
-  // Does this device use upside-down coordinates?
-  // (Upside-down means (0,0) is the top left corner of the page.)
-  virtual GBool upsideDown() { return gTrue; }
+    // Does this device use drawChar() or drawString()?
+    bool useDrawChar() override { return true; }
 
-  // Does this device use drawChar() or drawString()?
-  virtual GBool useDrawChar() { return gTrue; }
+    // Does this device use beginType3Char/endType3Char?  Otherwise,
+    // text in Type 3 fonts will be drawn with drawChar/drawString.
+    bool interpretType3Chars() override { return true; }
 
-  // Does this device use beginType3Char/endType3Char?  Otherwise,
-  // text in Type 3 fonts will be drawn with drawChar/drawString.
-  virtual GBool interpretType3Chars() { return gTrue; }
+    //----- initialization and control
 
-  // This device now supports text in pattern colorspace!
-  virtual GBool supportTextCSPattern(GfxState *state)
-  	{ return state->getFillColorSpace()->getMode() == csPattern; }
+    // Start a page.
+    void startPage(int pageNum, GfxState *state, XRef *xref) override;
 
-  //----- initialization and control
+    // End a page.
+    void endPage() override;
 
-  // Start a page.
-  virtual void startPage(int pageNum, GfxState *state);
+    //----- save/restore graphics state
+    void saveState(GfxState *state) override;
+    void restoreState(GfxState *state) override;
 
-  // End a page.
-  virtual void endPage();
+    //----- update graphics state
+    void updateAll(GfxState *state) override;
+    void updateCTM(GfxState *state, double m11, double m12, double m21, double m22, double m31, double m32) override;
+    void updateLineDash(GfxState *state) override;
+    void updateFlatness(GfxState *state) override;
+    void updateLineJoin(GfxState *state) override;
+    void updateLineCap(GfxState *state) override;
+    void updateMiterLimit(GfxState *state) override;
+    void updateLineWidth(GfxState *state) override;
+    void updateStrokeAdjust(GfxState *state) override;
+    void updateFillColorSpace(GfxState *state) override;
+    void updateStrokeColorSpace(GfxState *state) override;
+    void updateFillColor(GfxState *state) override;
+    void updateStrokeColor(GfxState *state) override;
+    void updateBlendMode(GfxState *state) override;
+    void updateFillOpacity(GfxState *state) override;
+    void updateStrokeOpacity(GfxState *state) override;
+    void updatePatternOpacity(GfxState *state) override;
+    void clearPatternOpacity(GfxState *state) override;
+    void updateFillOverprint(GfxState *state) override;
+    void updateStrokeOverprint(GfxState *state) override;
+    void updateOverprintMode(GfxState *state) override;
+    void updateTransfer(GfxState *state) override;
 
-  //----- save/restore graphics state
-  virtual void saveState(GfxState *state);
-  virtual void restoreState(GfxState *state);
+    //----- update text state
+    void updateFont(GfxState *state) override;
 
-  //----- update graphics state
-  virtual void updateAll(GfxState *state);
-  virtual void updateCTM(GfxState *state, double m11, double m12,
-			 double m21, double m22, double m31, double m32);
-  virtual void updateLineDash(GfxState *state);
-  virtual void updateFlatness(GfxState *state);
-  virtual void updateLineJoin(GfxState *state);
-  virtual void updateLineCap(GfxState *state);
-  virtual void updateMiterLimit(GfxState *state);
-  virtual void updateLineWidth(GfxState *state);
-  virtual void updateStrokeAdjust(GfxState *state);
-  virtual void updateFillColor(GfxState *state);
-  virtual void updateStrokeColor(GfxState *state);
-  virtual void updateBlendMode(GfxState *state);
-  virtual void updateFillOpacity(GfxState *state);
-  virtual void updateStrokeOpacity(GfxState *state);
-  virtual void updateFillOverprint(GfxState *state);
-  virtual void updateStrokeOverprint(GfxState *state);
-  virtual void updateOverprintMode(GfxState *state);
+    //----- path painting
+    void stroke(GfxState *state) override;
+    void fill(GfxState *state) override;
+    void eoFill(GfxState *state) override;
+    bool tilingPatternFill(GfxState *state, Gfx *gfx, Catalog *catalog, GfxTilingPattern *tPat, const double *mat, int x0, int y0, int x1, int y1, double xStep, double yStep) override;
+    bool functionShadedFill(GfxState *state, GfxFunctionShading *shading) override;
+    bool axialShadedFill(GfxState *state, GfxAxialShading *shading, double tMin, double tMax) override;
+    bool radialShadedFill(GfxState *state, GfxRadialShading *shading, double tMin, double tMax) override;
+    bool gouraudTriangleShadedFill(GfxState *state, GfxGouraudTriangleShading *shading) override;
 
-  //----- update text state
-  virtual void updateFont(GfxState *state);
+    //----- path clipping
+    void clip(GfxState *state) override;
+    void eoClip(GfxState *state) override;
+    void clipToStrokePath(GfxState *state) override;
 
-  //----- path painting
-  virtual void stroke(GfxState *state);
-  virtual void fill(GfxState *state);
-  virtual void eoFill(GfxState *state);
-  virtual GBool tilingPatternFill(GfxState *state, Catalog *catalog, Object *str,
-				  double *pmat, int paintType, int tilingType, Dict *resDict,
-				  double *mat, double *bbox,
-				  int x0, int y0, int x1, int y1,
-				  double xStep, double yStep);
-  virtual GBool axialShadedFill(GfxState *state, GfxAxialShading *shading, double tMin, double tMax);
-  virtual GBool radialShadedFill(GfxState *state, GfxRadialShading *shading, double tMin, double tMax);
-  virtual GBool gouraudTriangleShadedFill(GfxState *state, GfxGouraudTriangleShading *shading);
+    //----- text drawing
+    void drawChar(GfxState *state, double x, double y, double dx, double dy, double originX, double originY, CharCode code, int nBytes, const Unicode *u, int uLen) override;
+    bool beginType3Char(GfxState *state, double x, double y, double dx, double dy, CharCode code, const Unicode *u, int uLen) override;
+    void endType3Char(GfxState *state) override;
+    void beginTextObject(GfxState *state) override;
+    void endTextObject(GfxState *state) override;
 
-  //----- path clipping
-  virtual void clip(GfxState *state);
-  virtual void eoClip(GfxState *state);
-  virtual void clipToStrokePath(GfxState *state);
+    //----- image drawing
+    void drawImageMask(GfxState *state, Object *ref, Stream *str, int width, int height, bool invert, bool interpolate, bool inlineImg) override;
+    void setSoftMaskFromImageMask(GfxState *state, Object *ref, Stream *str, int width, int height, bool invert, bool inlineImg, double *baseMatrix) override;
+    void unsetSoftMaskFromImageMask(GfxState *state, double *baseMatrix) override;
+    void drawImage(GfxState *state, Object *ref, Stream *str, int width, int height, GfxImageColorMap *colorMap, bool interpolate, const int *maskColors, bool inlineImg) override;
+    void drawMaskedImage(GfxState *state, Object *ref, Stream *str, int width, int height, GfxImageColorMap *colorMap, bool interpolate, Stream *maskStr, int maskWidth, int maskHeight, bool maskInvert, bool maskInterpolate) override;
+    void drawSoftMaskedImage(GfxState *state, Object *ref, Stream *str, int width, int height, GfxImageColorMap *colorMap, bool interpolate, Stream *maskStr, int maskWidth, int maskHeight, GfxImageColorMap *maskColorMap,
+                             bool maskInterpolate) override;
 
-  //----- text drawing
-  virtual void drawChar(GfxState *state, double x, double y,
-			double dx, double dy,
-			double originX, double originY,
-			CharCode code, int nBytes, Unicode *u, int uLen);
-  virtual GBool beginType3Char(GfxState *state, double x, double y,
-			       double dx, double dy,
-			       CharCode code, Unicode *u, int uLen);
-  virtual void endType3Char(GfxState *state);
-  virtual void beginTextObject(GfxState *state);
-  virtual GBool deviceHasTextClip(GfxState *state) { return textClipPath && haveCSPattern; }
-  virtual void endTextObject(GfxState *state);
+    //----- Type 3 font operators
+    void type3D0(GfxState *state, double wx, double wy) override;
+    void type3D1(GfxState *state, double wx, double wy, double llx, double lly, double urx, double ury) override;
 
-  //----- image drawing
-  virtual void drawImageMask(GfxState *state, Object *ref, Stream *str,
-			     int width, int height, GBool invert,
-			     GBool interpolate, GBool inlineImg);
-  virtual void drawImage(GfxState *state, Object *ref, Stream *str,
-			 int width, int height, GfxImageColorMap *colorMap,
-			 GBool interpolate, int *maskColors, GBool inlineImg);
-  virtual void drawMaskedImage(GfxState *state, Object *ref, Stream *str,
-			       int width, int height,
-			       GfxImageColorMap *colorMap,
-			       GBool interpolate,
-			       Stream *maskStr, int maskWidth, int maskHeight,
-			       GBool maskInvert, GBool maskInterpolate);
-  virtual void drawSoftMaskedImage(GfxState *state, Object *ref, Stream *str,
-				   int width, int height,
-				   GfxImageColorMap *colorMap,
-				   GBool interpolate,
-				   Stream *maskStr,
-				   int maskWidth, int maskHeight,
-				   GfxImageColorMap *maskColorMap,
-				   GBool maskInterpolate);
-  // If current colorspace ist pattern,
-  // need this device special handling for masks in pattern colorspace?
-  // Default is false
-  virtual GBool fillMaskCSPattern(GfxState * state)
-  	{ return state->getFillColorSpace()->getMode() == csPattern; }
-  virtual void endMaskClip(GfxState * /*state*/);
+    //----- transparency groups and soft masks
+    bool checkTransparencyGroup(GfxState *state, bool knockout) override;
+    void beginTransparencyGroup(GfxState *state, const double *bbox, GfxColorSpace *blendingColorSpace, bool isolated, bool knockout, bool forSoftMask) override;
+    void endTransparencyGroup(GfxState *state) override;
+    void paintTransparencyGroup(GfxState *state, const double *bbox) override;
+    void setSoftMask(GfxState *state, const double *bbox, bool alpha, Function *transferFunc, GfxColor *backdropColor) override;
+    void clearSoftMask(GfxState *state) override;
 
-  //----- Type 3 font operators
-  virtual void type3D0(GfxState *state, double wx, double wy);
-  virtual void type3D1(GfxState *state, double wx, double wy,
-		       double llx, double lly, double urx, double ury);
+    //----- special access
 
-  //----- transparency groups and soft masks
-  virtual void beginTransparencyGroup(GfxState *state, double *bbox,
-				      GfxColorSpace *blendingColorSpace,
-				      GBool isolated, GBool knockout,
-				      GBool forSoftMask);
-  virtual void endTransparencyGroup(GfxState *state);
-  virtual void paintTransparencyGroup(GfxState *state, double *bbox);
-  virtual void setSoftMask(GfxState *state, double *bbox, GBool alpha,
-			   Function *transferFunc, GfxColor *backdropColor);
-  virtual void clearSoftMask(GfxState *state);
+    // Called to indicate that a new PDF document has been loaded.
+    void startDoc(PDFDoc *docA);
 
-  //----- special access
+    void setPaperColor(SplashColorPtr paperColorA);
 
-  // Called to indicate that a new PDF document has been loaded.
-  void startDoc(XRef *xrefA);
- 
-  void setPaperColor(SplashColorPtr paperColorA);
+    bool isReverseVideo() { return reverseVideo; }
+    void setReverseVideo(bool reverseVideoA) { reverseVideo = reverseVideoA; }
 
-  GBool isReverseVideo() { return reverseVideo; }
-  void setReverseVideo(GBool reverseVideoA) { reverseVideo = reverseVideoA; }
+    // Get the bitmap and its size.
+    SplashBitmap *getBitmap() { return bitmap; }
+    int getBitmapWidth();
+    int getBitmapHeight();
 
-  // Get the bitmap and its size.
-  SplashBitmap *getBitmap() { return bitmap; }
-  int getBitmapWidth();
-  int getBitmapHeight();
+    // Returns the last rasterized bitmap, transferring ownership to the
+    // caller.
+    SplashBitmap *takeBitmap();
 
-  // Returns the last rasterized bitmap, transferring ownership to the
-  // caller.
-  SplashBitmap *takeBitmap();
+    // Get the Splash object.
+    Splash *getSplash() { return splash; }
 
-  // Get the Splash object.
-  Splash *getSplash() { return splash; }
+    SplashFont *getCurrentFont() { return font; }
 
-  // Get the modified region.
-  void getModRegion(int *xMin, int *yMin, int *xMax, int *yMax);
-
-  // Clear the modified region.
-  void clearModRegion();
-
-  SplashFont *getCurrentFont() { return font; }
+    // If <skipTextA> is true, don't draw horizontal text.
+    // If <skipRotatedTextA> is true, don't draw rotated (non-horizontal) text.
+    void setSkipText(bool skipHorizTextA, bool skipRotatedTextA)
+    {
+        skipHorizText = skipHorizTextA;
+        skipRotatedText = skipRotatedTextA;
+    }
 
 #if 1 //~tmp: turn off anti-aliasing temporarily
-  virtual GBool getVectorAntialias();
-  virtual void setVectorAntialias(GBool vaa);
+    bool getVectorAntialias() override;
+    void setVectorAntialias(bool vaa) override;
 #endif
 
-  void setFreeTypeHinting(GBool enable, GBool enableSlightHinting);
+    bool getFontAntialias() { return fontAntialias; }
+    void setFontAntialias(bool anti) { fontAntialias = anti; }
+
+    void setFreeTypeHinting(bool enable, bool enableSlightHinting);
+    void setEnableFreeType(bool enable) { enableFreeType = enable; }
+
+protected:
+    void doUpdateFont(GfxState *state);
 
 private:
-  GBool univariateShadedFill(GfxState *state, SplashUnivariatePattern *pattern, double tMin, double tMax);
+    bool univariateShadedFill(GfxState *state, SplashUnivariatePattern *pattern, double tMin, double tMax);
 
-  void setupScreenParams(double hDPI, double vDPI);
-#if SPLASH_CMYK
-  SplashPattern *getColor(GfxColorSpace *colorSpace, GfxGray gray, GfxRGB *rgb, GfxCMYK *cmyk);
-#else
-  SplashPattern *getColor(GfxGray gray, GfxRGB *rgb);
+    void setupScreenParams(double hDPI, double vDPI);
+    SplashPattern *getColor(GfxGray gray);
+    SplashPattern *getColor(GfxRGB *rgb);
+    SplashPattern *getColor(GfxCMYK *cmyk);
+    SplashPattern *getColor(GfxColor *deviceN);
+    static void getMatteColor(SplashColorMode colorMode, GfxImageColorMap *colorMap, const GfxColor *matteColor, SplashColor splashMatteColor);
+    void setOverprintMask(GfxColorSpace *colorSpace, bool overprintFlag, int overprintMode, const GfxColor *singleColor, bool grayIndexed = false);
+    SplashPath convertPath(GfxState *state, const GfxPath *path, bool dropEmptySubpaths);
+    void drawType3Glyph(GfxState *state, T3FontCache *t3Font, T3FontCacheTag *tag, unsigned char *data);
+#ifdef USE_CMS
+    bool useIccImageSrc(void *data);
+    static void iccTransform(void *data, SplashBitmap *bitmap);
+    static bool iccImageSrc(void *data, SplashColorPtr colorLine, unsigned char *alphaLine);
 #endif
-  SplashPath *convertPath(GfxState *state, GfxPath *path);
-  void doUpdateFont(GfxState *state);
-  void drawType3Glyph(T3FontCache *t3Font,
-		      T3FontCacheTag *tag, Guchar *data);
-  static GBool imageMaskSrc(void *data, SplashColorPtr line);
-  static GBool imageSrc(void *data, SplashColorPtr colorLine,
-			Guchar *alphaLine);
-  static GBool alphaImageSrc(void *data, SplashColorPtr line,
-			     Guchar *alphaLine);
-  static GBool maskedImageSrc(void *data, SplashColorPtr line,
-			      Guchar *alphaLine);
-  static GBool tilingBitmapSrc(void *data, SplashColorPtr line,
-			     Guchar *alphaLine);
+    static bool imageMaskSrc(void *data, SplashColorPtr line);
+    static bool imageSrc(void *data, SplashColorPtr colorLine, unsigned char *alphaLine);
+    static bool alphaImageSrc(void *data, SplashColorPtr line, unsigned char *alphaLine);
+    static bool maskedImageSrc(void *data, SplashColorPtr line, unsigned char *alphaLine);
+    static bool tilingBitmapSrc(void *data, SplashColorPtr line, unsigned char *alphaLine);
 
-  GBool haveCSPattern;		// set if text has been drawn with a
-							//   clipping render mode because of pattern colorspace
-  GBool keepAlphaChannel;	// don't fill with paper color, keep alpha channel
+    bool keepAlphaChannel; // don't fill with paper color, keep alpha channel
 
-  SplashColorMode colorMode;
-  int bitmapRowPad;
-  GBool bitmapTopDown;
-  GBool allowAntialias;
-  GBool vectorAntialias;
-  GBool enableFreeTypeHinting;
-  GBool enableSlightHinting;
-  GBool reverseVideo;		// reverse video mode
-  SplashColor paperColor;	// paper color
-  SplashScreenParams screenParams;
+    SplashColorMode colorMode;
+    int bitmapRowPad;
+    bool bitmapTopDown;
+    bool fontAntialias;
+    bool vectorAntialias;
+    bool overprintPreview;
+    bool enableFreeType;
+    bool enableFreeTypeHinting;
+    bool enableSlightHinting;
+    bool reverseVideo; // reverse video mode
+    SplashColor paperColor; // paper color
+    SplashScreenParams screenParams;
+    bool skipHorizText;
+    bool skipRotatedText;
 
-  XRef *xref;			// xref table for current document
+    PDFDoc *doc; // the current document
+    XRef *xref; // the xref of the current document
 
-  SplashBitmap *bitmap;
-  Splash *splash;
-  SplashFontEngine *fontEngine;
+    SplashBitmap *bitmap;
+    Splash *splash;
+    SplashFontEngine *fontEngine;
 
-  T3FontCache *			// Type 3 font cache
-    t3FontCache[splashOutT3FontCacheSize];
-  int nT3Fonts;			// number of valid entries in t3FontCache
-  T3GlyphStack *t3GlyphStack;	// Type 3 glyph context stack
+    T3FontCache * // Type 3 font cache
+            t3FontCache[splashOutT3FontCacheSize];
+    int nT3Fonts; // number of valid entries in t3FontCache
+    T3GlyphStack *t3GlyphStack; // Type 3 glyph context stack
 
-  SplashFont *font;		// current font
-  GBool needFontUpdate;		// set when the font needs to be updated
-  SplashPath *textClipPath;	// clipping path built with text object
+    SplashFont *font; // current font
+    bool needFontUpdate; // set when the font needs to be updated
+    SplashPath *textClipPath; // clipping path built with text object
 
-  SplashTransparencyGroup *	// transparency group stack
-    transpGroupStack;
-  SplashBitmap *maskBitmap; // for image masks in pattern colorspace
+    SplashTransparencyGroup * // transparency group stack
+            transpGroupStack;
 };
 
 #endif

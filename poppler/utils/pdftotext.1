@@ -1,8 +1,8 @@
-.\" Copyright 1997-2004 Glyph & Cog, LLC
-.TH pdftotext 1 "22 January 2004"
+.\" Copyright 1997-2011 Glyph & Cog, LLC
+.TH pdftotext 1 "15 August 2011"
 .SH NAME
 pdftotext \- Portable Document Format (PDF) to text converter
-(version 3.00)
+(version 3.03)
 .SH SYNOPSIS
 .B pdftotext
 [options]
@@ -24,7 +24,9 @@ to
 .IR file.txt .
 If 
 .I text-file
-is \'-', the text is sent to stdout.
+is \'-', the text is sent to stdout.  If
+.I PDF-file
+is \'-', it reads the PDF file from stdin.
 .SH OPTIONS
 .TP
 .BI \-f " number"
@@ -53,10 +55,19 @@ Maintain (as best as possible) the original physical layout of the
 text.  The default is to \'undo' physical layout (columns,
 hyphenation, etc.) and output the text in reading order.
 .TP
+.BI \-fixed " number"
+Assume fixed-pitch (or tabular) text, with the specified character
+width (in points).  This forces physical layout mode.
+.TP
 .B \-raw
 Keep the text in content stream order.  This is a hack which often
 "undoes" column formatting, etc.  Use of raw mode is no longer
 recommended.
+.TP
+.B \-nodiag
+Discard diagonal text (i.e., text that is not close to one of the
+0, 90, 180, or 270 degree axes). This is useful for skipping
+watermarks drawn on body text.
 .TP
 .B \-htmlmeta
 Generate a simple HTML file, including the meta information.  This
@@ -67,11 +78,21 @@ headers.
 Generate an XHTML file containing bounding box information for each
 word in the file.
 .TP
+.B \-bbox-layout
+Generate an XHTML file containing bounding box information for each
+block, line, and word in the file.
+.TP
+.B \-cropbox
+Use the crop box rather than the media box with \-bbox and \-bbox-layout.
+.TP
+.BI \-colspacing " number"
+Specifies how much spacing we allow after a word before considering adjacent text to be a new column, measured as a fraction of the font size. Current default is 0.7, old releases had a 0.3 default.
+.TP
 .BI \-enc " encoding-name"
 Sets the encoding to use for text output. This defaults to "UTF-8".
 .TP
 .B \-listenc
-Lits the available encodings
+Lists the available encodings
 .TP
 .BI \-eol " unix | dos | mac"
 Sets the end-of-line convention to use for text output.
@@ -120,12 +141,17 @@ Error related to PDF permissions.
 99
 Other error.
 .SH AUTHOR
-The pdftotext software and documentation are copyright 1996-2004 Glyph
+The pdftotext software and documentation are copyright 1996-2011 Glyph
 & Cog, LLC.
+.SH "SEE ALSO"
+.BR pdfdetach (1),
 .BR pdffonts (1),
 .BR pdfimages (1),
 .BR pdfinfo (1),
 .BR pdftocairo (1),
 .BR pdftohtml (1),
 .BR pdftoppm (1),
-.BR pdftops (1)
+.BR pdftops (1),
+.BR pdfseparate (1),
+.BR pdfsig (1),
+.BR pdfunite (1)

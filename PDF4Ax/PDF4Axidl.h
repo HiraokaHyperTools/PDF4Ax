@@ -3,12 +3,12 @@
 /* this ALWAYS GENERATED file contains the definitions for the interfaces */
 
 
- /* File created by MIDL compiler version 7.00.0555 */
-/* at Thu Feb 10 13:21:49 2022
+ /* File created by MIDL compiler version 8.01.0622 */
+/* at Tue Jan 19 12:14:07 2038
  */
 /* Compiler settings for PDF4Ax.idl:
-    Oicf, W1, Zp8, env=Win32 (32b run), target_arch=X86 7.00.0555 
-    protocol : dce , ms_ext, c_ext
+    Oicf, W1, Zp8, env=Win32 (32b run), target_arch=X86 8.01.0622 
+    protocol : dce , ms_ext, c_ext, robust
     error checks: allocation ref bounds_check enum stub_data 
     VC __declspec() decoration level: 
          __declspec(uuid()), __declspec(selectany), __declspec(novtable)
@@ -16,16 +16,20 @@
 */
 /* @@MIDL_FILE_HEADING(  ) */
 
-#pragma warning( disable: 4049 )  /* more than 64k source lines */
 
 
 /* verify that the <rpcndr.h> version is high enough to compile this file*/
 #ifndef __REQUIRED_RPCNDR_H_VERSION__
-#define __REQUIRED_RPCNDR_H_VERSION__ 440
+#define __REQUIRED_RPCNDR_H_VERSION__ 500
 #endif
 
 #include "rpc.h"
 #include "rpcndr.h"
+
+#ifndef __RPCNDR_H_VERSION__
+#error this stub requires an updated version of <rpcndr.h>
+#endif /* __RPCNDR_H_VERSION__ */
+
 
 #ifndef __PDF4Axidl_h__
 #define __PDF4Axidl_h__
@@ -39,12 +43,14 @@
 #ifndef ___DPDF4Ax_FWD_DEFINED__
 #define ___DPDF4Ax_FWD_DEFINED__
 typedef interface _DPDF4Ax _DPDF4Ax;
+
 #endif 	/* ___DPDF4Ax_FWD_DEFINED__ */
 
 
 #ifndef ___DPDF4AxEvents_FWD_DEFINED__
 #define ___DPDF4AxEvents_FWD_DEFINED__
 typedef interface _DPDF4AxEvents _DPDF4AxEvents;
+
 #endif 	/* ___DPDF4AxEvents_FWD_DEFINED__ */
 
 
@@ -64,6 +70,24 @@ typedef struct PDF4Ax PDF4Ax;
 extern "C"{
 #endif 
 
+
+/* interface __MIDL_itf_PDF4Ax_0000_0000 */
+/* [local] */ 
+
+#pragma warning(push)
+#pragma warning(disable:4001) 
+#pragma once
+#pragma warning(push)
+#pragma warning(disable:4001) 
+#pragma once
+#pragma warning(pop)
+#pragma warning(pop)
+#pragma region Desktop Family
+#pragma endregion
+
+
+extern RPC_IF_HANDLE __MIDL_itf_PDF4Ax_0000_0000_v0_0_c_ifspec;
+extern RPC_IF_HANDLE __MIDL_itf_PDF4Ax_0000_0000_v0_0_s_ifspec;
 
 
 #ifndef __PDF4AxLib_LIBRARY_DEFINED__
@@ -101,7 +125,7 @@ EXTERN_C const IID DIID__DPDF4Ax;
             _DPDF4Ax * This,
             /* [in] */ REFIID riid,
             /* [annotation][iid_is][out] */ 
-            __RPC__deref_out  void **ppvObject);
+            _COM_Outptr_  void **ppvObject);
         
         ULONG ( STDMETHODCALLTYPE *AddRef )( 
             _DPDF4Ax * This);
@@ -129,14 +153,22 @@ EXTERN_C const IID DIID__DPDF4Ax;
         
         /* [local] */ HRESULT ( STDMETHODCALLTYPE *Invoke )( 
             _DPDF4Ax * This,
-            /* [in] */ DISPID dispIdMember,
-            /* [in] */ REFIID riid,
-            /* [in] */ LCID lcid,
-            /* [in] */ WORD wFlags,
-            /* [out][in] */ DISPPARAMS *pDispParams,
-            /* [out] */ VARIANT *pVarResult,
-            /* [out] */ EXCEPINFO *pExcepInfo,
-            /* [out] */ UINT *puArgErr);
+            /* [annotation][in] */ 
+            _In_  DISPID dispIdMember,
+            /* [annotation][in] */ 
+            _In_  REFIID riid,
+            /* [annotation][in] */ 
+            _In_  LCID lcid,
+            /* [annotation][in] */ 
+            _In_  WORD wFlags,
+            /* [annotation][out][in] */ 
+            _In_  DISPPARAMS *pDispParams,
+            /* [annotation][out] */ 
+            _Out_opt_  VARIANT *pVarResult,
+            /* [annotation][out] */ 
+            _Out_opt_  EXCEPINFO *pExcepInfo,
+            /* [annotation][out] */ 
+            _Out_opt_  UINT *puArgErr);
         
         END_INTERFACE
     } _DPDF4AxVtbl;
@@ -208,7 +240,7 @@ EXTERN_C const IID DIID__DPDF4AxEvents;
             _DPDF4AxEvents * This,
             /* [in] */ REFIID riid,
             /* [annotation][iid_is][out] */ 
-            __RPC__deref_out  void **ppvObject);
+            _COM_Outptr_  void **ppvObject);
         
         ULONG ( STDMETHODCALLTYPE *AddRef )( 
             _DPDF4AxEvents * This);
@@ -236,14 +268,22 @@ EXTERN_C const IID DIID__DPDF4AxEvents;
         
         /* [local] */ HRESULT ( STDMETHODCALLTYPE *Invoke )( 
             _DPDF4AxEvents * This,
-            /* [in] */ DISPID dispIdMember,
-            /* [in] */ REFIID riid,
-            /* [in] */ LCID lcid,
-            /* [in] */ WORD wFlags,
-            /* [out][in] */ DISPPARAMS *pDispParams,
-            /* [out] */ VARIANT *pVarResult,
-            /* [out] */ EXCEPINFO *pExcepInfo,
-            /* [out] */ UINT *puArgErr);
+            /* [annotation][in] */ 
+            _In_  DISPID dispIdMember,
+            /* [annotation][in] */ 
+            _In_  REFIID riid,
+            /* [annotation][in] */ 
+            _In_  LCID lcid,
+            /* [annotation][in] */ 
+            _In_  WORD wFlags,
+            /* [annotation][out][in] */ 
+            _In_  DISPPARAMS *pDispParams,
+            /* [annotation][out] */ 
+            _Out_opt_  VARIANT *pVarResult,
+            /* [annotation][out] */ 
+            _Out_opt_  EXCEPINFO *pExcepInfo,
+            /* [annotation][out] */ 
+            _Out_opt_  UINT *puArgErr);
         
         END_INTERFACE
     } _DPDF4AxEventsVtbl;

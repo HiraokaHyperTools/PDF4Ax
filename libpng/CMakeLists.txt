@@ -6,7 +6,7 @@
 # For conditions of distribution and use, see the disclaimer
 # and license in png.h
 
-cmake_minimum_required(VERSION 2.4.4)
+cmake_minimum_required(VERSION 3.21)
 set(CMAKE_ALLOW_LOOSE_LOOP_CONSTRUCTS true)
 
 if(UNIX AND NOT DEFINED CMAKE_BUILD_TYPE)
@@ -106,9 +106,6 @@ endif()
 # SET LIBNAME
 set(PNG_LIB_NAME png${PNGLIB_MAJOR}${PNGLIB_MINOR})
 
-# to distinguish between debug and release lib
-set(CMAKE_DEBUG_POSTFIX "d")
-
 # Use the prebuilt pnglibconf.h file from the scripts folder
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/scripts/pnglibconf.h.prebuilt
                ${CMAKE_CURRENT_BINARY_DIR}/pnglibconf.h)
@@ -181,6 +178,12 @@ endif()
 # NOW BUILD OUR TARGET
 include_directories(${CMAKE_CURRENT_SOURCE_DIR} ${ZLIB_INCLUDE_DIR})
 
+if(MSVC)
+  add_compile_options(
+    $<IF:$<CONFIG:Debug>,/MTd,/MT>
+  )
+endif()
+
 if(PNG_SHARED)
   add_library(${PNG_LIB_NAME} SHARED ${libpng_sources})
   if(MSVC)
@@ -193,7 +196,7 @@ endif()
 
 if(PNG_STATIC)
 # does not work without changing name
-  set(PNG_LIB_NAME_STATIC ${PNG_LIB_NAME}_static)
+  set(PNG_LIB_NAME_STATIC ${PNG_LIB_NAME})
   add_library(${PNG_LIB_NAME_STATIC} STATIC ${libpng_sources})
   if(MSVC)
     # msvc does not append 'lib' - do it here to have consistent name

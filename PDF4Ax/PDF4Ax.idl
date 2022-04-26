@@ -24,6 +24,7 @@ library PDF4AxLib
 		properties:
 			[id(1001)] BSTR src;
 			[id(1002)] BSTR iv;
+			[id(1003)] BSTR title;
 	methods:
 
 			[id(DISPID_ABOUTBOX)] void AboutBox();

@@ -108,8 +108,6 @@ Section "–{‘Ì “±“ü" ;No components page, name is not important
 
   RegDLL "$INSTDIR\PDF4Ax.ocx"
   
-  File "..\GPL\pdftocairo.exe"
-  
   ExecWait 'icacls pdftocairo.exe /setintegritylevel low' $0
   DetailPrint "Œ‹‰Ê: $0"
 

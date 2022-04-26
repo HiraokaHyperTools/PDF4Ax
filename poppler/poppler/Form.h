@@ -6,22 +6,41 @@
 //
 // Copyright 2006 Julien Rebetez <julienr@svn.gnome.org>
 // Copyright 2007, 2008, 2011 Carlos Garcia Campos <carlosgc@gnome.org>
-// Copyright 2007-2010 Albert Astals Cid <aacid@kde.org>
+// Copyright 2007-2010, 2012, 2015-2022 Albert Astals Cid <aacid@kde.org>
 // Copyright 2010 Mark Riedesel <mark@klowner.com>
 // Copyright 2011 Pino Toscano <pino@kde.org>
+// Copyright 2012 Fabio D'Urso <fabiodurso@hotmail.it>
+// Copyright 2013 Adrian Johnson <ajohnson@redneon.com>
+// Copyright 2015 André Guerreiro <aguerreiro1985@gmail.com>
+// Copyright 2015 André Esser <bepandre@hotmail.com>
+// Copyright 2017 Roland Hieber <r.hieber@pengutronix.de>
+// Copyright 2017 Hans-Ulrich Jüttner <huj@froreich-bioscientia.de>
+// Copyright 2018 Andre Heinecke <aheinecke@intevation.de>
+// Copyright 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
+// Copyright 2018 Chinmoy Ranjan Pradhan <chinmoyrp65@protonmail.com>
+// Copyright 2019, 2020 Oliver Sander <oliver.sander@tu-dresden.de>
+// Copyright 2019 João Netto <joaonetto901@gmail.com>
+// Copyright 2020, 2021 Nelson Benítez León <nbenitezl@gmail.com>
+// Copyright 2020 Marek Kasik <mkasik@redhat.com>
+// Copyright 2020 Thorsten Behrens <Thorsten.Behrens@CIB.de>
+// Copyright 2020 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by Technische Universität Dresden
+// Copyright 2021 Georgiy Sgibnev <georgiy@sgibnev.com>. Work sponsored by lab50.net.
+// Copyright 2021 Theofilos Intzoglou <int.teo@gmail.com>
 //
 //========================================================================
 
 #ifndef FORM_H
 #define FORM_H
 
-#ifdef USE_GCC_PRAGMAS
-#pragma interface
-#endif
-
 #include "Object.h"
+#include "Annot.h"
+#include "poppler_private_export.h"
 
+#include <ctime>
+
+#include <optional>
 #include <set>
+#include <vector>
 
 class GooString;
 class Array;
@@ -29,28 +48,49 @@ class Dict;
 class Annot;
 class AnnotWidget;
 class Annots;
-class Catalog;
 class LinkAction;
 class GfxResources;
+class PDFDoc;
+class SignatureInfo;
+class X509CertificateInfo;
+class SignatureHandler;
 
-enum FormFieldType {
-  formButton,
-  formText,
-  formChoice,
-  formSignature,
-  formUndef
+enum FormFieldType
+{
+    formButton,
+    formText,
+    formChoice,
+    formSignature,
+    formUndef
 };
 
-enum FormButtonType {
-  formButtonCheck,
-  formButtonPush,
-  formButtonRadio
+enum FormButtonType
+{
+    formButtonCheck,
+    formButtonPush,
+    formButtonRadio
 };
 
-enum VariableTextQuadding {
-  quaddingLeftJustified,
-  quaddingCentered,
-  quaddingRightJustified
+enum VariableTextQuadding
+{
+    quaddingLeftJustified,
+    quaddingCentered,
+    quaddingRightJustified
+};
+
+enum FormSignatureType
+{
+    adbe_pkcs7_sha1,
+    adbe_pkcs7_detached,
+    ETSI_CAdES_detached,
+    unknown_signature_type,
+    unsigned_signature_field
+};
+
+enum FillValueType
+{
+    fillValue,
+    fillDefaultValue
 };
 
 class Form;
@@ -66,185 +106,233 @@ class FormFieldChoice;
 // to a page.
 //------------------------------------------------------------------------
 
-class FormWidget {
+class POPPLER_PRIVATE_EXPORT FormWidget
+{
 public:
-  virtual ~FormWidget();
+    virtual ~FormWidget();
 
-  // Check if point is inside the field bounding rect
-  GBool inRect(double x, double y) const;
+    // Check if point is inside the field bounding rect
+    bool inRect(double x, double y) const;
 
-  // Get the field bounding rect
-  void getRect(double *x1, double *y1, double *x2, double *y2) const;
+    // Get the field bounding rect
+    void getRect(double *x1, double *y1, double *x2, double *y2) const;
 
-  unsigned getID () { return ID; }
-  void setID (unsigned int i) { ID=i; }
+    unsigned getID() { return ID; }
+    void setID(unsigned int i) { ID = i; }
 
-  FormField *getField () { return field; }
-  FormFieldType getType() { return type; }
+    FormField *getField() { return field; }
+    FormFieldType getType() { return type; }
 
-  Object* getObj() { return &obj; }
-  Ref getRef() { return ref; }
+    Object *getObj() { return &obj; }
+    Ref getRef() { return ref; }
 
-  void setChildNum (unsigned i) { childNum = i; }
-  unsigned getChildNum () { return childNum; }
+    void setChildNum(unsigned i) { childNum = i; }
+    unsigned getChildNum() { return childNum; }
 
-  double getFontSize() const;
+    const GooString *getPartialName() const;
+    void setPartialName(const GooString &name);
+    const GooString *getAlternateUiName() const;
+    const GooString *getMappingName() const;
+    GooString *getFullyQualifiedName();
 
-  GooString *getPartialName() const;
-  GooString *getAlternateUiName() const;
-  GooString *getMappingName() const;
-  GooString *getFullyQualifiedName();
+    bool isModified() const;
 
-  GBool isModified () const;
+    bool isReadOnly() const;
+    void setReadOnly(bool value);
 
-  bool isReadOnly() const;
+    LinkAction *getActivationAction(); // The caller should not delete the result
+    std::unique_ptr<LinkAction> getAdditionalAction(Annot::FormAdditionalActionsType type);
+    bool setAdditionalAction(Annot::FormAdditionalActionsType t, const GooString &js);
 
-  LinkAction *getActivationAction();
+    // return the unique ID corresponding to pageNum/fieldNum
+    static int encodeID(unsigned pageNum, unsigned fieldNum);
+    // decode id and retrieve pageNum and fieldNum
+    static void decodeID(unsigned id, unsigned *pageNum, unsigned *fieldNum);
 
-  // return the unique ID corresponding to pageNum/fieldNum
-  static int encodeID (unsigned pageNum, unsigned fieldNum);
-  // decode id and retrieve pageNum and fieldNum
-  static void decodeID (unsigned id, unsigned* pageNum, unsigned* fieldNum);
+    void createWidgetAnnotation();
+    AnnotWidget *getWidgetAnnotation() const { return widget; }
+    void setWidgetAnnotation(AnnotWidget *_widget) { widget = _widget; }
 
-  void createWidgetAnnotation(Catalog *catalog);
-  AnnotWidget *getWidgetAnnotation() const { return widget; }
+    virtual void updateWidgetAppearance() = 0;
 
-#ifdef DEBUG_FORMS
-  void print(int indent = 0);
-#endif
+    void print(int indent = 0);
 
 protected:
-  FormWidget(XRef *xrefA, Object *aobj, unsigned num, Ref aref, FormField *fieldA);
+    FormWidget(PDFDoc *docA, Object *aobj, unsigned num, Ref aref, FormField *fieldA);
 
-  AnnotWidget *widget;
-  FormField* field;
-  FormFieldType type;
-  Object obj;
-  Ref ref;
-  XRef *xref;
+    AnnotWidget *widget;
+    FormField *field;
+    FormFieldType type;
+    Object obj;
+    Ref ref;
+    PDFDoc *doc;
+    XRef *xref;
 
-  //index of this field in the parent's child list
-  unsigned childNum;
+    // index of this field in the parent's child list
+    unsigned childNum;
 
-  /*
-  Field ID is an (unsigned) integer, calculated as follow :
-  the first sizeof/2 bits are the field number, relative to the page
-  the last sizeof/2 bits are the page number
-  [page number | field number]
-  (encoding) id = (pageNum << 4*sizeof(unsigned)) + fieldNum;
-  (decoding) pageNum = id >> 4*sizeof(unsigned); fieldNum = (id << 4*sizeof(unsigned)) >> 4*sizeof(unsigned);
-  */
-  unsigned ID; 
+    /*
+    Field ID is an (unsigned) integer, calculated as follow :
+    the first sizeof/2 bits are the field number, relative to the page
+    the last sizeof/2 bits are the page number
+    [page number | field number]
+    (encoding) id = (pageNum << 4*sizeof(unsigned)) + fieldNum;
+    (decoding) pageNum = id >> 4*sizeof(unsigned); fieldNum = (id << 4*sizeof(unsigned)) >> 4*sizeof(unsigned);
+    */
+    unsigned ID;
 };
 
 //------------------------------------------------------------------------
 // FormWidgetButton
 //------------------------------------------------------------------------
 
-class FormWidgetButton: public FormWidget {
+class POPPLER_PRIVATE_EXPORT FormWidgetButton : public FormWidget
+{
 public:
-  FormWidgetButton(XRef *xrefA, Object *dict, unsigned num, Ref ref, FormField *p);
-  ~FormWidgetButton ();
+    FormWidgetButton(PDFDoc *docA, Object *dictObj, unsigned num, Ref ref, FormField *p);
+    ~FormWidgetButton() override;
 
-  FormButtonType getButtonType() const;
-  
-  void setState (GBool state);
-  GBool getState ();
+    FormButtonType getButtonType() const;
 
-  char* getOnStr();
-  void setAppearanceState(char *state);
+    void setState(bool state);
+    bool getState() const;
 
-  void setNumSiblingsID (int i);
-  void setSiblingsID (int i, unsigned id) { siblingsID[i] = id; }
-
-  //For radio buttons, return the IDs of the other radio buttons in the same group
-  unsigned* getSiblingsID () const { return siblingsID; }
-  int getNumSiblingsID () const { return numSiblingsID; }
+    const char *getOnStr() const;
+    void setAppearanceState(const char *state);
+    void updateWidgetAppearance() override;
 
 protected:
-  unsigned* siblingsID; // IDs of dependent buttons (each button of a radio field has all the others buttons
-                        // of the same field in this array)
-  int numSiblingsID;
-  GooString *onStr;
-  FormFieldButton *parent;
+    FormFieldButton *parent() const;
+    GooString *onStr;
 };
 
 //------------------------------------------------------------------------
 // FormWidgetText
 //------------------------------------------------------------------------
 
-class FormWidgetText: public FormWidget {
+class POPPLER_PRIVATE_EXPORT FormWidgetText : public FormWidget
+{
 public:
-  FormWidgetText(XRef *xrefA, Object *dict, unsigned num, Ref ref, FormField *p);
-  //return the field's content (UTF16BE)
-  GooString* getContent() ;
-  //return a copy of the field's content (UTF16BE)
-  GooString* getContentCopy();
+    FormWidgetText(PDFDoc *docA, Object *dictObj, unsigned num, Ref ref, FormField *p);
+    // return the field's content (UTF16BE)
+    const GooString *getContent() const;
 
-  //except a UTF16BE string
-  void setContent(GooString* new_content);
+    // expects a UTF16BE string
+    void setContent(const GooString *new_content);
+    // sets the text inside the field appearance stream
+    void setAppearanceContent(const GooString *new_content);
 
-  bool isMultiline () const; 
-  bool isPassword () const; 
-  bool isFileSelect () const; 
-  bool noSpellCheck () const; 
-  bool noScroll () const; 
-  bool isComb () const; 
-  bool isRichText () const;
-  int getMaxLen () const;
+    void updateWidgetAppearance() override;
+
+    bool isMultiline() const;
+    bool isPassword() const;
+    bool isFileSelect() const;
+    bool noSpellCheck() const;
+    bool noScroll() const;
+    bool isComb() const;
+    bool isRichText() const;
+    int getMaxLen() const;
+    // return the font size of the field's text
+    double getTextFontSize();
+    // set the font size of the field's text (currently only integer values)
+    void setTextFontSize(int fontSize);
+
 protected:
-  FormFieldText *parent;
+    FormFieldText *parent() const;
 };
 
 //------------------------------------------------------------------------
 // FormWidgetChoice
 //------------------------------------------------------------------------
 
-class FormWidgetChoice: public FormWidget {
+class POPPLER_PRIVATE_EXPORT FormWidgetChoice : public FormWidget
+{
 public:
-  FormWidgetChoice(XRef *xrefA, Object *dict, unsigned num, Ref ref, FormField *p);
-  ~FormWidgetChoice();
+    FormWidgetChoice(PDFDoc *docA, Object *dictObj, unsigned num, Ref ref, FormField *p);
+    ~FormWidgetChoice() override;
 
-  int getNumChoices();
-  //return the display name of the i-th choice (UTF16BE)
-  GooString* getChoice(int i);
-  //select the i-th choice
-  void select (int i); 
+    int getNumChoices() const;
+    // return the display name of the i-th choice (UTF16BE)
+    const GooString *getChoice(int i) const;
+    const GooString *getExportVal(int i) const;
+    // select the i-th choice
+    void select(int i);
 
-  //toggle selection of the i-th choice
-  void toggle (int i);
+    // toggle selection of the i-th choice
+    void toggle(int i);
 
-  //deselect everything
-  void deselectAll ();
+    // deselect everything
+    void deselectAll();
 
-  //except a UTF16BE string
-  //only work for editable combo box, set the user-entered text as the current choice
-  void setEditChoice(GooString* new_content);
+    // except a UTF16BE string
+    // only work for editable combo box, set the user-entered text as the current choice
+    void setEditChoice(const GooString *new_content);
 
-  GooString* getEditChoice ();
+    const GooString *getEditChoice() const;
 
-  bool isSelected (int i);
+    void updateWidgetAppearance() override;
+    bool isSelected(int i) const;
 
-  bool isCombo () const; 
-  bool hasEdit () const; 
-  bool isMultiSelect () const; 
-  bool noSpellCheck () const; 
-  bool commitOnSelChange () const; 
-  bool isListBox () const;
+    bool isCombo() const;
+    bool hasEdit() const;
+    bool isMultiSelect() const;
+    bool noSpellCheck() const;
+    bool commitOnSelChange() const;
+    bool isListBox() const;
+
 protected:
-  bool _checkRange (int i);
-  FormFieldChoice *parent;
+    bool _checkRange(int i) const;
+    FormFieldChoice *parent() const;
 };
 
 //------------------------------------------------------------------------
 // FormWidgetSignature
 //------------------------------------------------------------------------
 
-class FormWidgetSignature: public FormWidget {
+class POPPLER_PRIVATE_EXPORT FormWidgetSignature : public FormWidget
+{
 public:
-  FormWidgetSignature(XRef *xrefA, Object *dict, unsigned num, Ref ref, FormField *p);
-protected:
-  FormFieldSignature *parent;
+    FormWidgetSignature(PDFDoc *docA, Object *dictObj, unsigned num, Ref ref, FormField *p);
+    void updateWidgetAppearance() override;
+
+    FormSignatureType signatureType() const;
+    void setSignatureType(FormSignatureType fst);
+
+    // Use -1 for now as validationTime
+    SignatureInfo *validateSignature(bool doVerifyCert, bool forceRevalidation, time_t validationTime, bool ocspRevocationCheck, bool enableAIA);
+
+    // returns a list with the boundaries of the signed ranges
+    // the elements of the list are of type Goffset
+    std::vector<Goffset> getSignedRangeBounds() const;
+
+    // Creates or replaces the dictionary name "V" in the signature dictionary and
+    // fills it with the fields of the signature; the field "Contents" is the signature
+    // in PKCS#7 format, which is calculated over the byte range encompassing the whole
+    // document except for the signature itself; this byte range is specified in the
+    // field "ByteRange" in the dictionary "V".
+    // Arguments reason and location are UTF-16 big endian strings with BOM. An empty string and nullptr are acceptable too.
+    // Returns success.
+    bool signDocument(const char *filename, const char *certNickname, const char *digestName, const char *password, const GooString *reason = nullptr, const GooString *location = nullptr, const GooString *ownerPassword = nullptr,
+                      const GooString *userPassword = nullptr);
+
+    // Same as above but adds text, font color, etc.
+    bool signDocumentWithAppearance(const char *filename, const char *certNickname, const char *digestName, const char *password, const GooString *reason = nullptr, const GooString *location = nullptr,
+                                    const GooString *ownerPassword = nullptr, const GooString *userPassword = nullptr, const GooString &signatureText = {}, const GooString &signatureTextLeft = {}, double fontSize = {},
+                                    std::unique_ptr<AnnotColor> &&fontColor = {}, double borderWidth = {}, std::unique_ptr<AnnotColor> &&borderColor = {}, std::unique_ptr<AnnotColor> &&backgroundColor = {});
+
+    // checks the length encoding of the signature and returns the hex encoded signature
+    // if the check passed (and the checked file size as output parameter in checkedFileSize)
+    // otherwise a nullptr is returned
+    std::optional<GooString> getCheckedSignature(Goffset *checkedFileSize);
+
+    const GooString *getSignature() const;
+
+private:
+    bool createSignature(Object &vObj, Ref vRef, const GooString &name, const GooString *signature, const GooString *reason = nullptr, const GooString *location = nullptr);
+    bool getObjectStartEnd(GooString *filename, int objNum, Goffset *objStart, Goffset *objEnd, const GooString *ownerPassword, const GooString *userPassword);
+    bool updateOffsets(FILE *f, Goffset objStart, Goffset objEnd, Goffset *sigStart, Goffset *sigEnd, Goffset *fileSize);
+
+    bool updateSignature(FILE *f, Goffset sigStart, Goffset sigEnd, const GooString *signature);
 };
 
 //------------------------------------------------------------------------
@@ -254,231 +342,321 @@ protected:
 // only interact with FormWidgets.
 //------------------------------------------------------------------------
 
-class FormField {
+class FormField
+{
 public:
-  FormField(XRef* xrefa, Object *aobj, const Ref& aref, FormField *parent, std::set<int> *usedParents, FormFieldType t=formUndef);
+    FormField(PDFDoc *docA, Object &&aobj, const Ref aref, FormField *parent, std::set<int> *usedParents, FormFieldType t = formUndef);
 
-  virtual ~FormField();
+    virtual ~FormField();
 
-  // Accessors.
-  FormFieldType getType() { return type; }
-  Object* getObj() { return &obj; }
-  Ref getRef() { return ref; }
+    // Accessors.
+    FormFieldType getType() const { return type; }
+    Object *getObj() { return &obj; }
+    Ref getRef() { return ref; }
 
-  void setReadOnly (bool b) { readOnly = b; }
-  bool isReadOnly () const { return readOnly; }
+    void setReadOnly(bool value);
+    bool isReadOnly() const { return readOnly; }
+    void setStandAlone(bool value) { standAlone = value; }
+    bool isStandAlone() const { return standAlone; }
 
-  GBool isModified () const;
+    GooString *getDefaultAppearance() const { return defaultAppearance; }
+    void setDefaultAppearance(const std::string &appearance);
 
-  GooString* getDefaultAppearance() const { return defaultAppearance; }
-  GBool hasTextQuadding() const { return hasQuadding; }
-  VariableTextQuadding getTextQuadding() const { return quadding; }
+    bool hasTextQuadding() const { return hasQuadding; }
+    VariableTextQuadding getTextQuadding() const { return quadding; }
 
-  GooString *getPartialName() const { return partialName; }
-  GooString *getAlternateUiName() const { return alternateUiName; }
-  GooString *getMappingName() const { return mappingName; }
-  GooString *getFullyQualifiedName();
+    const GooString *getPartialName() const { return partialName; }
+    void setPartialName(const GooString &name);
+    const GooString *getAlternateUiName() const { return alternateUiName; }
+    const GooString *getMappingName() const { return mappingName; }
+    GooString *getFullyQualifiedName();
 
-  FormWidget* findWidgetByRef (Ref aref);
-  FormWidget *getWidget(int i) { return terminal ? widgets[i] : NULL; }
+    FormWidget *findWidgetByRef(Ref aref);
+    int getNumWidgets() const { return terminal ? numChildren : 0; }
+    FormWidget *getWidget(int i) const { return terminal ? widgets[i] : nullptr; }
+    int getNumChildren() const { return !terminal ? numChildren : 0; }
+    FormField *getChildren(int i) const { return children[i]; }
 
-  // only implemented in FormFieldButton
-  virtual void fillChildrenSiblingsID ();
+    // only implemented in FormFieldButton
+    virtual void fillChildrenSiblingsID();
 
-  void createWidgetAnnotations(Catalog *catalog);
+    void createWidgetAnnotations();
 
-#ifdef DEBUG_FORMS
-  void printTree(int indent = 0);
-  virtual void print(int indent = 0);
-#endif
+    void printTree(int indent = 0);
+    virtual void print(int indent = 0);
+    virtual void reset(const std::vector<std::string> &excludedFields);
+    void resetChildren(const std::vector<std::string> &excludedFields);
+    FormField *findFieldByRef(Ref aref);
+    FormField *findFieldByFullyQualifiedName(const std::string &name);
 
+protected:
+    void _createWidget(Object *obj, Ref aref);
+    void createChildren(std::set<int> *usedParents);
+    void updateChildrenAppearance();
+    bool isAmongExcludedFields(const std::vector<std::string> &excludedFields);
 
- protected:
-  void _createWidget (Object *obj, Ref aref);
-  void createChildren(std::set<int> *usedParents);
+    FormFieldType type; // field type
+    Ref ref;
+    bool terminal;
+    Object obj;
+    PDFDoc *doc;
+    XRef *xref;
+    FormField **children;
+    FormField *parent;
+    int numChildren;
+    FormWidget **widgets;
+    bool readOnly;
 
-  FormFieldType type;           // field type
-  Ref ref;
-  bool terminal;
-  Object obj;
-  XRef *xref;
-  FormField **children;
-  FormField *parent;
-  int numChildren;
-  FormWidget **widgets;
-  bool readOnly;
-  GBool modified;
+    GooString *partialName; // T field
+    GooString *alternateUiName; // TU field
+    GooString *mappingName; // TM field
+    GooString *fullyQualifiedName;
 
-  GooString *partialName; // T field
-  GooString *alternateUiName; // TU field
-  GooString *mappingName; // TM field
-  GooString *fullyQualifiedName;
+    // Variable Text
+    GooString *defaultAppearance;
+    bool hasQuadding;
+    VariableTextQuadding quadding;
 
-  // Variable Text
-  GooString *defaultAppearance;
-  GBool hasQuadding;
-  VariableTextQuadding quadding;
+    // True when FormField is not part of Catalog's Field array (or there isn't one).
+    bool standAlone;
 
 private:
-  FormField() {}
+    FormField() { }
 };
-
 
 //------------------------------------------------------------------------
 // FormFieldButton
 //------------------------------------------------------------------------
 
-class FormFieldButton: public FormField {
+class FormFieldButton : public FormField
+{
 public:
-  FormFieldButton(XRef *xrefA, Object *dict, const Ref& ref, FormField *parent, std::set<int> *usedParents);
+    FormFieldButton(PDFDoc *docA, Object &&dict, const Ref ref, FormField *parent, std::set<int> *usedParents);
 
-  FormButtonType getButtonType () { return btype; }
+    FormButtonType getButtonType() const { return btype; }
 
-  bool noToggleToOff () const { return noAllOff; }
+    bool noToggleToOff() const { return noAllOff; }
 
-  // returns gTrue if the state modification is accepted
-  GBool setState (char *state);
-  GBool getState(char *state);
+    // returns true if the state modification is accepted
+    bool setState(const char *state, bool ignoreToggleOff = false);
+    bool getState(const char *state) const;
 
-  char *getAppearanceState() { return appearanceState.isName() ? appearanceState.getName() : NULL; }
+    const char *getAppearanceState() const { return appearanceState.isName() ? appearanceState.getName() : nullptr; }
+    const char *getDefaultAppearanceState() const { return defaultAppearanceState.isName() ? defaultAppearanceState.getName() : nullptr; }
 
-  void fillChildrenSiblingsID ();
+    void fillChildrenSiblingsID() override;
 
-#ifdef DEBUG_FORMS
-  void print(int indent = 0);
-#endif
+    void setNumSiblings(int num);
+    void setSibling(int i, FormFieldButton *id) { siblings[i] = id; }
 
-  virtual ~FormFieldButton();
+    // For radio buttons, return the fields of the other radio buttons in the same group
+    FormFieldButton *getSibling(int i) const { return siblings[i]; }
+    int getNumSiblings() const { return numSiblings; }
+
+    void print(int indent) override;
+    void reset(const std::vector<std::string> &excludedFields) override;
+
+    ~FormFieldButton() override;
+
 protected:
-  void updateState(char *state);
+    void updateState(const char *state);
 
-  FormButtonType btype;
-  int size;
-  int active_child; //only used for combo box
-  bool noAllOff;
-  Object appearanceState; // V
+    FormFieldButton **siblings; // IDs of dependent buttons (each button of a radio field has all the others buttons
+                                // of the same field in this array)
+    int numSiblings;
+
+    FormButtonType btype;
+    int size;
+    int active_child; // only used for combo box
+    bool noAllOff;
+    Object appearanceState; // V
+    Object defaultAppearanceState; // DV
 };
 
 //------------------------------------------------------------------------
 // FormFieldText
 //------------------------------------------------------------------------
 
-class FormFieldText: public FormField {
+class FormFieldText : public FormField
+{
 public:
-  FormFieldText(XRef *xrefA, Object *dict, const Ref& ref, FormField *parent, std::set<int> *usedParents);
-  
-  GooString* getContent () { return content; }
-  GooString* getContentCopy ();
-  void setContentCopy (GooString* new_content);
-  virtual ~FormFieldText();
+    FormFieldText(PDFDoc *docA, Object &&dictObj, const Ref ref, FormField *parent, std::set<int> *usedParents);
 
-  bool isMultiline () const { return multiline; }
-  bool isPassword () const { return password; }
-  bool isFileSelect () const { return fileSelect; }
-  bool noSpellCheck () const { return doNotSpellCheck; }
-  bool noScroll () const { return doNotScroll; }
-  bool isComb () const { return comb; }
-  bool isRichText () const { return richText; }
+    const GooString *getContent() const { return content; }
+    const GooString *getAppearanceContent() const { return internalContent ? internalContent : content; }
+    void setContentCopy(const GooString *new_content);
+    void setAppearanceContentCopy(const GooString *new_content);
+    ~FormFieldText() override;
 
-  int getMaxLen () const { return maxLen; }
+    bool isMultiline() const { return multiline; }
+    bool isPassword() const { return password; }
+    bool isFileSelect() const { return fileSelect; }
+    bool noSpellCheck() const { return doNotSpellCheck; }
+    bool noScroll() const { return doNotScroll; }
+    bool isComb() const { return comb; }
+    bool isRichText() const { return richText; }
 
-#ifdef DEBUG_FORMS
-  void print(int indent = 0);
-#endif
+    int getMaxLen() const { return maxLen; }
+
+    // return the font size of the field's text
+    double getTextFontSize();
+    // set the font size of the field's text (currently only integer values)
+    void setTextFontSize(int fontSize);
+
+    void print(int indent) override;
+    void reset(const std::vector<std::string> &excludedFields) override;
+
+    static int tokenizeDA(const std::string &daString, std::vector<std::string> *daToks, const char *searchTok);
+
 protected:
-  GooString* content;
-  bool multiline;
-  bool password;
-  bool fileSelect;
-  bool doNotSpellCheck;
-  bool doNotScroll;
-  bool comb;
-  bool richText;
-  int maxLen;
+    int parseDA(std::vector<std::string> *daToks);
+    void fillContent(FillValueType fillType);
+
+    GooString *content;
+    GooString *internalContent;
+    GooString *defaultContent;
+    bool multiline;
+    bool password;
+    bool fileSelect;
+    bool doNotSpellCheck;
+    bool doNotScroll;
+    bool comb;
+    bool richText;
+    int maxLen;
 };
 
 //------------------------------------------------------------------------
 // FormFieldChoice
 //------------------------------------------------------------------------
 
-class FormFieldChoice: public FormField {
+class FormFieldChoice : public FormField
+{
 public:
-  FormFieldChoice(XRef *xrefA, Object *aobj, const Ref& ref, FormField *parent, std::set<int> *usedParents);
+    FormFieldChoice(PDFDoc *docA, Object &&aobj, const Ref ref, FormField *parent, std::set<int> *usedParents);
 
-  virtual ~FormFieldChoice();
+    ~FormFieldChoice() override;
 
-  int getNumChoices() { return numChoices; }
-  GooString* getChoice(int i) { return choices ? choices[i].optionName : NULL; }
-  GooString* getExportVal (int i) { return choices ? choices[i].exportVal : NULL; }
-  // For multi-select choices it returns the first one
-  GooString* getSelectedChoice();
+    int getNumChoices() const { return numChoices; }
+    const GooString *getChoice(int i) const { return choices ? choices[i].optionName : nullptr; }
+    const GooString *getExportVal(int i) const { return choices ? choices[i].exportVal : nullptr; }
+    // For multi-select choices it returns the first one
+    const GooString *getSelectedChoice() const;
 
-  //select the i-th choice
-  void select (int i); 
+    // select the i-th choice
+    void select(int i);
 
-  //toggle selection of the i-th choice
-  void toggle (int i);
+    // toggle selection of the i-th choice
+    void toggle(int i);
 
-  //deselect everything
-  void deselectAll ();
+    // deselect everything
+    void deselectAll();
 
-  //only work for editable combo box, set the user-entered text as the current choice
-  void setEditChoice(GooString* new_content);
+    // only work for editable combo box, set the user-entered text as the current choice
+    void setEditChoice(const GooString *new_content);
 
-  GooString* getEditChoice ();
+    const GooString *getEditChoice() const;
 
-  bool isSelected (int i) { return choices[i].selected; }
+    bool isSelected(int i) const { return choices[i].selected; }
 
-  int getNumSelected ();
+    int getNumSelected();
 
-  bool isCombo () const { return combo; }
-  bool hasEdit () const { return edit; }
-  bool isMultiSelect () const { return multiselect; }
-  bool noSpellCheck () const { return doNotSpellCheck; }
-  bool commitOnSelChange () const { return doCommitOnSelChange; }
-  bool isListBox () const { return !combo; }
+    bool isCombo() const { return combo; }
+    bool hasEdit() const { return edit; }
+    bool isMultiSelect() const { return multiselect; }
+    bool noSpellCheck() const { return doNotSpellCheck; }
+    bool commitOnSelChange() const { return doCommitOnSelChange; }
+    bool isListBox() const { return !combo; }
 
-  int getTopIndex() const { return topIdx; }
+    int getTopIndex() const { return topIdx; }
 
-#ifdef DEBUG_FORMS
-  void print(int indent = 0);
-#endif
+    void print(int indent) override;
+    void reset(const std::vector<std::string> &excludedFields) override;
 
 protected:
-  void unselectAll();
-  void updateSelection();
+    void unselectAll();
+    void updateSelection();
+    void fillChoices(FillValueType fillType);
 
-  bool combo;
-  bool edit;
-  bool multiselect;
-  bool doNotSpellCheck;
-  bool doCommitOnSelChange;
+    bool combo;
+    bool edit;
+    bool multiselect;
+    bool doNotSpellCheck;
+    bool doCommitOnSelChange;
 
-  struct ChoiceOpt {
-    GooString* exportVal; //the export value ("internal" name)
-    GooString* optionName; //displayed name
-    bool selected; //if this choice is selected
-  };
+    struct ChoiceOpt
+    {
+        GooString *exportVal; // the export value ("internal" name)
+        GooString *optionName; // displayed name
+        bool selected; // if this choice is selected
+    };
 
-  int numChoices;
-  ChoiceOpt* choices;
-  GooString* editedChoice;
-  int topIdx; // TI
+    int numChoices;
+    ChoiceOpt *choices;
+    bool *defaultChoices;
+    GooString *editedChoice;
+    int topIdx; // TI
 };
 
 //------------------------------------------------------------------------
 // FormFieldSignature
 //------------------------------------------------------------------------
 
-class FormFieldSignature: public FormField {
+class POPPLER_PRIVATE_EXPORT FormFieldSignature : public FormField
+{
 public:
-  FormFieldSignature(XRef *xrefA, Object *dict, const Ref& ref, FormField *parent, std::set<int> *usedParents);
+    FormFieldSignature(PDFDoc *docA, Object &&dict, const Ref ref, FormField *parent, std::set<int> *usedParents);
 
-  virtual ~FormFieldSignature();
+    // Use -1 for now as validationTime
+    SignatureInfo *validateSignature(bool doVerifyCert, bool forceRevalidation, time_t validationTime, bool ocspRevocationCheck, bool enableAIA);
 
-#ifdef DEBUG_FORMS
-  void print(int indent = 0);
-#endif
+    // returns a list with the boundaries of the signed ranges
+    // the elements of the list are of type Goffset
+    std::vector<Goffset> getSignedRangeBounds() const;
+
+    // checks the length encoding of the signature and returns the hex encoded signature
+    // if the check passed (and the checked file size as output parameter in checkedFileSize)
+    // otherwise a nullptr is returned
+    std::optional<GooString> getCheckedSignature(Goffset *checkedFileSize);
+
+    ~FormFieldSignature() override;
+    Object *getByteRange() { return &byte_range; }
+    const GooString *getSignature() const { return signature; }
+    void setSignature(const GooString &sig);
+    FormSignatureType getSignatureType() const { return signature_type; }
+    void setSignatureType(FormSignatureType t) { signature_type = t; }
+
+    const GooString &getCustomAppearanceContent() const;
+    void setCustomAppearanceContent(const GooString &s);
+
+    const GooString &getCustomAppearanceLeftContent() const;
+    void setCustomAppearanceLeftContent(const GooString &s);
+
+    double getCustomAppearanceLeftFontSize() const;
+    void setCustomAppearanceLeftFontSize(double size);
+
+    // Background image (ref to an object of type XObject). Invalid ref if not required.
+    Ref getImageResource() const;
+    void setImageResource(const Ref imageResourceA);
+
+    void setCertificateInfo(std::unique_ptr<X509CertificateInfo> &);
+
+    FormWidget *getCreateWidget();
+
+private:
+    void parseInfo();
+    void hashSignedDataBlock(SignatureHandler *handler, Goffset block_len);
+
+    FormSignatureType signature_type;
+    Object byte_range;
+    GooString *signature;
+    SignatureInfo *signature_info;
+    GooString customAppearanceContent;
+    GooString customAppearanceLeftContent;
+    double customAppearanceLeftFontSize = 20;
+    Ref imageResource = Ref::INVALID();
+    std::unique_ptr<X509CertificateInfo> certificate_info;
+
+    void print(int indent) override;
 };
 
 //------------------------------------------------------------------------
@@ -487,63 +665,81 @@ public:
 // Catalog entry).
 //------------------------------------------------------------------------
 
-class Form {
+class POPPLER_PRIVATE_EXPORT Form
+{
 public:
-  Form(XRef *xrefA, Object* acroForm);
+    Form(PDFDoc *docA, Object *acroForm);
 
-  ~Form();
+    ~Form();
 
-  // Look up an inheritable field dictionary entry.
-  static Object *fieldLookup(Dict *field, char *key, Object *obj);
-  
-  /* Creates a new Field of the type specified in obj's dict.
-     used in Form::Form and FormField::FormField */
-  static FormField *createFieldFromDict (Object* obj, XRef *xref, const Ref& aref, FormField *parent, std::set<int> *usedParents);
+    Form(const Form &) = delete;
+    Form &operator=(const Form &) = delete;
 
-  Object *getObj () const { return acroForm; }
-  GBool getNeedAppearances () const { return needAppearances; }
-  int getNumFields() const { return numFields; }
-  FormField* getRootField(int i) const { return rootFields[i]; }
-  GooString* getDefaultAppearance() const { return defaultAppearance; }
-  VariableTextQuadding getTextQuadding() const { return quadding; }
-  GfxResources* getDefaultResources() const { return defaultResources; }
-  Object* getDefaultResourcesObj() { return &resDict; }
+    // Look up an inheritable field dictionary entry.
+    static Object fieldLookup(Dict *field, const char *key);
 
-  FormWidget* findWidgetByRef (Ref aref);
+    /* Creates a new Field of the type specified in obj's dict.
+       used in Form::Form , FormField::FormField and
+       Page::loadStandaloneFields */
+    static FormField *createFieldFromDict(Object &&obj, PDFDoc *docA, const Ref aref, FormField *parent, std::set<int> *usedParents);
 
-  void postWidgetsLoad(Catalog *catalog);
+    Object *getObj() const { return acroForm; }
+    bool getNeedAppearances() const { return needAppearances; }
+    int getNumFields() const { return numFields; }
+    FormField *getRootField(int i) const { return rootFields[i]; }
+    const GooString *getDefaultAppearance() const { return defaultAppearance; }
+    VariableTextQuadding getTextQuadding() const { return quadding; }
+    GfxResources *getDefaultResources() const { return defaultResources; }
+    Object *getDefaultResourcesObj() { return &resDict; }
+
+    FormWidget *findWidgetByRef(Ref aref);
+    FormField *findFieldByRef(Ref aref) const;
+    FormField *findFieldByFullyQualifiedName(const std::string &name) const;
+
+    void postWidgetsLoad();
+
+    const std::vector<Ref> &getCalculateOrder() const { return calculateOrder; }
+
+    void reset(const std::vector<std::string> &fields, bool excludeFields);
+
 private:
-  FormField** rootFields;
-  int numFields;
-  int size;
-  XRef* xref;
-  Object *acroForm;
-  GBool needAppearances;
-  GfxResources *defaultResources;
-  Object resDict;
+    FormField **rootFields;
+    int numFields;
+    int size;
+    PDFDoc *doc;
+    XRef *xref;
+    Object *acroForm;
+    bool needAppearances;
+    GfxResources *defaultResources;
+    Object resDict;
+    std::vector<Ref> calculateOrder;
 
-  // Variable Text
-  GooString *defaultAppearance;
-  VariableTextQuadding quadding;
+    // Variable Text
+    GooString *defaultAppearance;
+    VariableTextQuadding quadding;
 };
 
 //------------------------------------------------------------------------
 // FormPageWidgets
 //------------------------------------------------------------------------
 
-class FormPageWidgets {
+class POPPLER_PRIVATE_EXPORT FormPageWidgets
+{
 public:
-  FormPageWidgets (Annots* annots, unsigned int page, Form *form);
-  ~FormPageWidgets();
-  
-  int getNumWidgets() const { return numWidgets; }
-  FormWidget* getWidget(int i) const { return widgets[i]; }
+    FormPageWidgets(Annots *annots, unsigned int page, Form *form);
+    ~FormPageWidgets();
+
+    FormPageWidgets(const FormPageWidgets &) = delete;
+    FormPageWidgets &operator=(const FormPageWidgets &) = delete;
+
+    int getNumWidgets() const { return numWidgets; }
+    FormWidget *getWidget(int i) const { return widgets[i]; }
+    void addWidgets(const std::vector<FormField *> &addedWidgets, unsigned int page);
 
 private:
-  FormWidget** widgets;
-  int numWidgets;
-  int size;
+    FormWidget **widgets;
+    int numWidgets;
+    int size;
 };
 
 #endif
-
