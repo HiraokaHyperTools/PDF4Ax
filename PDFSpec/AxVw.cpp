@@ -1029,6 +1029,34 @@ BOOL CAxVw::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt) {
 			m_sbV.SetScrollInfo(&si);
 			Invalidate();
 		}
+		else {
+			bool nextPage = zDelta < 0;
+
+			bool pageChanged = false;
+
+			if (nextPage) {
+				// go to next page
+				if (m_iPage + 1 < CntPages()) {
+					m_iPage++;
+					pageChanged = true;
+				}
+			}
+			else {
+				// go to previous page
+				if (m_iPage > 0) {
+					m_iPage--;
+					pageChanged = true;
+				}
+			}
+
+			if (pageChanged) {
+				LayoutClient();
+				InvalidateRect(m_rcPaint, false);
+				InvalidateRect(m_rcDisp, false);
+
+				Setft(ftWH);
+			}
+		}
 	}
 
 	return CWnd::OnMouseWheel(nFlags, zDelta, pt);
