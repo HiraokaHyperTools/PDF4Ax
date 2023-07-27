@@ -13,7 +13,7 @@
 #undef APSTUDIO_READONLY_SYMBOLS
 
 /////////////////////////////////////////////////////////////////////////////
-// 日本語 (日本) resources
+// Japanese (Japan) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_JPN)
 LANGUAGE LANG_JAPANESE, SUBLANG_DEFAULT
@@ -80,15 +80,16 @@ IDB_PRT                 BITMAP                  "prt.bmp"
 // Dialog
 //
 
-IDD_PRINT_OPTS DIALOGEX 0, 0, 253, 108
+IDD_PRINT_OPTS DIALOGEX 0, 0, 253, 124
 STYLE DS_SETFONT | DS_CONTROL | WS_CHILD | WS_VISIBLE
 FONT 9, "MS UI Gothic", 400, 0, 0x0
 BEGIN
-    GROUPBOX        "詳細",IDC_STATIC,7,7,229,82
+    GROUPBOX        "詳細",IDC_STATIC,7,7,229,103
     CONTROL         "センタリングする (オフの場合は、左上に寄せる)",IDC_CENTERING,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,13,25,139,10
     CONTROL         "ページ余白を無視する。ドキュメントの端が見切れる可能性があります",IDC_IGNORE_MARGIN,
                     "Button",BS_AUTOCHECKBOX | WS_TABSTOP,13,45,202,10
     CONTROL         "ページサイズに合わせて用紙サイズを選択",IDC_AUTO_PAPERSIZE,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,13,65,127,10
+    CONTROL         "PDF 注釈を併せて印刷する",IDC_PRINT_ANNOTATION,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,13,85,92,10
 END
 
 IDD_PRINTING DIALOGEX 0, 0, 189, 56
@@ -141,13 +142,48 @@ IDC_ZOOM                CURSOR                  "zoom.cur"
 
 /////////////////////////////////////////////////////////////////////////////
 //
+// DESIGNINFO
+//
+
+#ifdef APSTUDIO_INVOKED
+GUIDELINES DESIGNINFO
+BEGIN
+    IDD_PRINT_OPTS, DIALOG
+    BEGIN
+        BOTTOMMARGIN, 108
+    END
+
+    IDD_PRINTING, DIALOG
+    BEGIN
+    END
+END
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// AFX_DIALOG_LAYOUT
+//
+
+IDD_PRINT_OPTS AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
 // String Table
 //
 
 STRINGTABLE
 BEGIN
+    IDS_PRINTING_IS_NOT_ALLOWED "この PDF の印刷は不許可設定になっています。印刷できません。"
     IDS_PDF4AX_PRINT_PROP_CAPTION "印刷"
+END
 
+STRINGTABLE
+BEGIN
     IDS_STRING2001          "errOpenFile"
     IDS_STRING2002          "errBadCatalog"
     IDS_STRING2003          "errDamaged"
@@ -158,11 +194,9 @@ BEGIN
     IDS_STRING2008          "errPermission"
     IDS_STRING2009          "errBadPageNum"
     IDS_STRING2010          "errFileIO"
-
-    IDS_PRINTING_IS_NOT_ALLOWED "この PDF の印刷は不許可設定になっています。印刷できません。"
 END
 
-#endif    // 日本語 (日本) resources
+#endif    // Japanese (Japan) resources
 /////////////////////////////////////////////////////////////////////////////
 
 

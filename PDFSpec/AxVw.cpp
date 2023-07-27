@@ -4,6 +4,7 @@
 #include "pch.h"
 #include "res/PDFSpecResource.h"
 #include "AxVw.h"
+#include "PrintOptsPage.h"
 
 #undef max
 #undef min
@@ -1507,38 +1508,6 @@ void CAxVw::OnSetFocus(CWnd* pOldWnd) {
 	InvalidateRect(m_rcCmdBar);
 }
 
-class CPrintOptsPage : public CPropertyPage, public PrintOpts {
-	DECLARE_DYNAMIC(CPrintOptsPage);
-	DECLARE_MESSAGE_MAP();
-
-public:
-	enum { IDD = IDD_PRINT_OPTS };
-
-	CPrintOptsPage()
-		: CPropertyPage(IDD, IDS_PDF4AX_PRINT_PROP_CAPTION)
-	{
-	}
-
-	virtual BOOL OnInitDialog() {
-		__super::OnInitDialog();
-
-		UpdateData(false);
-		return true;
-	}
-
-	void DoDataExchange(CDataExchange* pDX) {
-		__super::DoDataExchange(pDX);
-		DDX_Check(pDX, IDC_CENTERING, m_bCentering);
-		DDX_Check(pDX, IDC_IGNORE_MARGIN, m_bIgnoreMargin);
-		DDX_Check(pDX, IDC_AUTO_PAPERSIZE, m_bAutoPaperSize);
-	}
-};
-
-BEGIN_MESSAGE_MAP(CPrintOptsPage, CPropertyPage)
-END_MESSAGE_MAP()
-
-IMPLEMENT_DYNAMIC(CPrintOptsPage, CPropertyPage);
-
 void CAxVw::OnFilePrint() {
 	CPrintDialogEx dlg(
 		PD_ALLPAGES | PD_PAGENUMS | PD_USEDEVMODECOPIES | PD_HIDEPRINTTOFILE | PD_NOSELECTION,
@@ -1753,7 +1722,7 @@ bool CAxVw::PrintNextPage() {
 		cairo_surface_set_fallback_resolution(surface.get(), 72, 72);
 
 		poppler::page_printer print;
-		print.print_page(pageOut.get(), printer.GetSafeHdc(), renderer.get());
+		print.print_page(pageOut.get(), printer.GetSafeHdc(), renderer.get(), m_printState.get()->opts.m_bPrintAnnotation);
 
 		cairo_surface_finish(surface.get());
 

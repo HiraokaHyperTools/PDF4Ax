@@ -1,9 +1,7 @@
 //{{NO_DEPENDENCIES}}
-// Microsoft Visual C++ で生成されたインクルード ファイル。
-// PDFSpecResource.rc で使用
+// Microsoft Visual C++ generated include file.
+// Used by PDFSpecResource.rc
 //
-#define IDS_PRINTING_IS_NOT_ALLOWED     5001
-#define IDS_PDF4AX_PRINT_PROP_CAPTION   5002
 #define IDC_POINTER                     1004
 #define IDC_ZOOM_IN                     1005
 #define IDC_ZOOM_OUT                    1006
@@ -33,6 +31,8 @@
 #define IDB_PRT                         3013
 #define IDD_PRINT_OPTS                  4001
 #define IDD_PRINTING                    4002
+#define IDS_PRINTING_IS_NOT_ALLOWED     5001
+#define IDS_PDF4AX_PRINT_PROP_CAPTION   5002
 #define ID_PAGE_UP                      32771
 #define ID_PAGE_DOWN                    32772
 #define ID_PAGE_FITW                    32775
@@ -60,12 +60,14 @@
 #define IDC_CENTERING                   41017
 #define IDC_IGNORE_MARGIN               41018
 #define IDC_AUTO_PAPERSIZE              41019
+#define IDC_AUTO_PAPERSIZE2             41020
+#define IDC_PRINT_ANNOTATION            41020
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        102
+#define _APS_NEXT_RESOURCE_VALUE        103
 #define _APS_NEXT_COMMAND_VALUE         40001
 #define _APS_NEXT_CONTROL_VALUE         1001
 #define _APS_NEXT_SYMED_VALUE           101

@@ -38,6 +38,15 @@
     <None Include="PDF4Ax.def">
       <Filter>ソース ファイル</Filter>
     </None>
+    <None Include="..\PDFSpec\res\zoomin.cur">
+      <Filter>リソース ファイル</Filter>
+    </None>
+    <None Include="..\PDFSpec\res\zoomout.cur">
+      <Filter>リソース ファイル</Filter>
+    </None>
+    <None Include="..\PDFSpec\res\zoom.cur">
+      <Filter>リソース ファイル</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Midl Include="PDF4Ax.idl">
@@ -90,6 +99,42 @@
       <Filter>リソース ファイル</Filter>
     </Image>
     <Image Include="res\Toolbar.bmp">
+      <Filter>リソース ファイル</Filter>
+    </Image>
+    <Image Include="..\PDFSpec\res\magbtn.bmp">
+      <Filter>リソース ファイル</Filter>
+    </Image>
+    <Image Include="..\PDFSpec\res\movebtn.bmp">
+      <Filter>リソース ファイル</Filter>
+    </Image>
+    <Image Include="..\PDFSpec\res\next.bmp">
+      <Filter>リソース ファイル</Filter>
+    </Image>
+    <Image Include="..\PDFSpec\res\prev.bmp">
+      <Filter>リソース ファイル</Filter>
+    </Image>
+    <Image Include="..\PDFSpec\res\zoomval.bmp">
+      <Filter>リソース ファイル</Filter>
+    </Image>
+    <Image Include="..\PDFSpec\res\about.bmp">
+      <Filter>リソース ファイル</Filter>
+    </Image>
+    <Image Include="..\PDFSpec\res\mag.bmp">
+      <Filter>リソース ファイル</Filter>
+    </Image>
+    <Image Include="..\PDFSpec\res\move.bmp">
+      <Filter>リソース ファイル</Filter>
+    </Image>
+    <Image Include="..\PDFSpec\res\disp.bmp">
+      <Filter>リソース ファイル</Filter>
+    </Image>
+    <Image Include="..\PDFSpec\res\mask10.bmp">
+      <Filter>リソース ファイル</Filter>
+    </Image>
+    <Image Include="..\PDFSpec\res\mask50.bmp">
+      <Filter>リソース ファイル</Filter>
+    </Image>
+    <Image Include="..\PDFSpec\res\prt.bmp">
       <Filter>リソース ファイル</Filter>
     </Image>
   </ItemGroup>
