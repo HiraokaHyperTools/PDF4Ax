@@ -1,0 +1,11 @@
+prefix=V:/static-poppler/root-x86
+exec_prefix=V:/static-poppler/root-x86
+libdir=V:/static-poppler/root-x86/lib
+includedir=V:/static-poppler/root-x86/include
+
+Name: libjpeg
+Description: png
+Version: 1.6.38
+Requires: zlib
+Libs: -L${libdir} -llibpng16_static
+Cflags: -I${includedir}/libpng16

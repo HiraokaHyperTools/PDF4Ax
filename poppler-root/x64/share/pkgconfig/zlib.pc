@@ -1,0 +1,13 @@
+prefix=V:/static-poppler/root-x64
+exec_prefix=V:/static-poppler/root-x64
+libdir=V:/static-poppler/root-x64/lib
+sharedlibdir=V:/static-poppler/root-x64/lib
+includedir=V:/static-poppler/root-x64/include
+
+Name: zlib
+Description: zlib compression library
+Version: 1.2.13
+
+Requires:
+Libs: -L${libdir} -L${sharedlibdir} -lz
+Cflags: -I${includedir}

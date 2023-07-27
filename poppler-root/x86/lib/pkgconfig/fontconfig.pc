@@ -1,0 +1,15 @@
+prefix=V:/static-poppler/root-x86
+includedir=${prefix}/include
+libdir=${prefix}/lib
+
+sysconfdir=V:/static-poppler/root-x86/etc
+localstatedir=V:/static-poppler/root-x86/var
+confdir=${sysconfdir}/fonts
+cachedir=${localstatedir}/cache/fontconfig
+
+Name: Fontconfig
+Description: Font configuration and customization library
+Version: 2.14.1
+Requires: freetype2 >=  21.0.15, expat, libpng
+Libs: -L${libdir} -llibfontconfig
+Cflags: -I${includedir}

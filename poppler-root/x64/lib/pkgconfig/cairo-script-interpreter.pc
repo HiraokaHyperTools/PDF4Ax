@@ -1,0 +1,10 @@
+prefix=V:/static-poppler/root-x64
+libdir=${prefix}/lib
+includedir=${prefix}/include
+
+Name: cairo-script-interpreter
+Description: script surface backend for cairo graphics library
+Version: 1.17.6
+Requires: cairo, lzo2, zlib, libpng, fontconfig >=  2.2.95, freetype2 >=  9.7.3, pixman-1 >=  0.36.0
+Libs: -L${libdir} -lcairo-script-interpreter -lgdi32 -lmsimg32 -ldwrite -ld2d1 -lwindowscodecs
+Cflags: -I${includedir}/cairo -DCAIRO_WIN32_STATIC_BUILD

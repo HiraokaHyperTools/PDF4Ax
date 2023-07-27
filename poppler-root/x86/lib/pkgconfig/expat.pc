@@ -1,0 +1,12 @@
+prefix=V:/static-poppler/root-x86
+exec_prefix=${prefix}
+libdir=${exec_prefix}/lib
+includedir=${prefix}/include
+
+Name: expatMD
+Version: 2.5.0
+Description: expat XML parser
+URL: https://libexpat.github.io/
+Libs: -L${libdir} -llibexpatMD
+Libs.private: 
+Cflags: -I${includedir}

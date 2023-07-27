@@ -1,0 +1,12 @@
+prefix=V:/static-poppler/root-x64
+exec_prefix=V:/static-poppler/root-x64/bin
+libdir=V:/static-poppler/root-x64/lib
+includedir=V:/static-poppler/root-x64/include
+
+Name: libiconv
+Description: libiconv thin wrapper library for Win32
+Version: 0.1
+
+Requires:
+Libs: -L${libdir} -llibiconv
+Cflags: -I${includedir}

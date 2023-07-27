@@ -1,0 +1,10 @@
+prefix=V:/static-poppler/root-x64
+exec_prefix=V:/static-poppler/root-x64
+libdir=V:/static-poppler/root-x64/lib
+includedir=V:/static-poppler/root-x64/include
+
+Name: libturbojpeg
+Description: A SIMD-accelerated JPEG codec that provides the TurboJPEG API
+Version: 2.1.4
+Libs: -L${libdir} -lturbojpeg
+Cflags: -I${includedir}

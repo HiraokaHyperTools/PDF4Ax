@@ -1,0 +1,12 @@
+prefix=V:/static-poppler/root-x86
+libdir=V:/static-poppler/root-x86/lib
+includedir=V:/static-poppler/root-x86/include
+
+Name: poppler-cpp
+Description: cpp backend for Poppler PDF rendering library
+Version: 23.03.0
+Requires: 
+Requires.private: poppler = 23.03.0
+
+Libs: -L${libdir} -lpoppler-cpp
+Cflags: -I${includedir}/poppler/cpp
