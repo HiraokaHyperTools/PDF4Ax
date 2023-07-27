@@ -13,7 +13,7 @@
 #undef APSTUDIO_READONLY_SYMBOLS
 
 /////////////////////////////////////////////////////////////////////////////
-// 日本語 (日本) resources
+// Japanese (Japan) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_JPN)
 LANGUAGE LANG_JAPANESE, SUBLANG_DEFAULT
@@ -51,8 +51,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 0,0,18,0
- PRODUCTVERSION 0,0,18,0
+ FILEVERSION 0,0,19,0
+ PRODUCTVERSION 0,0,19,0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -69,12 +69,12 @@ BEGIN
         BEGIN
             VALUE "CompanyName", "HIRAOKA HYPERS TOOLS, Inc."
             VALUE "FileDescription", "PDF4Ax"
-            VALUE "FileVersion", "0.0.18.0"
+            VALUE "FileVersion", "0.0.19.0"
             VALUE "InternalName", "PDF4Ax.ocx"
-            VALUE "LegalCopyright", "2011, 2020 (C) HIRAOKA HYPERS TOOLS, Inc..  All rights reserved."
+            VALUE "LegalCopyright", "2011, 2023 (C) HIRAOKA HYPERS TOOLS, Inc..  All rights reserved."
             VALUE "OriginalFilename", "PDF4Ax.ocx"
             VALUE "ProductName", "PDF4Ax"
-            VALUE "ProductVersion", "0.0.18.0"
+            VALUE "ProductVersion", "0.0.19.0"
         END
     END
     BLOCK "VarFileInfo"
@@ -248,7 +248,7 @@ BEGIN
     IDS_ERROR_PDF_LOADER    "PDF ファイルの読み込み中にエラーが発生しました。\n\n%1"
 END
 
-#endif    // 日本語 (日本) resources
+#endif    // Japanese (Japan) resources
 /////////////////////////////////////////////////////////////////////////////
 
 
