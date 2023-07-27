@@ -60,12 +60,6 @@ IDB_PREV                BITMAP                  "prev.bmp"
 
 IDB_ZOOMVAL             BITMAP                  "zoomval.bmp"
 
-IDB_ABOUT               BITMAP                  "about.bmp"
-
-IDB_MAG                 BITMAP                  "mag.bmp"
-
-IDB_MOVE                BITMAP                  "move.bmp"
-
 IDB_PAGE_DISP           BITMAP                  "disp.bmp"
 
 IDB_MASK10              BITMAP                  "mask10.bmp"
@@ -73,6 +67,12 @@ IDB_MASK10              BITMAP                  "mask10.bmp"
 IDB_MASKS50             BITMAP                  "mask50.bmp"
 
 IDB_PRT                 BITMAP                  "prt.bmp"
+
+IDB_MAGBTN_ACTIVE       BITMAP                  "magbtnactive.bmp"
+
+IDB_MOVEBTN_ACTIVE      BITMAP                  "movebtnactive.bmp"
+
+IDB_ABOUT               BITMAP                  "about.bmp"
 
 
 /////////////////////////////////////////////////////////////////////////////

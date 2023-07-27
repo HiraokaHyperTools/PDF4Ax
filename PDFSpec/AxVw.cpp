@@ -277,8 +277,8 @@ void CAxVw::OnPaint()
 		int cx = size.cx;
 		int cy = size.cy;
 
-		int xp = -m_hsc.nPos;
-		int yp = -m_vsc.nPos;
+		int xp = -m_hsc.nPos + m_rcPaint.left;
+		int yp = -m_vsc.nPos + m_rcPaint.top;
 
 		if (cx < m_rcPaint.Width()) {
 			xp = (m_rcPaint.Width() - cx) / 2;
@@ -334,7 +334,9 @@ void CAxVw::OnPaint()
 			StretchDIBits(
 				dc, xp, yp, cx, cy, 0, 0, pcx, pcy, bitmap.data(), &m_renderAll->bi, DIB_RGB_COLORS, SRCCOPY
 			);
-			if (state != 0) dc.RestoreDC(state);
+			if (state != 0) {
+				dc.RestoreDC(state);
+			}
 
 			if (fabs(m_renderAll->dpi - dpi) > 1) {
 				need = true;
@@ -415,99 +417,44 @@ void CAxVw::OnPaint()
 		dc.ExcludeClipRect(m_rcPaint);
 	}
 
-	bool fHatch = !IsActive();
+	auto RenderToolButton = [&dc](ToolButton& btn) {
+		if (dc.RectVisible(btn.clientBounds)) {
+			CDC dcMem;
+			dcMem.CreateCompatibleDC(&dc);
+			CBitmap* pOrg = dcMem.SelectObject(&btn.bitmap);
+			dc.BitBlt(
+				btn.clientBounds.left,
+				btn.clientBounds.top,
+				btn.clientBounds.Width(),
+				btn.clientBounds.Height(),
+				&dcMem,
+				0,
+				0,
+				SRCCOPY
+			);
+			dcMem.SelectObject(pOrg);
+			if (btn.renderCallback) {
+				btn.renderCallback(dc);
+			}
+			dc.ExcludeClipRect(btn.clientBounds);
+		}
+	};
 
-	if (dc.RectVisible(m_rcPrev)) {
-		CDC dcMem;
-		dcMem.CreateCompatibleDC(&dc);
-		CBitmap* pOrg = dcMem.SelectObject(&m_bmPrev);
-		dc.BitBlt(m_rcPrev.left, m_rcPrev.top, m_rcPrev.Width(), m_rcPrev.Height(), &dcMem, 0, 0, SRCCOPY);
-		dcMem.SelectObject(pOrg);
-		if (fHatch) FillHatch(dc, m_rcPrev);
-		dc.ExcludeClipRect(m_rcPrev);
+	{
+		auto iter = m_toolButtons.begin();
+		for (; iter != m_toolButtons.end(); iter++) {
+			RenderToolButton(**iter);
+		}
 	}
-	if (dc.RectVisible(m_rcNext)) {
-		CDC dcMem;
-		dcMem.CreateCompatibleDC(&dc);
-		CBitmap* pOrg = dcMem.SelectObject(&m_bmNext);
-		dc.BitBlt(m_rcNext.left, m_rcNext.top, m_rcNext.Width(), m_rcNext.Height(), &dcMem, 0, 0, SRCCOPY);
-		dcMem.SelectObject(pOrg);
-		if (fHatch) FillHatch(dc, m_rcNext);
-		dc.ExcludeClipRect(m_rcNext);
-	}
-	if (dc.RectVisible(m_rcDisp)) {
-		CDC dcMem;
-		dcMem.CreateCompatibleDC(&dc);
-		CBitmap* pOrg = dcMem.SelectObject(&m_bmPageDisp);
-		dc.BitBlt(m_rcDisp.left, m_rcDisp.top, m_rcDisp.Width(), m_rcDisp.Height(), &dcMem, 0, 0, SRCCOPY);
-		dcMem.SelectObject(pOrg);
 
-		dc.SelectStockObject(DEFAULT_GUI_FONT);
-		CString str;
-		if (m_iPage < CntPages())
-			str.Format(_T("%u/%u"), 1 + m_iPage, CntPages());
+	{
+		CPen grayPen(PS_SOLID, 1, RGB(64, 64, 64));
+		auto prevPen = dc.SelectObject(&grayPen);
+		dc.MoveTo(m_rcHorzBar.left, m_rcHorzBar.top);
+		dc.LineTo(m_rcHorzBar.right, m_rcHorzBar.top);
+		dc.SelectObject(prevPen);
 
-		//COLORREF lastBkClr = dc.SetBkColor(GetSysColor(COLOR_WINDOW));
-		UINT lastMode = dc.SetTextAlign(TA_CENTER | TA_TOP);
-		CSize size = dc.GetTextExtent(str);
-		CPoint pt = m_rcDisp.CenterPoint() - CPoint(0, size.cy / 2);
-		dc.ExtTextOut(pt.x, pt.y, ETO_CLIPPED, m_rcDisp, str, str.GetLength(), NULL);
-		dc.SetTextAlign(lastMode);
-		//dc.SetBkColor(lastBkClr);
-
-		if (fHatch) FillHatch(dc, m_rcDisp);
-		dc.ExcludeClipRect(m_rcDisp);
-	}
-	if (dc.RectVisible(m_rcAbout)) {
-		CDC dcMem;
-		dcMem.CreateCompatibleDC(&dc);
-		CBitmap* pOrg = dcMem.SelectObject(&m_bmAbout);
-		dc.BitBlt(m_rcAbout.left, m_rcAbout.top, m_rcAbout.Width(), m_rcAbout.Height(), &dcMem, 0, 0, SRCCOPY);
-		dcMem.SelectObject(pOrg);
-		if (fHatch) FillHatch(dc, m_rcAbout);
-		dc.ExcludeClipRect(m_rcAbout);
-	}
-	if (dc.RectVisible(m_rcPrt)) {
-		CDC dcMem;
-		dcMem.CreateCompatibleDC(&dc);
-		CBitmap* pOrg = dcMem.SelectObject(&m_bmPrt);
-		dc.BitBlt(m_rcPrt.left, m_rcPrt.top, m_rcPrt.Width(), m_rcPrt.Height(), &dcMem, 0, 0, SRCCOPY);
-		dcMem.SelectObject(pOrg);
-		if (fHatch) FillHatch(dc, m_rcPrt);
-		dc.ExcludeClipRect(m_rcPrt);
-	}
-	if (dc.RectVisible(m_rcMMSel)) {
-		CDC dcMem;
-		dcMem.CreateCompatibleDC(&dc);
-		CBitmap* pOrg = dcMem.SelectObject(m_toolZoom ? &m_bmMagBtn : &m_bmMoveBtn);
-		dc.BitBlt(m_rcMMSel.left, m_rcMMSel.top, m_rcMMSel.Width(), m_rcMMSel.Height(), &dcMem, 0, 0, SRCCOPY);
-		dcMem.SelectObject(pOrg);
-		if (fHatch) FillHatch(dc, m_rcMMSel);
-		dc.ExcludeClipRect(m_rcMMSel);
-	}
-	if (dc.RectVisible(m_rcZoomVal)) {
-		CDC dcMem;
-		dcMem.CreateCompatibleDC(&dc);
-		CBitmap* pOrg = dcMem.SelectObject(&m_bmZoomVal);
-		dc.BitBlt(m_rcZoomVal.left, m_rcZoomVal.top, m_rcZoomVal.Width(), m_rcZoomVal.Height(), &dcMem, 0, 0, SRCCOPY);
-		dcMem.SelectObject(pOrg);
-
-		dc.SelectStockObject(DEFAULT_GUI_FONT);
-		CString str;
-		str.Format(_T("%u %%"), (int)(100 * Getzf()));
-
-		//COLORREF lastBkClr = dc.SetBkColor(GetSysColor(COLOR_WINDOW));
-		UINT lastMode = dc.SetTextAlign(TA_CENTER | TA_TOP);
-		COLORREF lastTextClr = dc.SetTextColor(RGB(0, 0, 0));
-		CSize size = dc.GetTextExtent(str);
-		CPoint pt = m_rcZoomVal.CenterPoint() - CPoint(0, size.cy / 2);
-		dc.ExtTextOut(pt.x, pt.y, ETO_CLIPPED, m_rcZoomVal, str, str.GetLength(), NULL);
-		dc.SetTextColor(lastTextClr);
-		dc.SetTextAlign(lastMode);
-		//dc.SetBkColor(lastBkClr);
-
-		if (fHatch) FillHatch(dc, m_rcZoomVal);
-		dc.ExcludeClipRect(m_rcZoomVal);
+		dc.ExcludeClipRect(m_rcHorzBar);
 	}
 
 	{
@@ -717,26 +664,71 @@ BOOL CAxVw::OnPageUp(UINT nID) {
 
 int CAxVw::OnCreate(LPCREATESTRUCT lpCreateStruct)
 {
-	if (CWnd::OnCreate(lpCreateStruct) == -1)
+	if (CWnd::OnCreate(lpCreateStruct) == -1) {
 		return -1;
+	}
 
 	if (false
 		|| !m_sbH.Create(WS_CHILDWINDOW | WS_VISIBLE | SBS_HORZ | SBS_BOTTOMALIGN, CRect(), this, IDC_HORZ)
 		|| !m_sbV.Create(WS_CHILDWINDOW | WS_VISIBLE | SBS_VERT | SBS_RIGHTALIGN, CRect(), this, IDC_VERT))
+	{
 		return -1;
+	}
+
+	m_toolButtons.push_back(&m_magOff);
+	m_toolButtons.push_back(&m_magOn);
+	m_toolButtons.push_back(&m_moveOff);
+	m_toolButtons.push_back(&m_moveOn);
+	m_toolButtons.push_back(&m_pageZoom);
+	m_toolButtons.push_back(&m_prev);
+	m_toolButtons.push_back(&m_pageDisp);
+	m_toolButtons.push_back(&m_next);
+	m_toolButtons.push_back(&m_print);
+	m_toolButtons.push_back(&m_about);
+
+	m_pageZoom.renderCallback = [this](CDC& dc) {
+		dc.SelectStockObject(DEFAULT_GUI_FONT);
+		CString str;
+		str.Format(_T("%u %%"), (int)(100 * Getzf()));
+
+		//COLORREF lastBkClr = dc.SetBkColor(GetSysColor(COLOR_WINDOW));
+		UINT lastMode = dc.SetTextAlign(TA_CENTER | TA_TOP);
+		COLORREF lastTextClr = dc.SetTextColor(RGB(0, 0, 0));
+		CSize size = dc.GetTextExtent(str);
+		CPoint pt = m_pageZoom.clientBounds.CenterPoint() - CPoint(0, size.cy / 2);
+		dc.ExtTextOut(pt.x, pt.y, ETO_CLIPPED, m_pageZoom.clientBounds, str, str.GetLength(), NULL);
+		dc.SetTextColor(lastTextClr);
+		dc.SetTextAlign(lastMode);
+		//dc.SetBkColor(lastBkClr);
+	};
+	m_pageDisp.renderCallback = [this](CDC& dc) {
+		dc.SelectStockObject(DEFAULT_GUI_FONT);
+		CString str;
+		if (m_iPage < CntPages()) {
+			str.Format(_T("%u/%u"), 1 + m_iPage, CntPages());
+		}
+
+		//COLORREF lastBkClr = dc.SetBkColor(GetSysColor(COLOR_WINDOW));
+		UINT lastMode = dc.SetTextAlign(TA_CENTER | TA_TOP);
+		CSize size = dc.GetTextExtent(str);
+		CPoint pt = m_pageDisp.clientBounds.CenterPoint() - CPoint(0, size.cy / 2);
+		dc.ExtTextOut(pt.x, pt.y, ETO_CLIPPED, m_pageDisp.clientBounds, str, str.GetLength(), NULL);
+		dc.SetTextAlign(lastMode);
+		//dc.SetBkColor(lastBkClr);
+	};
 
 	if (false
-		|| !m_bmPrev.LoadBitmap(IDB_PREV)
-		|| !m_bmNext.LoadBitmap(IDB_NEXT)
-		|| !m_bmAbout.LoadBitmap(IDB_ABOUT)
-		|| !m_bmMag.LoadBitmap(IDB_MAG)
-		|| !m_bmMagBtn.LoadBitmap(IDB_MAGBTN)
-		|| !m_bmMove.LoadBitmap(IDB_MOVE)
-		|| !m_bmMoveBtn.LoadBitmap(IDB_MOVEBTN)
-		|| !m_bmZoomVal.LoadBitmap(IDB_ZOOMVAL)
-		|| !m_bmPageDisp.LoadBitmap(IDB_PAGE_DISP)
+		|| !m_prev.LoadBitmap(IDB_PREV)
+		|| !m_next.LoadBitmap(IDB_NEXT)
+		|| !m_about.LoadBitmap(IDB_ABOUT)
+		|| !m_print.LoadBitmap(IDB_PRT)
+		|| !m_magOff.LoadBitmap(IDB_MAGBTN)
+		|| !m_magOn.LoadBitmap(IDB_MAGBTN_ACTIVE)
+		|| !m_moveOff.LoadBitmap(IDB_MOVEBTN)
+		|| !m_moveOn.LoadBitmap(IDB_MOVEBTN_ACTIVE)
+		|| !m_pageZoom.LoadBitmap(IDB_ZOOMVAL)
+		|| !m_pageDisp.LoadBitmap(IDB_PAGE_DISP)
 		|| !m_bmMask10.LoadBitmap(IDB_MASK10)
-		|| !m_bmPrt.LoadBitmap(IDB_PRT)
 		)
 		return -1;
 
@@ -755,7 +747,7 @@ int CAxVw::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	m_vsc.cbSize = sizeof(m_hsc);
 	m_vsc.fMask = SIF_DISABLENOSCROLL | SIF_POS | SIF_RANGE | SIF_PAGE;
 
-	m_toolZoom = true;
+	SetToolZoom(true);
 	m_fDrag = false;
 	m_fFitOnSmall = true;
 	m_iPage = 0;
@@ -796,8 +788,11 @@ void CAxVw::Setft(FitMode ft) {
 	case ftZoom:
 		m_ft = ft;
 		UpdScroll();
-		InvalidateRect(m_rcZoomVal);
-		InvalidateRect(m_rcMMSel);
+		InvalidateRect(m_pageZoom.clientBounds);
+		InvalidateRect(m_moveOff.clientBounds);
+		InvalidateRect(m_moveOn.clientBounds);
+		InvalidateRect(m_magOff.clientBounds);
+		InvalidateRect(m_magOn.clientBounds);
 		InvalidateRect(m_rcPaint);
 		break;
 	}
@@ -840,78 +835,56 @@ void CAxVw::UpdScroll() {
 }
 
 void CAxVw::LayoutClient() {
-	CRect rc;
-	GetClientRect(&rc);
-	int curx = 0;
-	const int cyBar = 24;
-	const int cxBMPrev = 32;
-	const int cxBMNext = 32;
-	const int cxBMDisp = 55;
+	CRect remainder;
+	GetClientRect(&remainder);
 
-	m_rcCmdBar.left = curx;
-	m_rcCmdBar.top = rc.bottom - cyBar;
-	m_rcCmdBar.bottom = rc.bottom;
+	LONG cyBar = 0;
+	LONG cxBar = 0;
+
+	m_print.visible = m_canPrintThisPDF;
 
 	{
-		m_rcMMSel.left = curx;
-		m_rcMMSel.bottom = rc.bottom;
-		m_rcMMSel.right = (curx += 24);
-		m_rcMMSel.top = rc.bottom - cyBar;
-
-		m_rcZoomVal.left = curx;
-		m_rcZoomVal.bottom = rc.bottom;
-		m_rcZoomVal.right = (curx += 48);
-		m_rcZoomVal.top = rc.bottom - cyBar;
-
-		m_rcPrev.left = curx;
-		m_rcPrev.bottom = rc.bottom;
-		m_rcPrev.right = curx = (curx += cxBMPrev);
-		m_rcPrev.top = rc.bottom - cyBar;
-
-		m_rcDisp.left = curx;
-		m_rcDisp.bottom = rc.bottom;
-		m_rcDisp.right = curx = (curx += cxBMDisp);
-		m_rcDisp.top = rc.bottom - cyBar;
-
-		m_rcNext.left = curx;
-		m_rcNext.bottom = rc.bottom;
-		m_rcNext.right = curx = (curx += cxBMNext);
-		m_rcNext.top = rc.bottom - cyBar;
-
-		if (m_canPrintThisPDF) {
-			m_rcPrt.left = curx;
-			m_rcPrt.bottom = rc.bottom;
-			m_rcPrt.right = (curx += 24);
-			m_rcPrt.top = rc.bottom - cyBar;
+		auto iter = m_toolButtons.begin();
+		for (; iter != m_toolButtons.end(); iter++) {
+			auto& one = **iter;
+			if (one.visible) {
+				cyBar = std::max(cyBar, one.bm.bmHeight);
+				cxBar += one.bm.bmWidth;
+			}
 		}
-		else {
-			m_rcPrt.SetRectEmpty();
-		}
-
-		m_rcAbout.left = curx;
-		m_rcAbout.bottom = rc.bottom;
-		m_rcAbout.right = (curx += 24);
-		m_rcAbout.top = rc.bottom - cyBar;
 	}
 
-	m_rcCmdBar.right = curx;
+	m_rcCmdBar.left = remainder.left;
+	m_rcCmdBar.right = remainder.right;
+	m_rcCmdBar.top = remainder.top;
+	m_rcCmdBar.bottom = remainder.top + cyBar;
 
-	int cex = (rc.Width() - curx) / 2;
-	if (cex > 0) {
-		m_rcMMSel.OffsetRect(cex, 0);
-		m_rcZoomVal.OffsetRect(cex, 0);
-		m_rcPrev.OffsetRect(cex, 0);
-		m_rcDisp.OffsetRect(cex, 0);
-		m_rcNext.OffsetRect(cex, 0);
-		m_rcPrt.OffsetRect(cex, 0);
-		m_rcAbout.OffsetRect(cex, 0);
+	m_rcHorzBar = m_rcCmdBar;
+	m_rcHorzBar.top = m_rcCmdBar.bottom + 1;
+	m_rcHorzBar.bottom = m_rcHorzBar.top + 1;
 
-		m_rcCmdBar.OffsetRect(cex, 0);
+	remainder.top = m_rcHorzBar.bottom;
+
+	{
+		int xPos = (remainder.Width() - cxBar) / 2;
+
+		auto iter = m_toolButtons.begin();
+		for (; iter != m_toolButtons.end(); iter++) {
+			auto& one = **iter;
+			if (one.visible) {
+				one.clientBounds.left = xPos;
+				one.clientBounds.right = xPos + one.bm.bmWidth;
+				one.clientBounds.top = m_rcCmdBar.top;
+				one.clientBounds.bottom = m_rcCmdBar.top + one.bm.bmHeight;
+				xPos += one.bm.bmWidth;
+			}
+			else {
+				one.clientBounds.SetRectEmpty();
+			}
+		}
 	}
 
-	rc.bottom -= cyBar;
-
-	m_rcPaint = rc;
+	m_rcPaint = remainder;
 
 	UpdScroll();
 }
@@ -1053,7 +1026,7 @@ BOOL CAxVw::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt) {
 			if (pageChanged) {
 				LayoutClient();
 				InvalidateRect(m_rcPaint, false);
-				InvalidateRect(m_rcDisp, false);
+				InvalidateRect(m_pageDisp.clientBounds, false);
 
 				Setft(ftWH);
 			}
@@ -1077,28 +1050,29 @@ void CAxVw::OnLButtonDown(UINT nFlags, CPoint point) {
 
 			SetCapture();
 		}
-		else if (m_rcPrev.PtInRect(point)) {
+		else if (m_prev.clientBounds.PtInRect(point)) {
 			if (m_iPage > 0) {
 				m_iPage--;
 				LayoutClient();
 				InvalidateRect(m_rcPaint, false);
-				InvalidateRect(m_rcDisp, false);
+				InvalidateRect(m_pageDisp.clientBounds, false);
 			}
 		}
-		else if (m_rcNext.PtInRect(point)) {
+		else if (m_next.clientBounds.PtInRect(point)) {
 			if (m_iPage + 1 < CntPages()) {
 				m_iPage++;
 				LayoutClient();
 				InvalidateRect(m_rcPaint, false);
-				InvalidateRect(m_rcDisp, false);
+				InvalidateRect(m_pageDisp.clientBounds, false);
 			}
 		}
-		else if (m_rcAbout.PtInRect(point)) {
-			CWnd* p = GetOwner();
-			if (p)
-				p->OnCmdMsg(ID_APP_ABOUT, 0, NULL, NULL);
+		else if (m_about.clientBounds.PtInRect(point)) {
+			CWnd* window = GetOwner();
+			if (window) {
+				window->OnCmdMsg(ID_APP_ABOUT, 0, NULL, NULL);
+			}
 		}
-		else if (m_rcPrt.PtInRect(point)) {
+		else if (m_print.clientBounds.PtInRect(point)) {
 			CSingleLock lck(&s_lockpdf);
 			TCHAR tcTmpfp[MAX_PATH] = { 0 };
 			if (!IsPDFReady()) {
@@ -1110,25 +1084,25 @@ void CAxVw::OnLButtonDown(UINT nFlags, CPoint point) {
 			}
 			OnFilePrint();
 		}
-		else if (m_rcMMSel.PtInRect(point)) {
-			CMenu aSel;
-			VERIFY(aSel.CreatePopupMenu());
-			VERIFY(aSel.AppendMenu(MF_BITMAP, IDC_MAG, &m_bmMag));
-			VERIFY(aSel.AppendMenu(MF_BITMAP, IDC_MOVE, &m_bmMove));
-			CPoint ptMenu = m_rcMMSel.TopLeft();
-			ClientToScreen(&ptMenu);
-			aSel.TrackPopupMenu(TPM_LEFTALIGN, ptMenu.x, ptMenu.y, GetParentFrame());
+		else if (m_moveOff.clientBounds.PtInRect(point)) {
+			// move off → on
+			OnSelCmd(IDC_MOVE);
 		}
-		else if (m_rcZoomVal.PtInRect(point)) {
+		else if (m_magOff.clientBounds.PtInRect(point)) {
+			// mag off → on
+			OnSelCmd(IDC_MAG);
+		}
+		else if (m_pageZoom.clientBounds.PtInRect(point)) {
 			CMenu aSel;
 			VERIFY(aSel.LoadMenu(IDR_MENU_P));
 			CMenu* pMenu = aSel.GetSubMenu(0);
-			CPoint ptMenu = m_rcZoomVal.TopLeft();
+			CPoint ptMenu = m_pageZoom.clientBounds.TopLeft();
 			ClientToScreen(&ptMenu);
-			if (pMenu != NULL)
+			if (pMenu != NULL) {
 				pMenu->TrackPopupMenu(TPM_LEFTALIGN, ptMenu.x, ptMenu.y, GetParentFrame());
-		}
-		else if (m_rcDisp.PtInRect(point)) {
+			}
+			}
+		else if (m_pageDisp.clientBounds.PtInRect(point)) {
 			CPvMenu aSel(*this);
 			VERIFY(aSel.CreatePopupMenu());
 			int cy = CntPages();
@@ -1140,19 +1114,19 @@ void CAxVw::OnLButtonDown(UINT nFlags, CPoint point) {
 				aSel.AppendMenu(MF_OWNERDRAW, IDC_PAGE1 + y, str);
 #endif
 			}
-			CPoint ptMenu(m_rcDisp.left, m_rcDisp.bottom);
+			CPoint ptMenu(m_pageDisp.clientBounds.left, m_pageDisp.clientBounds.bottom);
 			ClientToScreen(&ptMenu);
 			aSel.TrackPopupMenu(TPM_LEFTALIGN, ptMenu.x, ptMenu.y, GetParentFrame());
 		}
-	}
+		}
 
 	CWnd::OnLButtonDown(nFlags, point);
-}
+	}
 
 BOOL CAxVw::OnSelCmd(UINT nID) {
 	switch (nID) {
-	case IDC_MAG: m_toolZoom = true; break;
-	case IDC_MOVE: m_toolZoom = false; break;
+	case IDC_MAG: SetToolZoom(true); break;
+	case IDC_MOVE: SetToolZoom(false); break;
 
 	case IDC_P6: SetzoomR(0.06f); return true;
 	case IDC_P12: SetzoomR(0.12f); return true;
@@ -1169,7 +1143,8 @@ BOOL CAxVw::OnSelCmd(UINT nID) {
 
 	default: return false;
 	}
-	InvalidateRect(m_rcMMSel, false);
+	LayoutClient();
+	Invalidate(false);
 	return true;
 }
 
@@ -1183,10 +1158,10 @@ void CAxVw::OnUpdateSelCmd(CCmdUI* pUI) {
 }
 
 void CAxVw::SetzoomR(float zf) {
-	CPoint posat = GetAbsPosAt(m_rcPaint.CenterPoint() + GetScrollOff());
+	CPoint posat = GetAbsPosAt(GetViewCenterPos() + GetScrollOff());
 	Setzf(zf);
 	LayoutClient();
-	SetCenterAt(posat, m_rcPaint.CenterPoint());
+	SetCenterAt(posat, GetViewCenterPos());
 	InvalidateRect(m_rcPaint, false);
 }
 
@@ -1210,6 +1185,13 @@ CPoint CAxVw::GetCenterPos() const {
 	return CPoint(
 		(int)(pt.x / zf),
 		(int)(pt.y / zf)
+	);
+}
+
+CPoint CAxVw::GetViewCenterPos() const {
+	return CPoint(
+		m_rcPaint.Width() / 2,
+		m_rcPaint.Height() / 2
 	);
 }
 
@@ -1317,8 +1299,9 @@ void CAxVw::OnMouseMove(UINT nFlags, CPoint point) {
 		if (yp != m_vsc.nPos)
 			m_sbV.SetScrollPos(m_vsc.nPos = yp), moved = true;
 
-		if (moved)
+		if (moved) {
 			InvalidateRect(m_rcPaint, false);
+		}
 	}
 
 	CWnd::OnMouseMove(nFlags, point);

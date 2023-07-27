@@ -39,6 +39,9 @@
     <ClInclude Include="pch.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
+    <ClInclude Include="..\PDFSpec\res\PDFSpecResource.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ViewerTest.cpp">
@@ -69,12 +72,57 @@
     <None Include="res\ViewerTest.rc2">
       <Filter>リソース ファイル</Filter>
     </None>
+    <None Include="..\PDFSpec\res\zoomin.cur">
+      <Filter>リソース ファイル</Filter>
+    </None>
+    <None Include="..\PDFSpec\res\zoomout.cur">
+      <Filter>リソース ファイル</Filter>
+    </None>
+    <None Include="..\PDFSpec\res\zoom.cur">
+      <Filter>リソース ファイル</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Image Include="res\ViewerTestDoc.ico">
       <Filter>リソース ファイル</Filter>
     </Image>
     <Image Include="res\ViewerTest.ico">
+      <Filter>リソース ファイル</Filter>
+    </Image>
+    <Image Include="..\PDFSpec\res\magbtn.bmp">
+      <Filter>リソース ファイル</Filter>
+    </Image>
+    <Image Include="..\PDFSpec\res\movebtn.bmp">
+      <Filter>リソース ファイル</Filter>
+    </Image>
+    <Image Include="..\PDFSpec\res\next.bmp">
+      <Filter>リソース ファイル</Filter>
+    </Image>
+    <Image Include="..\PDFSpec\res\prev.bmp">
+      <Filter>リソース ファイル</Filter>
+    </Image>
+    <Image Include="..\PDFSpec\res\zoomval.bmp">
+      <Filter>リソース ファイル</Filter>
+    </Image>
+    <Image Include="..\PDFSpec\res\disp.bmp">
+      <Filter>リソース ファイル</Filter>
+    </Image>
+    <Image Include="..\PDFSpec\res\mask10.bmp">
+      <Filter>リソース ファイル</Filter>
+    </Image>
+    <Image Include="..\PDFSpec\res\mask50.bmp">
+      <Filter>リソース ファイル</Filter>
+    </Image>
+    <Image Include="..\PDFSpec\res\prt.bmp">
+      <Filter>リソース ファイル</Filter>
+    </Image>
+    <Image Include="..\PDFSpec\res\magbtnactive.bmp">
+      <Filter>リソース ファイル</Filter>
+    </Image>
+    <Image Include="..\PDFSpec\res\movebtnactive.bmp">
+      <Filter>リソース ファイル</Filter>
+    </Image>
+    <Image Include="..\PDFSpec\res\about.bmp">
       <Filter>リソース ファイル</Filter>
     </Image>
   </ItemGroup>

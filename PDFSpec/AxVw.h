@@ -4,6 +4,7 @@
 #pragma once
 
 #include <atlcoll.h>
+#include <functional>
 #include "PaperSizeLite.h"
 #include "PrintingNowDialog.h"
 #include "PrintOpts.h"
@@ -25,16 +26,16 @@
 
 class CPvRender {
 public:
-	virtual CBitmap *GetThumb(int iPage, int cx) = NULL;
+	virtual CBitmap* GetThumb(int iPage, int cx) = NULL;
 };
 
 class CRenderInf;
 class CPDFRef : public IUnknown {
 public:
 	LONG locks;
-	poppler::document*ref_pdfdoc;
+	poppler::document* ref_pdfdoc;
 
-	CPDFRef(poppler::document*ref_pdfdoc)
+	CPDFRef(poppler::document* ref_pdfdoc)
 		: locks(0)
 		, ref_pdfdoc(ref_pdfdoc)
 	{
@@ -44,27 +45,27 @@ public:
 		delete ref_pdfdoc;
 	}
 
-    virtual HRESULT STDMETHODCALLTYPE QueryInterface( 
-        /* [in] */ REFIID riid,
-		/* [iid_is][out] */ __RPC__deref_out void __RPC_FAR *__RPC_FAR *ppvObject) {
-			if (ppvObject == NULL)
-				return E_POINTER;
-			if (riid == IID_IUnknown) {
-				*ppvObject = static_cast<IUnknown *>(this);
-			}
-			else {
-				*ppvObject = NULL;
-				return E_NOINTERFACE;
-			}
-			AddRef();
-			return S_OK;
+	virtual HRESULT STDMETHODCALLTYPE QueryInterface(
+		/* [in] */ REFIID riid,
+		/* [iid_is][out] */ __RPC__deref_out void __RPC_FAR* __RPC_FAR* ppvObject) {
+		if (ppvObject == NULL)
+			return E_POINTER;
+		if (riid == IID_IUnknown) {
+			*ppvObject = static_cast<IUnknown*>(this);
+		}
+		else {
+			*ppvObject = NULL;
+			return E_NOINTERFACE;
+		}
+		AddRef();
+		return S_OK;
 	}
 
-	virtual ULONG STDMETHODCALLTYPE AddRef( void) {
+	virtual ULONG STDMETHODCALLTYPE AddRef(void) {
 		return InterlockedIncrement(&locks);
 	}
 
-	virtual ULONG STDMETHODCALLTYPE Release( void) {
+	virtual ULONG STDMETHODCALLTYPE Release(void) {
 		ULONG x = InterlockedDecrement(&locks);
 		if (x == 0)
 			delete this;
@@ -187,11 +188,11 @@ class CAxVw : public CWnd, public CPvRender
 
 	bool PrintNextPage();
 
-// コンストラクション
+	// コンストラクション
 public:
 	CAxVw();
 
-// 属性
+	// 属性
 public:
 	CString m_strUrl;
 	CString m_errorMessage;
@@ -199,7 +200,7 @@ public:
 
 protected:
 	CComPtr<CPDFRef> m_prefpdf;
-	poppler::document*m_pdfdoc;
+	poppler::document* m_pdfdoc;
 	int m_iPage;
 	float m_fZoom;
 	typedef enum {
@@ -212,11 +213,51 @@ protected:
 	std::unique_ptr<CRenderInf> m_renderAll;
 	std::unique_ptr<CRenderInf> m_renderPart;
 	CBitmap m_bmMask10;
-	CWinThread *m_threadRenderer;
+	CWinThread* m_threadRenderer;
 
-	CBitmap m_bmPrev, m_bmNext, m_bmAbout, m_bmMag, m_bmMagBtn, m_bmMove, m_bmMoveBtn, m_bmZoomVal, m_bmPageDisp, m_bmPrt;
-	CRect m_rcPaint, m_rcPrev, m_rcNext, m_rcDisp, m_rcAbout, m_rcFitWH, m_rcFitW, m_rcPrt;
-	CRect m_rcMMSel, m_rcZoomVal, m_rcCmdBar;
+	class ToolButton {
+	public:
+		CBitmap bitmap;
+		BITMAP bm = { 0 };
+		CRect clientBounds;
+		bool visible = true;
+		std::function<void(CDC& dc)> renderCallback;
+
+		bool LoadBitmap(UINT nID) {
+			if (true
+				&& bitmap.LoadBitmap(nID)
+				&& bitmap.GetBitmap(&bm) != 0
+				)
+			{
+				return true;
+			}
+			else {
+				return false;
+			}
+		}
+	};
+
+	void SetToolZoom(bool selectZoom) {
+		m_toolZoom = selectZoom;
+		m_magOn.visible = m_moveOff.visible = selectZoom;
+		m_magOff.visible = m_moveOn.visible = !selectZoom;
+	}
+
+	ToolButton m_magOff;
+	ToolButton m_magOn;
+	ToolButton m_moveOff;
+	ToolButton m_moveOn;
+	ToolButton m_pageZoom;
+	ToolButton m_prev;
+	ToolButton m_pageDisp;
+	ToolButton m_next;
+	ToolButton m_about;
+	ToolButton m_print;
+	std::vector<ToolButton*> m_toolButtons;
+
+	CRect m_rcPaint;
+	CRect m_rcCmdBar;
+	CRect m_rcHorzBar;
 	bool m_toolZoom;
 	CPoint m_ptBegin, m_ptScrollFrm;
 	bool m_fDrag;
@@ -227,7 +268,7 @@ protected:
 	CArray<CPPSummary> m_pps;
 	bool m_canPrintThisPDF;
 
-// 操作
+	// 操作
 public:
 	HRESULT LoadPDF(LPCTSTR psz);
 	HRESULT LoadTruePDF(LPCTSTR psz);
@@ -249,6 +290,7 @@ public:
 	void SetzoomR(float zf);
 
 	CPoint GetCenterPos() const;
+	CPoint GetViewCenterPos() const;
 	CPoint GetAbsPosAt(CPoint pt) const;
 	void SetCenterAt(CPoint pt, CPoint clientpt);
 
@@ -258,7 +300,7 @@ public:
 	void Setzf(float zf) {
 		m_fZoom = zf;
 		SetFit(ftZoom);
-		InvalidateRect(m_rcZoomVal,false);
+		InvalidateRect(m_pageZoom.clientBounds, false);
 	}
 	void SetFit(FitMode fit) {
 		Setft(fit);
@@ -280,38 +322,38 @@ public:
 	class Fitrect {
 	public:
 		static CRect Fit(CRect rcMax, CSize rcBox) {
-            if (rcMax.Height() == 0 || rcBox.cy == 0)
-                return rcMax;
-            float frMax = rcMax.Width() / (float)rcMax.Height();
-            float frBox = rcBox.cx / (float)rcBox.cy;
-            float centerx = ((float)rcMax.left + rcMax.right) / 2;
+			if (rcMax.Height() == 0 || rcBox.cy == 0)
+				return rcMax;
+			float frMax = rcMax.Width() / (float)rcMax.Height();
+			float frBox = rcBox.cx / (float)rcBox.cy;
+			float centerx = ((float)rcMax.left + rcMax.right) / 2;
 			float centery = ((float)rcMax.top + rcMax.bottom) / 2;
-            if (frMax >= frBox) {
-                // 縦長
-                float v = (float)rcBox.cx * rcMax.Height() / rcBox.cy / 2;
-                return CRect(
-                    int(centerx - v),
-                    int(rcMax.top),
-                    int(centerx + v),
-                    int(rcMax.bottom)
-                    );
-            }
-            else {
-                // 横長
-                float v = (float)rcBox.cy * rcMax.Width() / rcBox.cx / 2;
-                return CRect(
-                    int(rcMax.left),
-                    int(centery - v),
-                    int(rcMax.right),
-                    int(centery + v)
-                    );
-            }
-        }
+			if (frMax >= frBox) {
+				// 縦長
+				float v = (float)rcBox.cx * rcMax.Height() / rcBox.cy / 2;
+				return CRect(
+					int(centerx - v),
+					int(rcMax.top),
+					int(centerx + v),
+					int(rcMax.bottom)
+				);
+			}
+			else {
+				// 横長
+				float v = (float)rcBox.cy * rcMax.Width() / rcBox.cx / 2;
+				return CRect(
+					int(rcMax.left),
+					int(centery - v),
+					int(rcMax.right),
+					int(centery + v)
+				);
+			}
+		}
 	};
 
-	CBitmap *GetThumb(int iPage, int cx);
+	CBitmap* GetThumb(int iPage, int cx);
 
-	void FillHatch(CDC &dc, CRect rc);
+	void FillHatch(CDC& dc, CRect rc);
 
 	bool IsPDFReady() const {
 		return m_pdfdoc != NULL;
@@ -319,11 +361,11 @@ public:
 
 	void OnFilePrint();
 
-// オーバーライド
+	// オーバーライド
 protected:
 	virtual BOOL PreCreateWindow(CREATESTRUCT& cs);
 
-// 実装
+	// 実装
 public:
 	virtual ~CAxVw();
 
@@ -342,7 +384,7 @@ protected:
 protected:
 	afx_msg void OnPaint();
 	afx_msg BOOL OnPageUp(UINT nID);
-	afx_msg void OnUpdatePageUp(CCmdUI *pUI);
+	afx_msg void OnUpdatePageUp(CCmdUI* pUI);
 	DECLARE_MESSAGE_MAP()
 public:
 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
@@ -352,7 +394,7 @@ public:
 	afx_msg BOOL OnMouseWheel(UINT nFlags, short zDelta, CPoint pt);
 	afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
 	afx_msg BOOL OnSelCmd(UINT nID);
-	afx_msg void OnUpdateSelCmd(CCmdUI *pUI);
+	afx_msg void OnUpdateSelCmd(CCmdUI* pUI);
 	afx_msg void OnLButtonUp(UINT nFlags, CPoint point);
 	afx_msg void OnMouseMove(UINT nFlags, CPoint point);
 	afx_msg LRESULT OnMouseHWheel(WPARAM, LPARAM);
@@ -360,7 +402,7 @@ public:
 	afx_msg void OnLButtonDblClk(UINT nFlags, CPoint point);
 	afx_msg void OnRButtonDblClk(UINT nFlags, CPoint point);
 	afx_msg BOOL OnPageSel(UINT nID);
-	afx_msg void OnUpdatePageSel(CCmdUI *pUI);
+	afx_msg void OnUpdatePageSel(CCmdUI* pUI);
 	afx_msg int OnMouseActivate(CWnd* pDesktopWnd, UINT nHitTest, UINT message);
 	afx_msg BOOL OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message);
 	afx_msg LRESULT OnSetRenderInf(WPARAM, LPARAM);

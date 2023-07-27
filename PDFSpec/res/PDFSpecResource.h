@@ -22,13 +22,13 @@
 #define IDB_PREV                        3004
 #define IDB_ZOOMVAL                     3005
 #define IDB_ABOUT                       3006
-#define IDB_MAG                         3007
-#define IDB_MOVE                        3008
 #define IDR_MENU_P                      3009
 #define IDB_PAGE_DISP                   3010
 #define IDB_MASK10                      3011
 #define IDB_MASKS50                     3012
 #define IDB_PRT                         3013
+#define IDB_MAGBTN_ACTIVE               3014
+#define IDB_MOVEBTN_ACTIVE              3015
 #define IDD_PRINT_OPTS                  4001
 #define IDD_PRINTING                    4002
 #define IDS_PRINTING_IS_NOT_ALLOWED     5001
@@ -60,7 +60,6 @@
 #define IDC_CENTERING                   41017
 #define IDC_IGNORE_MARGIN               41018
 #define IDC_AUTO_PAPERSIZE              41019
-#define IDC_AUTO_PAPERSIZE2             41020
 #define IDC_PRINT_ANNOTATION            41020
 
 // Next default values for new objects

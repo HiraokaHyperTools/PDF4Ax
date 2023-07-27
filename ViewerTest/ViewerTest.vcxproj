@@ -195,6 +195,7 @@
     </ResourceCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="..\PDFSpec\res\PDFSpecResource.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="MainFrm.h" />
     <ClInclude Include="pch.h" />
@@ -221,9 +222,24 @@
     <ResourceCompile Include="ViewerTest.rc" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\PDFSpec\res\zoom.cur" />
+    <None Include="..\PDFSpec\res\zoomin.cur" />
+    <None Include="..\PDFSpec\res\zoomout.cur" />
     <None Include="res\ViewerTest.rc2" />
   </ItemGroup>
   <ItemGroup>
+    <Image Include="..\PDFSpec\res\about.bmp" />
+    <Image Include="..\PDFSpec\res\disp.bmp" />
+    <Image Include="..\PDFSpec\res\magbtn.bmp" />
+    <Image Include="..\PDFSpec\res\magbtnactive.bmp" />
+    <Image Include="..\PDFSpec\res\mask10.bmp" />
+    <Image Include="..\PDFSpec\res\mask50.bmp" />
+    <Image Include="..\PDFSpec\res\movebtn.bmp" />
+    <Image Include="..\PDFSpec\res\movebtnactive.bmp" />
+    <Image Include="..\PDFSpec\res\next.bmp" />
+    <Image Include="..\PDFSpec\res\prev.bmp" />
+    <Image Include="..\PDFSpec\res\prt.bmp" />
+    <Image Include="..\PDFSpec\res\zoomval.bmp" />
     <Image Include="res\ViewerTest.ico" />
     <Image Include="res\ViewerTestDoc.ico" />
   </ItemGroup>

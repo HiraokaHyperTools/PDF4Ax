@@ -211,10 +211,12 @@
     <Image Include="res\disp.bmp" />
     <Image Include="res\mag.bmp" />
     <Image Include="res\magbtn.bmp" />
+    <Image Include="res\magbtnactive.bmp" />
     <Image Include="res\mask10.bmp" />
     <Image Include="res\mask50.bmp" />
     <Image Include="res\move.bmp" />
     <Image Include="res\movebtn.bmp" />
+    <Image Include="res\movebtnactive.bmp" />
     <Image Include="res\next.bmp" />
     <Image Include="res\prev.bmp" />
     <Image Include="res\prt.bmp" />
