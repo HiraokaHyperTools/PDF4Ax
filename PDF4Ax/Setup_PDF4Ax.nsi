@@ -15,35 +15,42 @@ Unicode true
 !include "Appver.tmp"
 !searchreplace APV ${VER} "." "_"
 
-!system 'MySign "..\Release\${APP}.ocx"'
+!system 'MySign "..\Release\${APP}.ocx" "..\x64\Release\${APP}_x64.ocx"'
 !finalize 'MySign "%1"'
 
 !define CLSID "{FE687896-F410-4D10-8740-D584DA23C74D}"
 
-!ifndef FDP
- !define TTL  "PDF4Ax"
- !define EXTN "PDF"
- !define EXT ".pdf"
- !define MIME "application/pdf"
-!else
- !define TTL  "FDP4Ax"
- !define EXTN "FDP"
- !define EXT ".fdpe"
- !define MIME "application/x-fdp-e"
+!ifdef FDP
+ !define NAME "FDP4Ax"
+ !define SPECNAME "FDP"
 
- !define EXT2 ".fdp"
- !define MIME2 "application/x-fdp"
+ !define FDPE_INSTALL
+ !define FDP_INSTALL
+!else
+ !define NAME "PDF4Ax"
+ !define SPECNAME "PDF"
+
+ !define PDF_INSTALL
 !endif
+
+!define PDF_FILEEXT ".pdf"
+!define PDF_MEDIATYPE "application/pdf"
+
+!define FDP_FILEEXT ".fdp"
+!define FDP_MEDIATYPE "application/x-fdp"
+
+!define FDPE_FILEEXT ".fdpe"
+!define FDPE_MEDIATYPE "application/x-fdp-e"
 
 !include "LogicLib.nsh"
 !include "FileFunc.nsh"
 !include "x64.nsh"
 
 ; The name of the installer
-Name "${TTL} ${VER}"
+Name "${NAME} ${VER}"
 
 ; The file to write
-OutFile "Setup_${TTL}_${APV}.exe"
+OutFile "Setup_${NAME}_${APV}.exe"
 
 ; The default installation directory
 InstallDir "$PROGRAMFILES\${APP}"
@@ -54,6 +61,8 @@ RequestExecutionLevel admin
 SetOverwrite ifdiff
 
 XPStyle on
+
+LoadLanguageFile "${NSISDIR}\Contrib\Language files\Japanese.nlf"
 
 ;--------------------------------
 
@@ -68,28 +77,42 @@ LicenseData GNUGPL2.txt
 
 ;--------------------------------
 
-InstType "導入(${EXTN})"
+InstType "導入(${SPECNAME})"
 InstType "削除"
 InstType "再導入"
 
-Section "ActiveX 関連付け 削除 (${EXTN})"
+!macro RemoveAssociation FILEEXT MEDIATYPE
+  WriteRegStr    HKCR "${FILEEXT}" "Content Type" "${MEDIATYPE}"
+  DeleteRegValue HKCR "Mime\Database\Content Type\${MEDIATYPE}" "CLSID"
+!macroend
+
+Section "ActiveX 関連付け 削除 (${SPECNAME})"
   SectionIn 2 3
 
-  WriteRegStr    HKCR "${EXT}" "Content Type" "${MIME}"
-  DeleteRegValue HKCR "Mime\Database\Content Type\${MIME}" "CLSID"
+!ifdef PDF_INSTALL
+  !insertmacro RemoveAssociation "${PDF_FILEEXT}" "${PDF_MEDIATYPE}"
+!endif
 
-!ifdef EXT2
-  WriteRegStr    HKCR "${EXT2}" "Content Type" "${MIME2}"
-  DeleteRegValue HKCR "Mime\Database\Content Type\${MIME2}" "CLSID"
+!ifdef FDP_INSTALL
+  !insertmacro RemoveAssociation "${FDP_FILEEXT}" "${FDP_MEDIATYPE}"
+!endif
+
+!ifdef FDPE_INSTALL
+  !insertmacro RemoveAssociation "${FDPE_FILEEXT}" "${FDPE_MEDIATYPE}"
 !endif
 SectionEnd
 
 Section "本体 削除"
   SectionIn 2 3
 
-  UnRegDLL "$INSTDIR\PDF4Ax.ocx"
-
-  Delete "$INSTDIR\PDF4Ax.ocx"
+  ${If} 1 == 1
+    ExecWait 'regsvr32.exe /s /u "$INSTDIR\PDF4Ax.ocx"'
+    Delete                       "$INSTDIR\PDF4Ax.ocx"
+  ${EndIf}
+  ${If} ${RunningX64}
+    ExecWait 'regsvr32.exe /s /u "$INSTDIR\PDF4Ax_x64.ocx"'
+    Delete                       "$INSTDIR\PDF4Ax_x64.ocx"
+  ${EndIf}
 
   RMDir /r "$INSTDIR\share\poppler"
   RMDir    "$INSTDIR\share"
@@ -104,49 +127,44 @@ Section "本体 導入" ;No components page, name is not important
   SetOutPath $INSTDIR
   
   ; Put file there
-  File "..\Release\PDF4Ax.ocx"
-
-  RegDLL "$INSTDIR\PDF4Ax.ocx"
-  
-  ExecWait 'icacls pdftocairo.exe /setintegritylevel low' $0
-  DetailPrint "結果: $0"
+  ${If} 1 == 1
+    File                    "..\Release\PDF4Ax.ocx"
+    ExecWait 'regsvr32.exe /s "$INSTDIR\PDF4Ax.ocx"'
+  ${EndIf}
+  ${If} ${RunningX64}
+    File                "..\x64\Release\PDF4Ax_x64.ocx"
+    ExecWait 'regsvr32.exe /s "$INSTDIR\PDF4Ax_x64.ocx"'
+  ${EndIf}
 
   SetOutPath "$INSTDIR\share\poppler"
   File /r /x ".svn" "..\poppler-data\*.*"
 
 SectionEnd ; end the section
 
-Section "ActiveX 関連付け 設定 (${EXTN})"
+Section "ActiveX 関連付け 設定 (${SPECNAME})"
   SectionIn 1 3
 
-  WriteRegStr HKCR "${EXT}" "Content Type" "${MIME}"
+!macro AddAssociation FILEEXT MEDIATYPE CLSID
+  WriteRegStr HKCR "${FILEEXT}" "Content Type" "${MEDIATYPE}"
 
-  WriteRegStr HKCR "Mime\Database\Content Type\${MIME}" "CLSID" "${CLSID}"
-  WriteRegStr HKCR "Mime\Database\Content Type\${MIME}" "Extension" "${EXT}"
+  WriteRegStr HKCR "Mime\Database\Content Type\${MEDIATYPE}" "CLSID" "${CLSID}"
+  WriteRegStr HKCR "Mime\Database\Content Type\${MEDIATYPE}" "Extension" "${FILEEXT}"
 
-  WriteRegStr HKCR "CLSID\${CLSID}\EnableFullPage\${EXT}" "" ""
+  WriteRegStr HKCR "CLSID\${CLSID}\EnableFullPage\${FILEEXT}" "" ""
+!macroend
 
-!ifdef EXT2
-  WriteRegStr HKCR "${EXT2}" "Content Type" "${MIME2}"
-
-  WriteRegStr HKCR "Mime\Database\Content Type\${MIME2}" "CLSID" "${CLSID}"
-  WriteRegStr HKCR "Mime\Database\Content Type\${MIME2}" "Extension" "${EXT2}"
-
-  WriteRegStr HKCR "CLSID\${CLSID}\EnableFullPage\${EXT2}" "" ""
+!ifdef PDF_INSTALL
+  !insertmacro AddAssociation  "${PDF_FILEEXT}" "${PDF_MEDIATYPE}" "${CLSID}"
 !endif
 
-  ${If} 32 < 8086
-    WriteRegStr   HKLM "SOFTWARE\Microsoft\Internet Explorer\Low Rights\ElevationPolicy\${CLSID}" "AppName" "pdftocairo.exe"
-    WriteRegStr   HKLM "SOFTWARE\Microsoft\Internet Explorer\Low Rights\ElevationPolicy\${CLSID}" "AppPath" "$INSTDIR"
-    WriteRegDWord HKLM "SOFTWARE\Microsoft\Internet Explorer\Low Rights\ElevationPolicy\${CLSID}" "Policy" 1
-  ${EndIf}
-  ${If} ${RunningX64}
-    SetRegView 64
-    WriteRegStr   HKLM "SOFTWARE\Microsoft\Internet Explorer\Low Rights\ElevationPolicy\${CLSID}" "AppName" "pdftocairo.exe"
-    WriteRegStr   HKLM "SOFTWARE\Microsoft\Internet Explorer\Low Rights\ElevationPolicy\${CLSID}" "AppPath" "$INSTDIR"
-    WriteRegDWord HKLM "SOFTWARE\Microsoft\Internet Explorer\Low Rights\ElevationPolicy\${CLSID}" "Policy" 1
-    SetRegView lastused
-  ${EndIf}
+!ifdef FDP_INSTALL
+  !insertmacro AddAssociation  "${FDP_FILEEXT}" "${FDP_MEDIATYPE}" "${CLSID}"
+!endif
+
+!ifdef FDPE_INSTALL
+  !insertmacro AddAssociation  "${FDPE_FILEEXT}" "${FDPE_MEDIATYPE}" "${CLSID}"
+!endif
+
 SectionEnd
 
 ;--------------------------------
