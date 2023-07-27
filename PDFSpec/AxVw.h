@@ -287,7 +287,7 @@ public:
 
 	void Zoomat(bool fIn, CPoint at);
 	void ZoomatR(float zf, CPoint at);
-	void SetzoomR(float zf);
+	void SetZoomAbsRatio(float zf);
 
 	CPoint GetCenterPos() const;
 	CPoint GetViewCenterPos() const;

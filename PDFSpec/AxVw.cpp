@@ -277,14 +277,21 @@ void CAxVw::OnPaint()
 		int cx = size.cx;
 		int cy = size.cy;
 
-		int xp = -m_hsc.nPos + m_rcPaint.left;
-		int yp = -m_vsc.nPos + m_rcPaint.top;
+		int xp;
+		int yp;
 
 		if (cx < m_rcPaint.Width()) {
-			xp = (m_rcPaint.Width() - cx) / 2;
+			xp = m_rcPaint.left + (m_rcPaint.Width() - cx) / 2;
 		}
+		else {
+			xp = -m_hsc.nPos + m_rcPaint.left;
+		}
+
 		if (cy < m_rcPaint.Height()) {
-			yp = (m_rcPaint.Height() - cy) / 2;
+			yp = m_rcPaint.top + (m_rcPaint.Height() - cy) / 2;
+		}
+		else {
+			yp = -m_vsc.nPos + m_rcPaint.top;
 		}
 
 		int vx = std::max(0, -xp);
@@ -387,11 +394,11 @@ void CAxVw::OnPaint()
 				for (int by = rc.top; by < rc.bottom; by += 64) {
 					for (int bx = rc.left; bx < rc.right; bx += 64) {
 						dc.BitBlt(bx, by, std::min((int)rc.right - bx, 64), std::min((int)rc.bottom - by, 64), &dcMem, 0, 0, SRCPAINT);
-					}
-				}
+			}
+		}
 				dcMem.SelectObject(pOrg);
 #endif
-			}
+	}
 			CFont font;
 			font.CreateStockObject(DEFAULT_GUI_FONT);
 			LOGFONT lf;
@@ -405,7 +412,7 @@ void CAxVw::OnPaint()
 				dc.DrawText(_T("お待ちください..."), rc, DT_SINGLELINE | DT_CENTER | DT_VCENTER);
 				dc.SelectObject(pOrg);
 			}
-		}
+}
 
 		int state = dc.SaveDC();
 		dc.ExcludeClipRect(dx, dy, dx + cx, dy + cy);
@@ -1101,7 +1108,7 @@ void CAxVw::OnLButtonDown(UINT nFlags, CPoint point) {
 			if (pMenu != NULL) {
 				pMenu->TrackPopupMenu(TPM_LEFTALIGN, ptMenu.x, ptMenu.y, GetParentFrame());
 			}
-			}
+		}
 		else if (m_pageDisp.clientBounds.PtInRect(point)) {
 			CPvMenu aSel(*this);
 			VERIFY(aSel.CreatePopupMenu());
@@ -1118,25 +1125,25 @@ void CAxVw::OnLButtonDown(UINT nFlags, CPoint point) {
 			ClientToScreen(&ptMenu);
 			aSel.TrackPopupMenu(TPM_LEFTALIGN, ptMenu.x, ptMenu.y, GetParentFrame());
 		}
-		}
+	}
 
 	CWnd::OnLButtonDown(nFlags, point);
-	}
+}
 
 BOOL CAxVw::OnSelCmd(UINT nID) {
 	switch (nID) {
 	case IDC_MAG: SetToolZoom(true); break;
 	case IDC_MOVE: SetToolZoom(false); break;
 
-	case IDC_P6: SetzoomR(0.06f); return true;
-	case IDC_P12: SetzoomR(0.12f); return true;
-	case IDC_P25: SetzoomR(0.25f); return true;
-	case IDC_P50: SetzoomR(0.5f); return true;
-	case IDC_P100: SetzoomR(1); return true;
-	case IDC_P200: SetzoomR(2); return true;
-	case IDC_P400: SetzoomR(4); return true;
-	case IDC_P800: SetzoomR(8); return true;
-	case IDC_P1600: SetzoomR(16); return true;
+	case IDC_P6: SetZoomAbsRatio(0.06f); return true;
+	case IDC_P12: SetZoomAbsRatio(0.12f); return true;
+	case IDC_P25: SetZoomAbsRatio(0.25f); return true;
+	case IDC_P50: SetZoomAbsRatio(0.5f); return true;
+	case IDC_P100: SetZoomAbsRatio(1); return true;
+	case IDC_P200: SetZoomAbsRatio(2); return true;
+	case IDC_P400: SetZoomAbsRatio(4); return true;
+	case IDC_P800: SetZoomAbsRatio(8); return true;
+	case IDC_P1600: SetZoomAbsRatio(16); return true;
 
 	case IDC_FITW: Setft(ftW); return true;
 	case IDC_FITWH: Setft(ftWH); return true;
@@ -1157,7 +1164,7 @@ void CAxVw::OnUpdateSelCmd(CCmdUI* pUI) {
 	}
 }
 
-void CAxVw::SetzoomR(float zf) {
+void CAxVw::SetZoomAbsRatio(float zf) {
 	CPoint posat = GetAbsPosAt(GetViewCenterPos() + GetScrollOff());
 	Setzf(zf);
 	LayoutClient();
@@ -1436,7 +1443,6 @@ int CAxVw::OnMouseActivate(CWnd* pDesktopWnd, UINT nHitTest, UINT message) {
 	if (r == MA_ACTIVATE) {
 		if (GetFocus() != this) {
 			SetFocus();
-			r = MA_ACTIVATEANDEAT;
 		}
 	}
 	return r;
