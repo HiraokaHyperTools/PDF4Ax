@@ -26,6 +26,8 @@
 
 #define WM_SET_RENDERINF (WM_APP+0x0010)
 
+#define HTCMDBAR 7000
+
 namespace {
 	bool GetTempPathName(TCHAR tctmp[MAX_PATH], LPCTSTR pszPrefix = NULL) {
 		TCHAR tcdir[MAX_PATH] = { 0 };
@@ -149,6 +151,7 @@ BEGIN_MESSAGE_MAP(CAxVw, CWnd)
 	ON_WM_KILLFOCUS()
 	ON_WM_SETFOCUS()
 	ON_WM_TIMER()
+	ON_WM_NCHITTEST()
 END_MESSAGE_MAP()
 
 // CAxVw メッセージ ハンドラ
@@ -394,11 +397,11 @@ void CAxVw::OnPaint()
 				for (int by = rc.top; by < rc.bottom; by += 64) {
 					for (int bx = rc.left; bx < rc.right; bx += 64) {
 						dc.BitBlt(bx, by, std::min((int)rc.right - bx, 64), std::min((int)rc.bottom - by, 64), &dcMem, 0, 0, SRCPAINT);
-			}
-		}
+					}
+				}
 				dcMem.SelectObject(pOrg);
 #endif
-	}
+			}
 			CFont font;
 			font.CreateStockObject(DEFAULT_GUI_FONT);
 			LOGFONT lf;
@@ -412,7 +415,7 @@ void CAxVw::OnPaint()
 				dc.DrawText(_T("お待ちください..."), rc, DT_SINGLELINE | DT_CENTER | DT_VCENTER);
 				dc.SelectObject(pOrg);
 			}
-}
+		}
 
 		int state = dc.SaveDC();
 		dc.ExcludeClipRect(dx, dy, dx + cx, dy + cy);
@@ -1720,4 +1723,9 @@ bool CAxVw::PrintNextPage() {
 
 	m_printState.get()->moveToNextPage();
 	return true;
+}
+
+LRESULT CAxVw::OnNcHitTest(CPoint point)
+{
+	return __super::OnNcHitTest(point);
 }
